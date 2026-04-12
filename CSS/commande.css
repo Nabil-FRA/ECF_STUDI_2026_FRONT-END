@@ -1,6 +1,5 @@
 /* ============================================================
    commande.css — Page de commande Vite & Gourmand
-   Complète main.css, ne le remplace pas.
    ============================================================ */
 
 /* ── En-tête de page ───────────────────────────────────────── */
@@ -13,41 +12,12 @@
 .page-header h1 {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: clamp(1.5rem, 4vw, 2.2rem);
-  color: var(--color-text-dark, #1a1a1a);
   margin-bottom: 0.5rem;
 }
 
 .page-header .lead {
-  color: var(--color-text-muted, #6c757d);
   font-size: 1rem;
   margin-bottom: 0;
-}
-
-/* Fil d'Ariane */
-.breadcrumb {
-  background: transparent;
-  padding: 0;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-}
-
-.breadcrumb-item + .breadcrumb-item::before {
-  content: "›";
-  color: var(--color-text-muted, #6c757d);
-}
-
-.breadcrumb-item a {
-  color: var(--color-primary, #b5451b);
-  text-decoration: none;
-}
-
-.breadcrumb-item a:hover,
-.breadcrumb-item a:focus {
-  text-decoration: underline;
-}
-
-.breadcrumb-item.active {
-  color: var(--color-text-muted, #6c757d);
 }
 
 /* ── Stepper (indicateur d'étapes) ─────────────────────────── */
@@ -55,11 +25,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 0;
   list-style: none;
   padding: 0;
   margin: 0;
-  counter-reset: step;
 }
 
 .stepper-item {
@@ -76,12 +44,13 @@
 .stepper-item:not(:last-child)::after {
   content: "";
   position: absolute;
-  top: 18px; /* centré sur le cercle */
+  top: 18px;
   left: calc(50% + 20px);
   width: calc(100% - 40px);
   height: 2px;
   background-color: #dee2e6;
   z-index: 0;
+  transition: background-color 0.25s ease;
 }
 
 .stepper-item.completed:not(:last-child)::after {
@@ -98,29 +67,27 @@
   border-radius: 50%;
   border: 2px solid #dee2e6;
   background-color: #fff;
-  color: var(--color-text-muted, #6c757d);
+  color: #6c757d;
   font-size: 0.875rem;
   font-weight: 600;
-  font-family: 'Source Sans 3', sans-serif;
   position: relative;
   z-index: 1;
   transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
-/* Étape active */
 .stepper-item.active .stepper-number {
   background-color: var(--color-primary, #b5451b);
   border-color: var(--color-primary, #b5451b);
   color: #fff;
 }
 
-/* Étape complétée : remplace le numéro par une coche */
 .stepper-item.completed .stepper-number {
   background-color: var(--color-primary, #b5451b);
   border-color: var(--color-primary, #b5451b);
   color: #fff;
 }
 
+/* Coche pour les étapes complétées */
 .stepper-item.completed .stepper-number::after {
   content: "✓";
   font-size: 1rem;
@@ -134,8 +101,7 @@
 .stepper-label {
   margin-top: 0.5rem;
   font-size: 0.8rem;
-  color: var(--color-text-muted, #6c757d);
-  font-family: 'Source Sans 3', sans-serif;
+  color: #6c757d;
   line-height: 1.2;
   transition: color 0.25s ease;
 }
@@ -159,13 +125,12 @@
 .form-step-title {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.3rem;
-  color: var(--color-text-dark, #1a1a1a);
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
   border-bottom: 2px solid var(--color-primary, #b5451b);
 }
 
-/* Transition d'apparition des étapes */
+/* Animation d'apparition à chaque changement d'étape */
 .form-step:not([hidden]) {
   animation: fadeInStep 0.3s ease;
 }
@@ -181,79 +146,46 @@
   }
 }
 
-/* ── Cards du formulaire ────────────────────────────────────── */
-.card {
-  border: 1px solid #e8e0d5;
-  border-radius: 0.75rem;
-  box-shadow: none;
+/* ── Surcharges couleur primaire Bootstrap ──────────────────── */
+
+/* Focus sur les champs : anneau couleur primaire */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary, #b5451b);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.2);
 }
 
+/* Bouton primaire : couleur de la charte */
+.btn-primary {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #943a17;
+  border-color: #943a17;
+}
+
+.btn-primary:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.4);
+}
+
+/* ── Éléments custom spécifiques à la page ──────────────────── */
+
+/* Titre des sections dans les cards */
 .card-title {
-  font-family: 'Source Sans 3', sans-serif;
-  font-weight: 600;
-  color: var(--color-text-dark, #1a1a1a);
-  margin-bottom: 1.25rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #f0ebe3;
 }
 
-/* ── Champs de formulaire ───────────────────────────────────── */
-.form-label {
-  font-weight: 500;
-  font-size: 0.9375rem;
-  color: var(--color-text-dark, #1a1a1a);
-  margin-bottom: 0.35rem;
-}
-
-.form-control,
-.form-select {
-  border-color: #ced4da;
-  border-radius: 0.5rem;
-  padding: 0.55rem 0.85rem;
-  font-size: 0.9375rem;
-  color: var(--color-text-dark, #1a1a1a);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--color-primary, #b5451b);
-  box-shadow: 0 0 0 3px rgba(181, 69, 27, 0.18);
-  outline: none;
-}
-
-/* État invalide (après tentative de soumission) */
-.form-control.is-invalid,
-.form-select.is-invalid {
-  border-color: #dc3545;
-}
-
-.form-control.is-invalid:focus,
-.form-select.is-invalid:focus {
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
-}
-
-/* Hint texte sous les champs */
-.form-text {
-  font-size: 0.8125rem;
-  color: var(--color-text-muted, #6c757d);
-  margin-top: 0.3rem;
-}
-
-/* Message d'erreur inline */
-.invalid-feedback {
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
-/* ── Info menu sélectionné ──────────────────────────────────── */
+/* Info menu sélectionné : bordure gauche custom */
 #menu-info {
   border-left: 4px solid #0dcaf0;
   border-radius: 0 0.5rem 0.5rem 0;
-  font-size: 0.9rem;
 }
 
-/* ── Conditions du menu (alerte importante) ─────────────────── */
+/* Conditions du menu : mise en évidence forte */
 #conditions-menu {
   border-left: 4px solid #ffc107;
   border-radius: 0 0.75rem 0.75rem 0;
@@ -263,87 +195,32 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
 }
 
-/* ── Tableau récapitulatif des prix ─────────────────────────── */
-#detail-prix .table {
-  margin-bottom: 0;
-  font-size: 0.9375rem;
-}
-
-#detail-prix .table td:last-child,
-#detail-prix .table th:last-child {
-  text-align: right;
-}
-
-#detail-prix tfoot tr {
-  border-top: 2px solid #dee2e6;
-  font-size: 1.05rem;
-}
-
-/* Ligne de remise */
+/* Ligne de remise dans le tableau des prix */
 .prix-remise {
   color: #198754;
   font-weight: 500;
 }
 
-/* ── Boutons de navigation ──────────────────────────────────── */
-.btn-primary {
-  background-color: var(--color-primary, #b5451b);
-  border-color: var(--color-primary, #b5451b);
-  font-weight: 600;
-  border-radius: 0.5rem;
-  padding: 0.6rem 1.5rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+/* Séparateur renforcé avant le total */
+#detail-prix tfoot tr {
+  border-top: 2px solid #dee2e6;
+  font-size: 1.05rem;
 }
 
-.btn-primary:hover,
-.btn-primary:focus {
-  background-color: #943a17;
-  border-color: #943a17;
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
-}
-
-.btn-primary:focus-visible {
-  outline: 3px solid rgba(181, 69, 27, 0.4);
-  outline-offset: 2px;
-}
-
-.btn-outline-secondary {
-  font-weight: 500;
-  border-radius: 0.5rem;
-  padding: 0.6rem 1.5rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-/* Bouton désactivé pendant le chargement */
+/* Bouton désactivé pendant un appel API */
 .btn[aria-busy="true"] {
   opacity: 0.75;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* ── Zone d'alerte globale ──────────────────────────────────── */
-#alert-global .alert {
-  border-radius: 0.75rem;
-  font-size: 0.9375rem;
-}
-
-/* ── Spinner de chargement (réutilisé depuis main.css) ─────── */
+/* Spinner de chargement */
 .loading-spinner {
   display: inline-block;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
   border: 2px solid rgba(181, 69, 27, 0.25);
   border-top-color: var(--color-primary, #b5451b);
   border-radius: 50%;
@@ -356,9 +233,15 @@
   to { transform: rotate(360deg); }
 }
 
+/* ── Focus visible global (RGAA 10.7) ──────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: 2px;
+}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 575.98px) {
-  /* Stepper : on cache les labels sur très petits écrans */
+  /* Stepper : labels masqués sur très petits écrans */
   .stepper-label {
     display: none;
   }
@@ -373,11 +256,7 @@
     font-size: 1.1rem;
   }
 
-  .btn-lg {
-    font-size: 1rem;
-    padding: 0.55rem 1.1rem;
-  }
-
+  /* Boutons empilés, "Suivant" toujours en premier */
   .d-flex.justify-content-between {
     flex-direction: column;
     gap: 0.75rem;
@@ -388,13 +267,12 @@
     justify-content: center;
   }
 
-  /* Sur mobile, bouton précédent en second */
   .d-flex.justify-content-between .btn-outline-secondary {
     order: 2;
   }
 
   .d-flex.justify-content-between .btn-primary,
-  .d-flex.justify-content-between .btn-success {
+  .d-flex.justify-content-false .btn-success {
     order: 1;
   }
 }
@@ -403,10 +281,4 @@
   .page-header {
     padding: 1.25rem 0 1rem;
   }
-}
-
-/* ── Focus visible global (RGAA 10.7) ──────────────────────── */
-:focus-visible {
-  outline: 3px solid var(--color-primary, #b5451b);
-  outline-offset: 2px;
 }
