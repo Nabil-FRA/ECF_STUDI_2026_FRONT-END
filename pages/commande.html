@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Passez votre commande — Vite &amp; Gourmand, traiteur événementiel à Bordeaux.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="csrf-token" content=""><!-- Rempli dynamiquement par js/security.js -->
+  <title>Commander un menu — Vite &amp; Gourmand</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- CSS commun -->
+  <link rel="stylesheet" href="../css/main.css">
+  <!-- CSS spécifique à cette page -->
+  <link rel="stylesheet" href="../css/commande.css">
+</head>
+<body>
+
+  <!-- Lien d'évitement — RGAA 12.7 -->
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <!-- ====== HEADER (identique aux autres pages) ====== -->
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a href="../index.html" class="logo" aria-label="Vite et Gourmand — Accueil">
+        <span class="logo-text" aria-hidden="true">V&amp;G</span>
+        <span class="sr-only">Vite et Gourmand</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navigation principale">
+        <button
+          type="button"
+          class="menu-toggle"
+          id="menu-toggle"
+          aria-expanded="false"
+          aria-controls="nav-list"
+          aria-label="Ouvrir le menu de navigation"
+        >
+          <svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+
+        <ul class="nav-list" id="nav-list">
+          <li><a href="../index.html" class="nav-link">Accueil</a></li>
+          <li><a href="menus.html" class="nav-link">Nos menus</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions" id="auth-area">
+        <a href="connexion.html" class="btn btn-secondary btn-sm">Connexion</a>
+        <a href="inscription.html" class="btn btn-primary btn-sm">Inscription</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====== CONTENU PRINCIPAL ====== -->
+  <main id="main-content" role="main">
+
+    <!-- En-tête de page -->
+    <section class="page-header" aria-labelledby="page-title">
+      <div class="container">
+        <!-- Fil d'Ariane — RGAA 6 / navigation contextuelle -->
+        <nav aria-label="Fil d'Ariane">
+          <ol class="breadcrumb" role="list">
+            <li class="breadcrumb-item">
+              <a href="../index.html">Accueil</a>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="menus.html">Nos menus</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              Commander
+            </li>
+          </ol>
+        </nav>
+        <h1 id="page-title">Passer une commande</h1>
+        <p class="lead">Complétez le formulaire ci-dessous en 3 étapes pour finaliser votre commande.</p>
+      </div>
+    </section>
+
+    <!-- Zone d'alerte globale (erreurs / succès injectés par JS) -->
+    <!-- role="alert" + aria-live="assertive" : annoncé immédiatement aux lecteurs d'écran -->
+    <div
+      id="alert-global"
+      class="container mt-3"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <!-- Contenu injecté dynamiquement par js/commande.js -->
+    </div>
+
+    <!-- ====== INDICATEUR D'ÉTAPES ====== -->
+    <section class="container my-4" aria-label="Progression du formulaire de commande">
+      <!-- Navigation par étapes : accessible via aria-current -->
+      <ol class="stepper" role="list" aria-label="Étapes de la commande">
+        <li class="stepper-item active" aria-current="step" id="step-indicator-1">
+          <span class="stepper-number" aria-hidden="true">1</span>
+          <span class="stepper-label">Vos informations</span>
+        </li>
+        <li class="stepper-item" id="step-indicator-2">
+          <span class="stepper-number" aria-hidden="true">2</span>
+          <span class="stepper-label">Choix du menu</span>
+        </li>
+        <li class="stepper-item" id="step-indicator-3">
+          <span class="stepper-number" aria-hidden="true">3</span>
+          <span class="stepper-label">Récapitulatif &amp; prix</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ====== FORMULAIRE MULTI-ÉTAPES ====== -->
+    <section class="container mb-5" aria-labelledby="form-title">
+      <h2 id="form-title" class="sr-only">Formulaire de commande</h2>
+
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+          <form
+            id="form-commande"
+            novalidate
+            aria-label="Formulaire de commande en 3 étapes"
+          >
+            <!-- Token CSRF (rempli par js/security.js au chargement) -->
+            <input type="hidden" id="csrf-token-field" name="_csrf" value="">
+
+            <!-- ================================================
+                 ÉTAPE 1 — Informations client & prestation
+                 (visible par défaut)
+                 ================================================ -->
+            <fieldset
+              id="etape-1"
+              class="form-step"
+              aria-labelledby="etape-1-titre"
+            >
+              <legend id="etape-1-titre" class="form-step-title">
+                Étape 1 — Vos informations et la prestation
+              </legend>
+
+              <!-- Sous-section : infos client -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h3 class="card-title h5" id="section-client">Vos coordonnées</h3>
+                  <!-- Note : pré-rempli dynamiquement par js/commande.js depuis le compte connecté -->
+                  <p class="text-muted small" aria-live="polite" id="prefill-notice">
+                    <!-- JS injecte ici : "Vos informations ont été pré-remplies depuis votre compte." -->
+                  </p>
+
+                  <div class="row g-3">
+                    <!-- Prénom -->
+                    <div class="col-sm-6">
+                      <label for="prenom" class="form-label">
+                        Prénom <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="prenom"
+                        name="prenom"
+                        autocomplete="given-name"
+                        required
+                        aria-required="true"
+                        aria-describedby="prenom-error"
+                        maxlength="50"
+                      >
+                      <div
+                        id="prenom-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez saisir votre prénom.
+                      </div>
+                    </div>
+
+                    <!-- Nom -->
+                    <div class="col-sm-6">
+                      <label for="nom" class="form-label">
+                        Nom <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="nom"
+                        name="nom"
+                        autocomplete="family-name"
+                        required
+                        aria-required="true"
+                        aria-describedby="nom-error"
+                        maxlength="50"
+                      >
+                      <div
+                        id="nom-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez saisir votre nom.
+                      </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-sm-6">
+                      <label for="email" class="form-label">
+                        Adresse e-mail <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        id="email"
+                        name="email"
+                        autocomplete="email"
+                        required
+                        aria-required="true"
+                        aria-describedby="email-error email-hint"
+                        maxlength="254"
+                      >
+                      <div id="email-hint" class="form-text">
+                        Utilisée pour la confirmation de commande.
+                      </div>
+                      <div
+                        id="email-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez saisir une adresse e-mail valide.
+                      </div>
+                    </div>
+
+                    <!-- GSM -->
+                    <div class="col-sm-6">
+                      <label for="gsm" class="form-label">
+                        Numéro de téléphone <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        class="form-control"
+                        id="gsm"
+                        name="gsm"
+                        autocomplete="tel"
+                        required
+                        aria-required="true"
+                        aria-describedby="gsm-error gsm-hint"
+                        pattern="^(\+33|0033|0)[1-9](\d{2}){4}$"
+                        maxlength="20"
+                      >
+                      <div id="gsm-hint" class="form-text">
+                        Format : 06 12 34 56 78 ou +33 6 12 34 56 78
+                      </div>
+                      <div
+                        id="gsm-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez saisir un numéro de téléphone valide.
+                      </div>
+                    </div>
+                  </div><!-- /row coordonnées -->
+                </div>
+              </div><!-- /card coordonnées -->
+
+              <!-- Sous-section : infos prestation -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h3 class="card-title h5" id="section-prestation">Détails de la prestation</h3>
+
+                  <div class="row g-3">
+                    <!-- Date de la prestation -->
+                    <div class="col-sm-6">
+                      <label for="date-prestation" class="form-label">
+                        Date de la prestation <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="date-prestation"
+                        name="date_prestation"
+                        required
+                        aria-required="true"
+                        aria-describedby="date-prestation-error date-prestation-hint"
+                      >
+                      <div id="date-prestation-hint" class="form-text">
+                        Respectez le délai minimum indiqué dans les conditions du menu.
+                      </div>
+                      <div
+                        id="date-prestation-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez sélectionner une date valide.
+                      </div>
+                    </div>
+
+                    <!-- Heure souhaitée de livraison -->
+                    <div class="col-sm-6">
+                      <label for="heure-livraison" class="form-label">
+                        Heure souhaitée de livraison <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="time"
+                        class="form-control"
+                        id="heure-livraison"
+                        name="heure_livraison"
+                        required
+                        aria-required="true"
+                        aria-describedby="heure-livraison-error"
+                        min="08:00"
+                        max="20:00"
+                      >
+                      <div
+                        id="heure-livraison-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez indiquer une heure entre 08h00 et 20h00.
+                      </div>
+                    </div>
+
+                    <!-- Adresse de livraison -->
+                    <div class="col-12">
+                      <label for="adresse-livraison" class="form-label">
+                        Adresse de livraison <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="adresse-livraison"
+                        name="adresse_livraison"
+                        autocomplete="street-address"
+                        required
+                        aria-required="true"
+                        aria-describedby="adresse-livraison-error adresse-livraison-hint"
+                        maxlength="200"
+                        placeholder="N° et nom de la rue"
+                      >
+                      <div id="adresse-livraison-hint" class="form-text">
+                        Une majoration de livraison s'applique hors Bordeaux (5 € + 0,59 €/km).
+                      </div>
+                      <div
+                        id="adresse-livraison-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez saisir l'adresse de livraison.
+                      </div>
+                    </div>
+
+                    <!-- Code postal -->
+                    <div class="col-sm-4">
+                      <label for="code-postal" class="form-label">
+                        Code postal <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="code-postal"
+                        name="code_postal"
+                        autocomplete="postal-code"
+                        required
+                        aria-required="true"
+                        aria-describedby="code-postal-error"
+                        pattern="[0-9]{5}"
+                        maxlength="5"
+                        inputmode="numeric"
+                      >
+                      <div
+                        id="code-postal-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez saisir un code postal valide (5 chiffres).
+                      </div>
+                    </div>
+
+                    <!-- Ville -->
+                    <div class="col-sm-8">
+                      <label for="ville" class="form-label">
+                        Ville <span class="text-danger" aria-hidden="true">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="ville"
+                        name="ville"
+                        autocomplete="address-level2"
+                        required
+                        aria-required="true"
+                        aria-describedby="ville-error"
+                        maxlength="100"
+                      >
+                      <div
+                        id="ville-error"
+                        class="invalid-feedback"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        Veuillez saisir la ville de livraison.
+                      </div>
+                    </div>
+
+                  </div><!-- /row prestation -->
+                </div>
+              </div><!-- /card prestation -->
+
+              <!-- Note champs obligatoires -->
+              <p class="text-muted small mb-3">
+                <span class="text-danger" aria-hidden="true">*</span>
+                <span>Champs obligatoires</span>
+              </p>
+
+              <!-- Bouton suivant étape 1 -->
+              <div class="d-flex justify-content-end">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-lg"
+                  id="btn-etape-1-suivant"
+                  aria-controls="etape-2"
+                >
+                  Étape suivante
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </button>
+              </div>
+            </fieldset>
+            <!-- /étape 1 -->
+
+
+            <!-- ================================================
+                 ÉTAPE 2 — Choix du menu
+                 (masquée par défaut, gérée par js/commande.js)
+                 ================================================ -->
+            <fieldset
+              id="etape-2"
+              class="form-step"
+              aria-labelledby="etape-2-titre"
+              hidden
+            >
+              <legend id="etape-2-titre" class="form-step-title">
+                Étape 2 — Choix du menu et nombre de convives
+              </legend>
+
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h3 class="card-title h5">Sélection du menu</h3>
+
+                  <!-- Menu sélectionné (pré-rempli si arrivée depuis la page détail) -->
+                  <div class="mb-3">
+                    <label for="menu-choisi" class="form-label">
+                      Menu <span class="text-danger" aria-hidden="true">*</span>
+                    </label>
+                    <select
+                      class="form-select"
+                      id="menu-choisi"
+                      name="menu_id"
+                      required
+                      aria-required="true"
+                      aria-describedby="menu-choisi-error menu-choisi-hint"
+                    >
+                      <option value="">-- Chargement des menus… --</option>
+                      <!-- Options chargées dynamiquement par js/commande.js via l'API -->
+                    </select>
+                    <div id="menu-choisi-hint" class="form-text">
+                      Les menus disponibles sont chargés depuis notre catalogue.
+                    </div>
+                    <div
+                      id="menu-choisi-error"
+                      class="invalid-feedback"
+                      role="alert"
+                      aria-live="polite"
+                    >
+                      Veuillez sélectionner un menu.
+                    </div>
+                  </div>
+
+                  <!-- Infos du menu sélectionné (injectées par JS) -->
+                  <div
+                    id="menu-info"
+                    class="alert alert-info d-none"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Informations sur le menu sélectionné"
+                  >
+                    <!-- JS injecte : conditions, nombre minimum de personnes, prix de base -->
+                  </div>
+
+                  <!-- Nombre de personnes -->
+                  <div class="mb-3">
+                    <label for="nb-personnes" class="form-label">
+                      Nombre de personnes <span class="text-danger" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="nb-personnes"
+                      name="nb_personnes"
+                      min="1"
+                      step="1"
+                      required
+                      aria-required="true"
+                      aria-describedby="nb-personnes-error nb-personnes-hint"
+                      inputmode="numeric"
+                    >
+                    <!-- Le minimum est mis à jour dynamiquement selon le menu choisi -->
+                    <div id="nb-personnes-hint" class="form-text">
+                      Le nombre minimum sera mis à jour selon le menu sélectionné.
+                    </div>
+                    <div
+                      id="nb-personnes-error"
+                      class="invalid-feedback"
+                      role="alert"
+                      aria-live="polite"
+                    >
+                      Veuillez indiquer un nombre de personnes valide.
+                    </div>
+                  </div>
+
+                </div>
+              </div><!-- /card menu -->
+
+              <!-- Boutons navigation étape 2 -->
+              <div class="d-flex justify-content-between">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-lg"
+                  id="btn-etape-2-precedent"
+                  aria-controls="etape-1"
+                >
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                  </svg>
+                  Étape précédente
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-lg"
+                  id="btn-etape-2-suivant"
+                  aria-controls="etape-3"
+                >
+                  Voir le récapitulatif
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </button>
+              </div>
+            </fieldset>
+            <!-- /étape 2 -->
+
+
+            <!-- ================================================
+                 ÉTAPE 3 — Récapitulatif & confirmation
+                 (masquée par défaut)
+                 ================================================ -->
+            <fieldset
+              id="etape-3"
+              class="form-step"
+              aria-labelledby="etape-3-titre"
+              hidden
+            >
+              <legend id="etape-3-titre" class="form-step-title">
+                Étape 3 — Récapitulatif et confirmation
+              </legend>
+
+              <!-- Récapitulatif (injecté par JS) -->
+              <div
+                id="recapitulatif"
+                class="card mb-4"
+                role="region"
+                aria-label="Récapitulatif de votre commande"
+                aria-live="polite"
+              >
+                <div class="card-body">
+                  <h3 class="card-title h5">Récapitulatif de votre commande</h3>
+                  <!-- JS injecte le tableau de récapitulatif ici -->
+                  <div id="recap-contenu">
+                    <!-- Contenu généré dynamiquement -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Détail du prix -->
+              <div
+                id="detail-prix"
+                class="card mb-4"
+                role="region"
+                aria-label="Détail du prix"
+                aria-live="polite"
+              >
+                <div class="card-body">
+                  <h3 class="card-title h5">Détail du prix</h3>
+                  <table class="table table-sm" aria-label="Tableau de détail des prix">
+                    <tbody id="prix-tbody">
+                      <!-- JS injecte les lignes : prix menu, remise éventuelle, livraison, total -->
+                    </tbody>
+                    <tfoot>
+                      <tr class="table-active fw-bold">
+                        <th scope="row">Total TTC</th>
+                        <td id="prix-total" class="text-end">—</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Conditions importantes — mise en évidence RGAA -->
+              <div
+                id="conditions-menu"
+                class="alert alert-warning"
+                role="note"
+                aria-labelledby="conditions-titre"
+              >
+                <h3 class="h6 alert-heading" id="conditions-titre">
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                  </svg>
+                  Conditions importantes à lire avant de confirmer
+                </h3>
+                <div id="conditions-contenu">
+                  <!-- JS injecte les conditions spécifiques au menu sélectionné -->
+                  <p class="mb-0">Les conditions du menu sélectionné s'afficheront ici.</p>
+                </div>
+              </div>
+
+              <!-- Boutons navigation étape 3 -->
+              <div class="d-flex justify-content-between align-items-center">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-lg"
+                  id="btn-etape-3-precedent"
+                  aria-controls="etape-2"
+                >
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                  </svg>
+                  Modifier ma commande
+                </button>
+
+                <!-- Bouton de soumission finale -->
+                <button
+                  type="submit"
+                  class="btn btn-success btn-lg"
+                  id="btn-confirmer"
+                  aria-describedby="submit-hint"
+                >
+                  Confirmer la commande
+                </button>
+              </div>
+              <p id="submit-hint" class="text-muted small mt-2 text-end">
+                Un e-mail de confirmation vous sera envoyé après validation.
+              </p>
+
+            </fieldset>
+            <!-- /étape 3 -->
+
+          </form><!-- /form-commande -->
+
+        </div><!-- /col -->
+      </div><!-- /row -->
+    </section>
+
+  </main>
+  <!-- /main -->
+
+  <!-- ====== FOOTER (identique aux autres pages) ====== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">Horaires</h3>
+          <div id="horaires-footer">
+            <p>Lun - Ven : 8h00 - 19h00</p>
+            <p>Samedi : 9h00 - 17h00</p>
+            <p>Dimanche : Fermé</p>
+          </div>
+        </div>
+        <div>
+          <h3 class="footer-title">Contact</h3>
+          <p>Bordeaux, Gironde</p>
+          <p><a href="tel:+33556781234" class="footer-link">05 56 78 12 34</a></p>
+          <p><a href="mailto:contact@viteetgourmand.fr" class="footer-link">contact@viteetgourmand.fr</a></p>
+        </div>
+        <div>
+          <h3 class="footer-title">Navigation</h3>
+          <nav aria-label="Navigation du pied de page">
+            <a href="menus.html" class="footer-link">Nos menus</a>
+            <a href="contact.html" class="footer-link">Contact</a>
+            <a href="mentions-legales.html" class="footer-link">Mentions légales</a>
+            <a href="cgv.html" class="footer-link">Conditions générales de vente</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="current-year"></span> Vite &amp; Gourmand — Tous droits réservés</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmkhjxPPDaJH2jqM3OkxcDFMK7K" crossorigin="anonymous"></script>
+
+  <!-- JS communs -->
+  <script src="../js/security.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/main.js"></script>
+  <!-- JS spécifique à cette page -->
+  <script src="../js/commande.js"></script>
+
+</body>
+</html>
