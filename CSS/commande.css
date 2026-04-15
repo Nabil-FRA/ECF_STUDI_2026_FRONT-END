@@ -185,6 +185,23 @@
   border-radius: 0 0.5rem 0.5rem 0;
 }
 
+/* Stock du menu : styles selon l'état */
+#menu-stock {
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+#menu-stock.alert-danger {
+  border-left: 4px solid #dc3545;
+}
+
+#menu-stock.alert-warning {
+  border-left: 4px solid #ffc107;
+}
+
+#menu-stock.alert-info {
+  border-left: 4px solid #0dcaf0;
+}
+
 /* Conditions du menu : mise en évidence forte */
 #conditions-menu {
   border-left: 4px solid #ffc107;
@@ -221,8 +238,8 @@
   display: inline-block;
   width: 1.1rem;
   height: 1.1rem;
-  border: 2px solid rgba(181, 69, 27, 0.25);
-  border-top-color: var(--color-primary, #b5451b);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   vertical-align: middle;
@@ -237,6 +254,17 @@
 :focus-visible {
   outline: 3px solid var(--color-primary, #b5451b);
   outline-offset: 2px;
+}
+
+/* Checkbox focus */
+.form-check-input:focus {
+  border-color: var(--color-primary, #b5451b);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */
@@ -272,7 +300,7 @@
   }
 
   .d-flex.justify-content-between .btn-primary,
-  .d-flex.justify-content-false .btn-success {
+  .d-flex.justify-content-between .btn-success {
     order: 1;
   }
 }
