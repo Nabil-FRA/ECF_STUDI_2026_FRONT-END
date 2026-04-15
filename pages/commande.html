@@ -501,6 +501,16 @@
                     <!-- JS injecte : conditions, nombre minimum de personnes, prix de base -->
                   </div>
 
+                  <!-- AJOUT : Stock disponible du menu (c'était dans le cahier des charges) -->
+                  <div
+                    id="menu-stock"
+                    class="alert alert-warning d-none"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <!-- JS injecte ici le stock restant -->
+                  </div>
+
                   <!-- Nombre de personnes -->
                   <div class="mb-3">
                     <label for="nb-personnes" class="form-label">
@@ -530,6 +540,13 @@
                     >
                       Veuillez indiquer un nombre de personnes valide.
                     </div>
+                  </div>
+
+                  <!-- petit rappel sur la remise -->
+                  <div class="alert alert-success" role="note">
+                    <small>
+                      <strong>Bon à savoir :</strong> une réduction de 10% est appliquée si vous commandez pour 5 personnes de plus que le minimum du menu !
+                    </small>
                   </div>
 
                 </div>
@@ -623,7 +640,7 @@
               <div
                 id="conditions-menu"
                 class="alert alert-warning"
-                role="note"
+                role="alert"
                 aria-labelledby="conditions-titre"
               >
                 <h3 class="h6 alert-heading" id="conditions-titre">
@@ -635,6 +652,32 @@
                 <div id="conditions-contenu">
                   <!-- JS injecte les conditions spécifiques au menu sélectionné -->
                   <p class="mb-0">Les conditions du menu sélectionné s'afficheront ici.</p>
+                </div>
+              </div>
+
+              <!-- case à cocher pour accepter les CGV -->
+              <div class="form-check mb-4">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="accepte-cgv"
+                  name="accepte_cgv"
+                  required
+                  aria-required="true"
+                  aria-describedby="accepte-cgv-error"
+                >
+                <label class="form-check-label" for="accepte-cgv">
+                  J'ai lu et j'accepte les conditions du menu et les
+                  <a href="cgv.html" target="_blank" rel="noopener">conditions générales de vente</a>
+                  <span class="text-danger" aria-hidden="true">*</span>
+                </label>
+                <div
+                  id="accepte-cgv-error"
+                  class="invalid-feedback"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  Vous devez accepter les conditions pour valider la commande.
                 </div>
               </div>
 
