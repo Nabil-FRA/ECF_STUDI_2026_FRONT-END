@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Connectez-vous à votre compte — Vite &amp; Gourmand, traiteur événementiel à Bordeaux.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="csrf-token" content=""><!-- Rempli dynamiquement par js/security.js -->
+  <title>Connexion — Vite &amp; Gourmand</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- CSS commun -->
+  <link rel="stylesheet" href="../css/main.css">
+  <!-- CSS spécifique à cette page -->
+  <link rel="stylesheet" href="../css/connexion.css">
+</head>
+<body>
+
+  <!-- Lien d'évitement — RGAA 12.7 -->
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <!-- ====== HEADER ====== -->
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a href="../index.html" class="logo" aria-label="Vite et Gourmand — Accueil">
+        <span class="logo-text" aria-hidden="true">V&amp;G</span>
+        <span class="sr-only">Vite et Gourmand</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navigation principale">
+        <button
+          type="button"
+          class="menu-toggle"
+          id="menu-toggle"
+          aria-expanded="false"
+          aria-controls="nav-list"
+          aria-label="Ouvrir le menu de navigation"
+        >
+          <svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+
+        <ul class="nav-list" id="nav-list">
+          <li><a href="../index.html" class="nav-link">Accueil</a></li>
+          <li><a href="menus.html" class="nav-link">Nos menus</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions" id="auth-area">
+        <a href="connexion.html" class="btn btn-secondary btn-sm" aria-current="page">Connexion</a>
+        <a href="inscription.html" class="btn btn-primary btn-sm">Inscription</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====== CONTENU PRINCIPAL ====== -->
+  <main id="main-content" role="main">
+
+    <!-- En-tête de page -->
+    <section class="page-header" aria-labelledby="page-title">
+      <div class="container">
+        <h1 id="page-title">Connexion</h1>
+        <p class="lead">Accédez à votre espace client pour gérer vos commandes.</p>
+      </div>
+    </section>
+
+    <!-- Zone d'alerte globale -->
+    <div
+      id="alert-global"
+      class="container mt-3"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <!-- Contenu injecté dynamiquement par js/connexion.js -->
+    </div>
+
+    <!-- ====== FORMULAIRE DE CONNEXION ====== -->
+    <section class="container my-5" aria-labelledby="form-title">
+      <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-8 col-lg-5">
+
+          <div class="card login-card">
+            <div class="card-body p-4">
+              <h2 id="form-title" class="card-title text-center mb-4">
+                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16" class="login-icon">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                </svg>
+                <span class="d-block mt-2">Se connecter</span>
+              </h2>
+
+              <form
+                id="form-connexion"
+                novalidate
+                aria-label="Formulaire de connexion"
+              >
+                <!-- Token CSRF -->
+                <input type="hidden" id="csrf-token-field" name="_csrf" value="">
+
+                <!-- Email -->
+                <div class="mb-3">
+                  <label for="email" class="form-label">
+                    Adresse e-mail <span class="text-danger" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    class="form-control form-control-lg"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                    aria-required="true"
+                    aria-describedby="email-error"
+                    maxlength="254"
+                    placeholder="votre@email.fr"
+                  >
+                  <div
+                    id="email-error"
+                    class="invalid-feedback"
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    Veuillez saisir une adresse e-mail valide.
+                  </div>
+                </div>
+
+                <!-- Mot de passe -->
+                <div class="mb-3">
+                  <label for="password" class="form-label">
+                    Mot de passe <span class="text-danger" aria-hidden="true">*</span>
+                  </label>
+                  <div class="input-group">
+                    <input
+                      type="password"
+                      class="form-control form-control-lg"
+                      id="password"
+                      name="password"
+                      autocomplete="current-password"
+                      required
+                      aria-required="true"
+                      aria-describedby="password-error"
+                      minlength="8"
+                      placeholder="••••••••"
+                    >
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary"
+                      id="toggle-password"
+                      aria-label="Afficher le mot de passe"
+                      aria-pressed="false"
+                    >
+                      <svg id="icon-eye" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                      </svg>
+                      <svg id="icon-eye-slash" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="d-none">
+                        <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/>
+                        <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/>
+                        <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    id="password-error"
+                    class="invalid-feedback"
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    Veuillez saisir votre mot de passe.
+                  </div>
+                </div>
+
+                <!-- Se souvenir de moi -->
+                <div class="form-check mb-3">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="remember-me"
+                    name="remember_me"
+                  >
+                  <label class="form-check-label" for="remember-me">
+                    Se souvenir de moi
+                  </label>
+                </div>
+
+                <!-- Bouton de connexion -->
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-lg w-100 mb-3"
+                  id="btn-connexion"
+                >
+                  Se connecter
+                </button>
+
+                <!-- Lien mot de passe oublié -->
+                <p class="text-center mb-0">
+                  <a href="mot-de-passe-oublie.html" class="link-secondary">
+                    Mot de passe oublié ?
+                  </a>
+                </p>
+
+              </form><!-- /form-connexion -->
+            </div>
+          </div><!-- /card -->
+
+          <!-- Lien vers inscription -->
+          <div class="text-center mt-4">
+            <p class="mb-0">
+              Pas encore de compte ?
+              <a href="inscription.html" class="fw-semibold">Créer un compte</a>
+            </p>
+          </div>
+
+        </div><!-- /col -->
+      </div><!-- /row -->
+    </section>
+
+  </main>
+  <!-- /main -->
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">Horaires</h3>
+          <div id="horaires-footer">
+            <p>Lun - Ven : 8h00 - 19h00</p>
+            <p>Samedi : 9h00 - 17h00</p>
+            <p>Dimanche : Fermé</p>
+          </div>
+        </div>
+        <div>
+          <h3 class="footer-title">Contact</h3>
+          <p>Bordeaux, Gironde</p>
+          <p><a href="tel:+33556781234" class="footer-link">05 56 78 12 34</a></p>
+          <p><a href="mailto:contact@viteetgourmand.fr" class="footer-link">contact@viteetgourmand.fr</a></p>
+        </div>
+        <div>
+          <h3 class="footer-title">Navigation</h3>
+          <nav aria-label="Navigation du pied de page">
+            <a href="menus.html" class="footer-link">Nos menus</a>
+            <a href="contact.html" class="footer-link">Contact</a>
+            <a href="mentions-legales.html" class="footer-link">Mentions légales</a>
+            <a href="cgv.html" class="footer-link">Conditions générales de vente</a>
+          </nav>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="current-year"></span> Vite &amp; Gourmand — Tous droits réservés</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmkhjxPPDaJH2jqM3OkxcDFMK7K" crossorigin="anonymous"></script>
+
+  <!-- JS communs -->
+  <script src="../js/security.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/main.js"></script>
+  <!-- JS spécifique à cette page -->
+  <script src="../js/connexion.js"></script>
+
+</body>
+</html>
