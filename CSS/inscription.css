@@ -1,0 +1,208 @@
+/* ============================================================
+   inscription.css — Page d'inscription Vite & Gourmand
+   ============================================================ */
+
+/* ── En-tête de page ───────────────────────────────────────── */
+.page-header {
+  background-color: var(--color-bg-alt, #f8f5f0);
+  padding: 2rem 0 1.5rem;
+  border-bottom: 1px solid #e8e0d5;
+  text-align: center;
+}
+
+.page-header h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  margin-bottom: 0.5rem;
+}
+
+.page-header .lead {
+  font-size: 1rem;
+  margin-bottom: 0;
+  color: #666;
+}
+
+/* ── Card d'inscription ────────────────────────────────────── */
+.register-card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background-color: #fff;
+}
+
+.register-card .card-title {
+  color: var(--color-primary, #b5451b);
+  font-family: 'Playfair Display', Georgia, serif;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.register-icon {
+  color: var(--color-primary, #b5451b);
+  opacity: 0.8;
+}
+
+/* ── Formulaire ────────────────────────────────────────────── */
+
+/* Focus sur les champs */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary, #b5451b);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.2);
+}
+
+/* Input group pour le mot de passe */
+.input-group .form-control {
+  border-right: none;
+}
+
+.input-group .btn-outline-secondary {
+  border-color: #dee2e6;
+  background-color: #fff;
+  color: #6c757d;
+}
+
+.input-group .btn-outline-secondary:hover,
+.input-group .btn-outline-secondary:focus {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: var(--color-primary, #b5451b);
+}
+
+.input-group .form-control:focus + .btn-outline-secondary {
+  border-color: var(--color-primary, #b5451b);
+}
+
+.input-group .btn-outline-secondary:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ── Indicateur de force du mot de passe ───────────────────── */
+.password-strength {
+  margin-top: 0.5rem;
+}
+
+.strength-bar {
+  height: 6px;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-text {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* ── Bouton primaire ───────────────────────────────────────── */
+.btn-primary {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+  font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #943a17;
+  border-color: #943a17;
+}
+
+.btn-primary:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.4);
+}
+
+/* Bouton désactivé pendant le chargement */
+.btn[aria-busy="true"] {
+  opacity: 0.75;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Spinner de chargement ─────────────────────────────────── */
+.loading-spinner {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Checkbox ──────────────────────────────────────────────── */
+.form-check-input:focus {
+  border-color: var(--color-primary, #b5451b);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.form-check-label a {
+  color: var(--color-primary, #b5451b);
+}
+
+.form-check-label a:hover {
+  text-decoration: underline;
+}
+
+/* ── Liens ─────────────────────────────────────────────────── */
+a.fw-semibold {
+  color: var(--color-primary, #b5451b);
+  text-decoration: none;
+}
+
+a.fw-semibold:hover,
+a.fw-semibold:focus {
+  text-decoration: underline;
+}
+
+/* ── Focus visible global (RGAA 10.7) ──────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: 2px;
+}
+
+/* ── Alertes ───────────────────────────────────────────────── */
+.alert-link {
+  font-weight: 600;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 575.98px) {
+  .register-card .card-body {
+    padding: 1.5rem !important;
+  }
+
+  .page-header {
+    padding: 1.25rem 0 1rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  /* Sur mobile, prénom et nom sur 2 lignes */
+  .row.g-3 > .col-sm-6 {
+    margin-bottom: 0.5rem;
+  }
+}
