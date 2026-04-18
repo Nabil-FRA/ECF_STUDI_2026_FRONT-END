@@ -6,13 +6,11 @@
 
 /* ---------- VARIABLES CUSTOM ---------- */
 :root {
-  /* Couleurs principales */
   --vg-primary:        #b5451b;
   --vg-primary-dark:   #8c3514;
   --vg-primary-light:  #d4724e;
   --vg-primary-bg:     #fdf0eb;
 
-  /* Neutres */
   --vg-text:           #2c2c2c;
   --vg-text-light:     #5a5a5a;
   --vg-text-muted:     #8a8a8a;
@@ -21,7 +19,6 @@
   --vg-bg-dark:        #2c2218;
   --vg-border:         #e2ddd8;
 
-  /* Statuts */
   --vg-success:        #2d7a3a;
   --vg-success-bg:     #eaf5ec;
   --vg-warning:        #b8860b;
@@ -29,21 +26,19 @@
   --vg-danger:         #c0392b;
   --vg-danger-bg:      #fdeaea;
 
-  /* Ombres */
   --vg-shadow-sm:      0 1px 3px rgba(0,0,0,0.06);
   --vg-shadow:         0 2px 8px rgba(0,0,0,0.08);
   --vg-shadow-md:      0 4px 16px rgba(0,0,0,0.10);
   --vg-shadow-lg:      0 8px 32px rgba(0,0,0,0.12);
 
-  /* Rayons */
   --vg-radius:         8px;
   --vg-radius-lg:      12px;
-
-  /* Transition */
   --vg-transition:     0.25s ease;
 }
 
 /* ---------- SURCHARGES BOOTSTRAP : COULEUR PRIMAIRE ---------- */
+
+/* Boutons */
 .btn-primary {
   background-color: var(--vg-primary);
   border-color: var(--vg-primary);
@@ -65,27 +60,17 @@
   color: #fff;
 }
 
-.btn-secondary {
-  background-color: var(--vg-bg-dark);
-  border-color: var(--vg-bg-dark);
-  color: #fff;
-}
-.btn-secondary:hover,
-.btn-secondary:focus-visible {
-  background-color: #1a1510;
-  border-color: #1a1510;
-}
-
-a {
+/* Liens — SEULEMENT hors composants Bootstrap */
+a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item) {
   color: var(--vg-primary);
   transition: color var(--vg-transition);
 }
-a:hover,
-a:focus-visible {
+a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item):hover,
+a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item):focus-visible {
   color: var(--vg-primary-dark);
 }
 
-/* Focus ring Bootstrap → couleur primaire */
+/* Focus ring sur les champs → couleur primaire */
 .form-control:focus,
 .form-select:focus {
   border-color: var(--vg-primary-light);
@@ -145,7 +130,7 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   color: #fff;
 }
 
-/* sr-only — masqué visuellement, visible par les lecteurs d'écran */
+/* sr-only */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -164,7 +149,7 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   outline-offset: 2px;
 }
 
-/* ---------- HEADER ---------- */
+/* ---------- HEADER (compatible navbar Bootstrap) ---------- */
 .site-header {
   background: var(--vg-bg);
   border-bottom: 1px solid var(--vg-border);
@@ -174,81 +159,35 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   box-shadow: var(--vg-shadow-sm);
 }
 
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 72px;
-  gap: 1rem;
-}
-
-/* Logo */
-.logo {
-  text-decoration: none;
-  flex-shrink: 0;
-}
-.logo-text {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--vg-primary);
-  letter-spacing: 0.02em;
-}
-.logo:hover .logo-text,
-.logo:focus-visible .logo-text {
-  color: var(--vg-primary-dark);
-}
-
-/* Navigation principale */
-.main-nav {
-  display: flex;
-  align-items: center;
-}
-
-.nav-list {
-  display: flex;
-  list-style: none;
-  gap: 0.25rem;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  display: block;
-  padding: 0.5rem 1rem;
+/* Style des liens nav Bootstrap avec la charte V&G */
+.site-header .nav-link {
   color: var(--vg-text);
   font-weight: 500;
   border-radius: var(--vg-radius);
   transition: background var(--vg-transition), color var(--vg-transition);
-  text-decoration: none;
 }
-.nav-link:hover,
-.nav-link:focus-visible {
+.site-header .nav-link:hover,
+.site-header .nav-link:focus-visible {
   background: var(--vg-primary-bg);
   color: var(--vg-primary);
 }
-.nav-link[aria-current="page"] {
+.site-header .nav-link.active,
+.site-header .nav-link[aria-current="page"] {
   color: var(--vg-primary);
   font-weight: 600;
   background: var(--vg-primary-bg);
 }
 
-/* Bouton hamburger */
-.menu-toggle {
-  display: none;
-  padding: 0.5rem;
-  color: var(--vg-text);
-  background: none;
-  border: none;
-  cursor: pointer;
+/* Breadcrumb — lien couleur primaire */
+.breadcrumb-item a {
+  color: var(--vg-primary);
 }
-
-/* Zone auth (connexion / inscription) */
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
+.breadcrumb-item a:hover {
+  color: var(--vg-primary-dark);
+  text-decoration: underline;
+}
+.breadcrumb-item.active {
+  color: var(--vg-text-muted);
 }
 
 /* ---------- SECTIONS ---------- */
@@ -304,41 +243,25 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
 .site-footer {
   background: var(--vg-bg-dark);
   color: #d4cfc9;
-  padding: 3rem 0 1.5rem;
 }
 
-.footer-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.footer-title {
+.site-footer h3 {
+  color: #fff;
   font-family: 'Playfair Display', Georgia, serif;
-  color: #fff;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
 }
 
-.footer-link {
-  display: block;
+.site-footer a {
   color: #d4cfc9;
-  padding: 0.2rem 0;
-  transition: color var(--vg-transition);
   text-decoration: none;
+  transition: color var(--vg-transition);
 }
-.footer-link:hover,
-.footer-link:focus-visible {
+.site-footer a:hover,
+.site-footer a:focus-visible {
   color: #fff;
 }
 
-.footer-bottom {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 1.5rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: #8a827a;
+.site-footer hr {
+  border-color: rgba(255,255,255,0.1);
 }
 
 /* ---------- LOADING / SPINNER ---------- */
@@ -413,51 +336,11 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
 }
 
 /* ---------- RESPONSIVE ---------- */
-@media (max-width: 991.98px) {
-  .menu-toggle {
-    display: block;
-  }
-
-  .nav-list {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 72px;
-    left: 0;
-    right: 0;
-    background: var(--vg-bg);
-    border-bottom: 1px solid var(--vg-border);
-    box-shadow: var(--vg-shadow-md);
-    padding: 1rem;
-    z-index: 1029;
-  }
-
-  .nav-list.is-open {
-    display: flex;
-  }
-
-  .nav-link {
-    padding: 0.75rem 1rem;
-  }
-
-  .header-actions {
-    gap: 0.35rem;
-  }
-  .header-actions .btn {
-    font-size: 0.8rem;
-    padding: 0.35rem 0.65rem;
-  }
-}
-
 @media (max-width: 575.98px) {
   .section {
     padding: 2.5rem 0;
   }
   .section-title {
     margin-bottom: 1.75rem;
-  }
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
 }
