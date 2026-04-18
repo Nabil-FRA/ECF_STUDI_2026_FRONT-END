@@ -1,0 +1,131 @@
+/* ============================================================
+   espace.css — CSS partagé pour les espaces client/employé/admin
+   ============================================================ */
+
+/* ── Titre de page ─────────────────────────────────────────── */
+.page-titre {
+  color: var(--color-primary, #b5451b);
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+
+/* ── Cartes statistiques ───────────────────────────────────── */
+.stat-card {
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-nombre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* couleurs pour les stats employé */
+.stat-attente .stat-nombre { color: #ffc107; }
+.stat-confirmee .stat-nombre { color: #198754; }
+.stat-livree .stat-nombre { color: #0d6efd; }
+
+/* ── Onglets Bootstrap custom ──────────────────────────────── */
+.nav-tabs .nav-link {
+  color: #495057;
+  font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--color-primary, #b5451b);
+  border-bottom-color: var(--color-primary, #b5451b);
+  border-bottom-width: 3px;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--color-primary, #b5451b);
+}
+
+.nav-tabs .nav-link:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: -3px;
+}
+
+/* ── Tableaux ──────────────────────────────────────────────── */
+.table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6c757d;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* ── Badges ────────────────────────────────────────────────── */
+.badge {
+  font-size: 0.8rem;
+}
+
+/* ── Boutons ───────────────────────────────────────────────── */
+.btn-primary {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.btn-primary:hover {
+  background-color: #943a16;
+  border-color: #943a16;
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: 2px;
+}
+
+.btn-outline-primary {
+  color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+  color: #fff;
+}
+
+/* ── Formulaires ───────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary, #b5451b);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.15);
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-titre {
+    font-size: 1.3rem;
+  }
+
+  .stat-nombre {
+    font-size: 1.5rem;
+  }
+
+  .nav-tabs .nav-link {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* cacher le texte des onglets sur petit écran, garder l'icône */
+  .nav-tabs .nav-link span {
+    display: none;
+  }
+}
