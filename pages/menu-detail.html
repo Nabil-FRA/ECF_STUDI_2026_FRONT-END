@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Détail du menu — Vite &amp; Gourmand, traiteur événementiel à Bordeaux.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Détail du menu — Vite &amp; Gourmand</title>
+
+  <!-- Bootstrap 5 -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/NPq0unNn0lSzMO0kzGHqKO7v5soGqs"
+    crossorigin="anonymous"
+  >
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+  >
+  <!-- CSS global -->
+  <link rel="stylesheet" href="../css/style.css">
+  <!-- CSS spécifique -->
+  <link rel="stylesheet" href="../css/menu-detail.css">
+</head>
+<body>
+
+  <!-- skip link pour l'accessibilité -->
+  <a href="#contenu-principal" class="visually-hidden-focusable skip-link">
+    Aller au contenu principal
+  </a>
+
+  <!-- ════════════════════════════════════════════════════════
+       HEADER (même que les autres pages)
+       ════════════════════════════════════════════════════════ -->
+  <header class="site-header" role="banner">
+    <nav class="navbar navbar-expand-lg" aria-label="Navigation principale">
+      <div class="container">
+        <a class="navbar-brand" href="../index.html">
+          <img src="../images/logo.svg" alt="Vite &amp; Gourmand — Accueil" height="48">
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#nav-principal"
+          aria-controls="nav-principal"
+          aria-expanded="false"
+          aria-label="Ouvrir le menu de navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav-principal">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="../index.html">Accueil</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="menus.html">Nos menus</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="commande.html">Commander</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="contact.html">Contact</a>
+            </li>
+            <!-- lien connexion / espace client (géré par JS) -->
+            <li class="nav-item" id="nav-auth">
+              <a class="nav-link" href="connexion.html">
+                <i class="bi bi-person-circle" aria-hidden="true"></i>
+                <span>Connexion</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════
+       FIL D'ARIANE
+       ════════════════════════════════════════════════════════ -->
+  <nav aria-label="Fil d'Ariane" class="container mt-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="../index.html">Accueil</a></li>
+      <li class="breadcrumb-item"><a href="menus.html">Nos menus</a></li>
+      <li class="breadcrumb-item active" aria-current="page" id="breadcrumb-menu">
+        <!-- JS injecte le nom du menu ici -->
+        Chargement...
+      </li>
+    </ol>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════
+       CONTENU PRINCIPAL
+       ════════════════════════════════════════════════════════ -->
+  <main id="contenu-principal" class="container my-4" role="main">
+
+    <!-- état de chargement -->
+    <div id="etat-chargement" class="text-center py-5" aria-live="polite">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement du menu...</span>
+      </div>
+      <p class="mt-2">Chargement du menu...</p>
+    </div>
+
+    <!-- état d'erreur (caché par défaut) -->
+    <div id="etat-erreur" class="d-none text-center py-5" role="alert">
+      <i class="bi bi-exclamation-triangle display-1 text-warning" aria-hidden="true"></i>
+      <h1 class="h3 mt-3">Menu introuvable</h1>
+      <p>Ce menu n'existe pas ou a été supprimé.</p>
+      <a href="menus.html" class="btn btn-primary">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        Retour aux menus
+      </a>
+    </div>
+
+    <!-- contenu du menu (caché pendant le chargement) -->
+    <article id="contenu-menu" class="d-none" itemscope itemtype="https://schema.org/Product">
+
+      <!-- ── Partie haute : image + infos ─────────────────── -->
+      <div class="row g-4">
+
+        <!-- colonne gauche : galerie photo -->
+        <div class="col-lg-6">
+          <div class="menu-galerie">
+            <!-- image principale -->
+            <div class="menu-img-principale mb-3">
+              <img
+                id="menu-img-main"
+                src=""
+                alt=""
+                class="img-fluid rounded-3"
+                itemprop="image"
+              >
+            </div>
+            <!-- miniatures (s'il y a plusieurs photos) -->
+            <div id="menu-thumbnails" class="menu-thumbnails d-none" role="list" aria-label="Autres photos du menu">
+              <!-- JS injecte les miniatures ici -->
+            </div>
+          </div>
+        </div>
+
+        <!-- colonne droite : infos du menu -->
+        <div class="col-lg-6">
+          <header>
+            <h1 id="menu-titre" class="menu-titre" itemprop="name">
+              <!-- JS injecte le nom -->
+            </h1>
+
+            <!-- badges : thème + régime -->
+            <div id="menu-badges" class="menu-badges mb-3">
+              <!-- JS injecte les badges -->
+            </div>
+          </header>
+
+          <!-- description courte -->
+          <p id="menu-description" class="menu-description lead" itemprop="description">
+            <!-- JS injecte la description -->
+          </p>
+
+          <!-- infos clés dans une petite grille -->
+          <div class="menu-infos-cles">
+            <!-- prix -->
+            <div class="info-cle" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+              <span class="info-cle-label">Prix par personne</span>
+              <span id="menu-prix" class="info-cle-valeur prix" itemprop="price">
+                <!-- JS injecte le prix -->
+              </span>
+              <meta itemprop="priceCurrency" content="EUR">
+            </div>
+
+            <!-- nb convives -->
+            <div class="info-cle">
+              <span class="info-cle-label">Convives</span>
+              <span id="menu-convives" class="info-cle-valeur">
+                <!-- JS injecte "Min X — Max Y personnes" -->
+              </span>
+            </div>
+
+            <!-- stock disponible -->
+            <div class="info-cle">
+              <span class="info-cle-label">Disponibilité</span>
+              <span id="menu-stock" class="info-cle-valeur" role="status" aria-live="polite">
+                <!-- JS injecte le stock -->
+              </span>
+            </div>
+
+            <!-- durée prestation (si dispo) -->
+            <div class="info-cle" id="bloc-duree">
+              <span class="info-cle-label">Durée prestation</span>
+              <span id="menu-duree" class="info-cle-valeur">
+                <!-- JS injecte la durée -->
+              </span>
+            </div>
+          </div>
+
+          <!-- encadré remise 10% -->
+          <div class="alert alert-success mt-3" role="note">
+            <i class="bi bi-piggy-bank" aria-hidden="true"></i>
+            <strong>Bon plan :</strong> 10% de réduction si vous dépassez de 5 personnes
+            le minimum de convives !
+          </div>
+
+          <!-- bouton commander -->
+          <div class="menu-actions mt-4">
+            <a
+              id="btn-commander"
+              href="#"
+              class="btn btn-primary btn-lg w-100"
+              role="button"
+            >
+              <i class="bi bi-cart-plus" aria-hidden="true"></i>
+              Commander ce menu
+            </a>
+            <!-- le lien sera : commande.html?menu=ID -->
+
+            <!-- si rupture de stock -->
+            <div id="alerte-rupture" class="alert alert-danger mt-2 d-none" role="alert">
+              <i class="bi bi-x-octagon" aria-hidden="true"></i>
+              Ce menu n'est plus disponible pour le moment.
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- fin partie haute -->
+
+      <!-- ── Partie basse : composition détaillée ──────────── -->
+      <section class="menu-composition mt-5" aria-labelledby="titre-composition">
+        <h2 id="titre-composition" class="section-titre">
+          <i class="bi bi-list-check" aria-hidden="true"></i>
+          Composition du menu
+        </h2>
+
+        <!-- onglets pour les catégories (entrées, plats, desserts, boissons...) -->
+        <div id="composition-tabs" role="tablist" aria-label="Catégories du menu" class="mt-3">
+          <!-- JS génère les onglets dynamiquement -->
+        </div>
+        <div id="composition-panels" class="mt-3">
+          <!-- JS génère les panneaux dynamiquement -->
+        </div>
+      </section>
+
+      <!-- ── Infos supplémentaires ─────────────────────────── -->
+      <section class="menu-infos-sup mt-5" aria-labelledby="titre-infos-sup">
+        <h2 id="titre-infos-sup" class="section-titre">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          Informations pratiques
+        </h2>
+
+        <div class="row g-4 mt-2">
+          <!-- allergènes -->
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="card-title h6">
+                  <i class="bi bi-exclamation-triangle text-warning" aria-hidden="true"></i>
+                  Allergènes
+                </h3>
+                <p id="menu-allergenes" class="card-text">
+                  <!-- JS injecte la liste des allergènes -->
+                  Aucun allergène signalé.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- conditions -->
+          <div class="col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="card-title h6">
+                  <i class="bi bi-clock text-primary" aria-hidden="true"></i>
+                  Conditions de commande
+                </h3>
+                <ul class="mb-0" id="menu-conditions">
+                  <li>Commande minimum <strong>48h</strong> à l'avance</li>
+                  <li>Livraison gratuite sur Bordeaux</li>
+                  <li>5€ + 0,59€/km hors Bordeaux</li>
+                  <li>Annulation gratuite jusqu'à 24h avant</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Menus similaires (suggestion) ─────────────────── -->
+      <section class="menus-similaires mt-5 mb-5" aria-labelledby="titre-similaires">
+        <h2 id="titre-similaires" class="section-titre">
+          <i class="bi bi-grid" aria-hidden="true"></i>
+          Vous aimerez aussi
+        </h2>
+        <div id="grille-similaires" class="row g-4 mt-2">
+          <!-- JS injecte 3 cards de menus du même thème -->
+        </div>
+      </section>
+
+    </article>
+    <!-- fin contenu-menu -->
+
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container py-4">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <h3 class="h6">Vite &amp; Gourmand</h3>
+          <p class="small">Traiteur événementiel à Bordeaux depuis 25 ans.</p>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h3 class="h6">Liens utiles</h3>
+          <ul class="list-unstyled small">
+            <li><a href="menus.html">Nos menus</a></li>
+            <li><a href="commande.html">Commander</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4 mb-3">
+          <h3 class="h6">Légal</h3>
+          <ul class="list-unstyled small">
+            <li><a href="mentions-legales.html">Mentions légales</a></li>
+            <li><a href="cgv.html">CGV</a></li>
+            <li><a href="politique-confidentialite.html">Politique de confidentialité</a></li>
+          </ul>
+        </div>
+      </div>
+      <hr>
+      <p class="text-center small mb-0">
+        &copy; 2026 Vite &amp; Gourmand — Tous droits réservés
+      </p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+  <!-- JS global (si t'en as un) -->
+  <!-- <script src="../JS/global.js"></script> -->
+  <!-- JS spécifique -->
+  <script src="../JS/menu-detail.js"></script>
+</body>
+</html>
