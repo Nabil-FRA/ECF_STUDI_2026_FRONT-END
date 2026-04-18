@@ -1,22 +1,126 @@
 /* ============================================================
    contact.css — Page contact Vite & Gourmand
+   Complète main.css + Bootstrap 5, ne les remplace pas.
    ============================================================ */
 
-/* ── Titre de page ─────────────────────────────────────────── */
+/* ── Mise en page générale ─────────────────────────────────── */
 .page-titre {
-  color: var(--color-primary, #b5451b);
+  color: var(--vg-primary, #b5451b);
   font-weight: 700;
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  margin-bottom: 0.5rem;
+}
+
+.lead {
+  color: var(--vg-text-light, #5a5a5a);
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+}
+
+/* ── Formulaire ────────────────────────────────────────────── */
+#form-contact {
+  max-width: 600px;
+}
+
+#form-contact .form-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--vg-text, #2c2c2c);
+  margin-bottom: 0.35rem;
+}
+
+#form-contact .form-control,
+#form-contact .form-select {
+  border-radius: var(--vg-radius, 8px);
+  border-color: var(--vg-border, #e2ddd8);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#form-contact .form-control:focus,
+#form-contact .form-select:focus {
+  border-color: var(--vg-primary-light, #d4724e);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.15);
+}
+
+#form-contact .form-control.is-invalid,
+#form-contact .form-select.is-invalid {
+  border-color: var(--vg-danger, #c0392b);
+  box-shadow: none;
+}
+
+#form-contact .form-control.is-invalid:focus,
+#form-contact .form-select.is-invalid:focus {
+  box-shadow: 0 0 0 0.2rem rgba(192, 57, 43, 0.15);
+}
+
+#form-contact textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Compteur de caractères */
+#form-contact .form-text {
+  font-size: 0.8rem;
+  color: var(--vg-text-muted, #8a8a8a);
+}
+
+/* ── Bouton envoyer ────────────────────────────────────────── */
+#btn-envoyer {
+  background-color: var(--vg-primary, #b5451b);
+  border-color: var(--vg-primary, #b5451b);
+  padding: 0.6rem 1.75rem;
+  font-weight: 600;
+  border-radius: var(--vg-radius, 8px);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+#btn-envoyer:hover {
+  background-color: var(--vg-primary-dark, #8c3514);
+  border-color: var(--vg-primary-dark, #8c3514);
+  transform: translateY(-1px);
+}
+
+#btn-envoyer:focus-visible {
+  outline: 3px solid var(--vg-primary, #b5451b);
+  outline-offset: 2px;
+}
+
+#btn-envoyer:disabled,
+#btn-envoyer[aria-busy="true"] {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Alertes succès / erreur ───────────────────────────────── */
+#succes-envoi {
+  background-color: var(--vg-success-bg, #eaf5ec);
+  color: var(--vg-success, #2d7a3a);
+  border-color: var(--vg-success, #2d7a3a);
+  border-radius: var(--vg-radius, 8px);
+}
+
+#erreur-globale {
+  background-color: var(--vg-danger-bg, #fdeaea);
+  color: var(--vg-danger, #c0392b);
+  border-color: var(--vg-danger, #c0392b);
+  border-radius: var(--vg-radius, 8px);
 }
 
 /* ── Carte coordonnées ─────────────────────────────────────── */
 .coordonnees-card {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 0.75rem;
+  background-color: var(--vg-bg-alt, #faf8f6);
+  border: 1px solid var(--vg-border, #e2ddd8);
+  border-radius: var(--vg-radius-lg, 12px);
   padding: 2rem;
   position: sticky;
   top: 100px;
+  box-shadow: var(--vg-shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+}
+
+.coordonnees-card h2 {
+  color: var(--vg-text, #2c2c2c);
+  font-family: 'Playfair Display', Georgia, serif;
 }
 
 .coordonnee {
@@ -26,79 +130,122 @@
 }
 
 .coordonnee i {
-  font-size: 1.3rem;
-  color: var(--color-primary, #b5451b);
+  font-size: 1.25rem;
+  color: var(--vg-primary, #b5451b);
   margin-top: 0.2rem;
   flex-shrink: 0;
 }
 
+.coordonnee strong {
+  color: var(--vg-text, #2c2c2c);
+  font-size: 0.95rem;
+}
+
+.coordonnee span {
+  font-size: 0.9rem;
+  color: var(--vg-text-light, #5a5a5a);
+  line-height: 1.5;
+}
+
 .coordonnee a {
-  color: var(--color-primary, #b5451b);
+  color: var(--vg-primary, #b5451b);
   text-decoration: none;
+  font-size: 0.9rem;
 }
 
 .coordonnee a:hover {
   text-decoration: underline;
+  color: var(--vg-primary-dark, #8c3514);
 }
 
 /* ── Réseaux sociaux ───────────────────────────────────────── */
+.reseaux-sociaux h3 {
+  color: var(--vg-text, #2c2c2c);
+  margin-bottom: 0.25rem;
+}
+
 .reseau-lien {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background-color: var(--color-primary, #b5451b);
+  background-color: var(--vg-primary, #b5451b);
   color: #fff;
   font-size: 1.1rem;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: transform 0.2s ease, background-color 0.2s ease;
   text-decoration: none;
 }
 
 .reseau-lien:hover {
   transform: scale(1.1);
-  background-color: #943a16;
+  background-color: var(--vg-primary-dark, #8c3514);
   color: #fff;
 }
 
 .reseau-lien:focus-visible {
-  outline: 3px solid var(--color-primary, #b5451b);
-  outline-offset: 2px;
+  outline: 3px solid var(--vg-primary, #b5451b);
+  outline-offset: 3px;
 }
 
-/* ── Formulaire ────────────────────────────────────────────── */
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--color-primary, #b5451b);
-  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.15);
+/* ── Fil d'ariane ──────────────────────────────────────────── */
+.breadcrumb-item a {
+  color: var(--vg-primary, #b5451b);
 }
 
-/* ── Bouton envoyer ────────────────────────────────────────── */
-.btn-primary {
-  background-color: var(--color-primary, #b5451b);
-  border-color: var(--color-primary, #b5451b);
+.breadcrumb-item a:hover {
+  color: var(--vg-primary-dark, #8c3514);
+  text-decoration: underline;
 }
 
-.btn-primary:hover {
-  background-color: #943a16;
-  border-color: #943a16;
+.breadcrumb-item.active {
+  color: var(--vg-text-muted, #8a8a8a);
 }
 
-.btn-primary:focus-visible {
-  outline: 3px solid var(--color-primary, #b5451b);
-  outline-offset: 2px;
+/* ── Footer ────────────────────────────────────────────────── */
+.site-footer {
+  background-color: var(--vg-bg-dark, #2c2218);
+  color: #d4cfc9;
+}
+
+.site-footer h3 {
+  color: #fff;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.site-footer a {
+  color: #d4cfc9;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer a:hover {
+  color: #fff;
+}
+
+.site-footer hr {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 991.98px) {
+  .coordonnees-card {
+    position: static;
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 575.98px) {
   .page-titre {
     font-size: 1.4rem;
   }
 
   .coordonnees-card {
-    position: static;
-    margin-top: 2rem;
     padding: 1.5rem;
+  }
+
+  #btn-envoyer {
+    width: 100%;
   }
 }
