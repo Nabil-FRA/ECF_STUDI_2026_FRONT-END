@@ -1,0 +1,127 @@
+/* ============================================================
+   confirmation.css — Page confirmation commande Vite & Gourmand
+   ============================================================ */
+
+/* ── Icône de succès ───────────────────────────────────────── */
+.confirmation-icon {
+  font-size: 5rem;
+  color: #198754;
+  animation: pop-in 0.5s ease-out;
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Titre ─────────────────────────────────────────────────── */
+.confirmation-titre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #198754;
+  margin-top: 1rem;
+}
+
+.confirmation-sous-titre {
+  font-size: 1.1rem;
+  color: #6c757d;
+  max-width: 500px;
+  margin: 0.5rem auto 0;
+}
+
+/* ── Numéro de commande ────────────────────────────────────── */
+.confirmation-numero {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 0.75rem;
+  padding: 1rem 2rem;
+  margin-top: 1.5rem;
+}
+
+.confirmation-numero .label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.confirmation-numero .numero {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary, #b5451b);
+  font-family: monospace;
+}
+
+/* ── Section titre ─────────────────────────────────────────── */
+.section-titre {
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 3px solid var(--color-primary, #b5451b);
+  padding-bottom: 0.5rem;
+}
+
+.section-titre i {
+  color: var(--color-primary, #b5451b);
+}
+
+/* ── Récap prix ────────────────────────────────────────────── */
+.recap-prix {
+  max-width: 400px;
+  margin-left: auto;
+}
+
+.recap-prix .prix {
+  color: var(--color-primary, #b5451b);
+}
+
+/* ── Cards étapes ──────────────────────────────────────────── */
+.etape-card {
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s;
+}
+
+.etape-card:hover {
+  transform: translateY(-3px);
+}
+
+.etape-card .bi {
+  color: var(--color-primary, #b5451b) !important;
+}
+
+/* ── Boutons ───────────────────────────────────────────────── */
+.btn-primary {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.btn-primary:hover {
+  background-color: #943a16;
+  border-color: #943a16;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .confirmation-titre {
+    font-size: 1.5rem;
+  }
+
+  .confirmation-numero {
+    padding: 0.75rem 1.5rem;
+  }
+
+  .confirmation-numero .numero {
+    font-size: 1.3rem;
+  }
+}
