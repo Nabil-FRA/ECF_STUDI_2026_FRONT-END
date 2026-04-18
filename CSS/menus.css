@@ -1,0 +1,330 @@
+/* ============================================================
+   menus.css — Page liste des menus Vite & Gourmand
+   ============================================================ */
+
+/* ── En-tête de page ───────────────────────────────────────── */
+.page-header {
+  background-color: var(--color-bg-alt, #f8f5f0);
+  padding: 2rem 0 1.5rem;
+  border-bottom: 1px solid #e8e0d5;
+}
+
+.page-header h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  margin-bottom: 0.5rem;
+}
+
+.page-header .lead {
+  font-size: 1rem;
+  margin-bottom: 0;
+  color: #666;
+}
+
+/* ── Sidebar Filtres ───────────────────────────────────────── */
+.filters-card {
+  background-color: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 1rem;
+}
+
+.filters-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--color-primary, #b5451b);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary, #b5451b);
+}
+
+.filters-card fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filters-card legend {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.filters-card .form-check {
+  margin-bottom: 0.35rem;
+}
+
+.filters-card .form-check-label {
+  font-size: 0.9rem;
+}
+
+/* Slider prix */
+.form-range::-webkit-slider-thumb {
+  background-color: var(--color-primary, #b5451b);
+}
+
+.form-range::-moz-range-thumb {
+  background-color: var(--color-primary, #b5451b);
+}
+
+.form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.25);
+}
+
+/* ── Barre de résultats ────────────────────────────────────── */
+.results-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.results-count {
+  font-weight: 600;
+  color: #495057;
+}
+
+.results-sort {
+  display: flex;
+  align-items: center;
+}
+
+.results-sort .form-label {
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+/* ── Cards Menu ────────────────────────────────────────────── */
+.menu-card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.menu-card-img-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-card-img {
+  height: 180px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.menu-card:hover .menu-card-img {
+  transform: scale(1.05);
+}
+
+.menu-card .card-body {
+  padding: 1.25rem;
+}
+
+.menu-card .card-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #2c2c2c;
+}
+
+.menu-card .card-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.menu-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.menu-card-badges .badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.menu-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0ebe3;
+}
+
+.menu-card-personnes {
+  font-size: 0.85rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.menu-card-prix {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary, #b5451b);
+}
+
+.menu-card .card-footer {
+  padding: 0 1.25rem 1.25rem;
+}
+
+/* ── État vide ─────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+}
+
+.empty-state svg {
+  opacity: 0.4;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
+}
+
+/* ── Pagination ────────────────────────────────────────────── */
+.pagination .page-link {
+  color: var(--color-primary, #b5451b);
+  border-color: #dee2e6;
+}
+
+.pagination .page-link:hover {
+  background-color: #f8f5f0;
+  border-color: var(--color-primary, #b5451b);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+  color: #fff;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+}
+
+/* ── Boutons ───────────────────────────────────────────────── */
+.btn-primary {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #943a17;
+  border-color: #943a17;
+}
+
+.btn-primary:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.4);
+}
+
+.btn-outline-primary {
+  color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+  color: #fff;
+}
+
+/* ── Checkbox ──────────────────────────────────────────────── */
+.form-check-input:focus {
+  border-color: var(--color-primary, #b5451b);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.25);
+}
+
+.form-check-input:checked {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+/* ── Focus visible (RGAA 10.7) ─────────────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: 2px;
+}
+
+/* ── Spinner chargement ────────────────────────────────────── */
+.spinner-border.text-primary {
+  color: var(--color-primary, #b5451b) !important;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 991.98px) {
+  /* Filtres en haut sur tablette/mobile */
+  .filters-card {
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+
+  /* On cache certains filtres par défaut sur mobile */
+  .filters-card fieldset {
+    display: none;
+  }
+
+  .filters-card.expanded fieldset {
+    display: block;
+  }
+
+  /* Bouton pour afficher/masquer les filtres */
+  .filters-toggle {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .filters-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .page-header {
+    padding: 1.25rem 0 1rem;
+  }
+
+  .results-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .menu-card-img {
+    height: 150px;
+  }
+}
