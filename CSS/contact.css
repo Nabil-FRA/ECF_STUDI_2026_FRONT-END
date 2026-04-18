@@ -1,0 +1,104 @@
+/* ============================================================
+   contact.css — Page contact Vite & Gourmand
+   ============================================================ */
+
+/* ── Titre de page ─────────────────────────────────────────── */
+.page-titre {
+  color: var(--color-primary, #b5451b);
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+/* ── Carte coordonnées ─────────────────────────────────────── */
+.coordonnees-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  position: sticky;
+  top: 100px;
+}
+
+.coordonnee {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.coordonnee i {
+  font-size: 1.3rem;
+  color: var(--color-primary, #b5451b);
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.coordonnee a {
+  color: var(--color-primary, #b5451b);
+  text-decoration: none;
+}
+
+.coordonnee a:hover {
+  text-decoration: underline;
+}
+
+/* ── Réseaux sociaux ───────────────────────────────────────── */
+.reseau-lien {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-primary, #b5451b);
+  color: #fff;
+  font-size: 1.1rem;
+  transition: transform 0.2s, background-color 0.2s;
+  text-decoration: none;
+}
+
+.reseau-lien:hover {
+  transform: scale(1.1);
+  background-color: #943a16;
+  color: #fff;
+}
+
+.reseau-lien:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: 2px;
+}
+
+/* ── Formulaire ────────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary, #b5451b);
+  box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.15);
+}
+
+/* ── Bouton envoyer ────────────────────────────────────────── */
+.btn-primary {
+  background-color: var(--color-primary, #b5451b);
+  border-color: var(--color-primary, #b5451b);
+}
+
+.btn-primary:hover {
+  background-color: #943a16;
+  border-color: #943a16;
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid var(--color-primary, #b5451b);
+  outline-offset: 2px;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-titre {
+    font-size: 1.4rem;
+  }
+
+  .coordonnees-card {
+    position: static;
+    margin-top: 2rem;
+    padding: 1.5rem;
+  }
+}
