@@ -1,6 +1,8 @@
 /* ============================================================
    main.css — Vite & Gourmand
    Complète Bootstrap 5, ne le remplace pas.
+   Supporte 2 types de header : custom (.header-inner) et
+   Bootstrap (.navbar-expand-lg)
    Charte : #b5451b (primaire), Playfair Display + Source Sans 3
    ============================================================ */
 
@@ -36,7 +38,9 @@
   --vg-transition:     0.25s ease;
 }
 
-/* ---------- SURCHARGES BOOTSTRAP : COULEUR PRIMAIRE ---------- */
+/* ==========================================================
+   SURCHARGES BOOTSTRAP : COULEUR PRIMAIRE
+   ========================================================== */
 
 /* Boutons */
 .btn-primary {
@@ -60,24 +64,44 @@
   color: #fff;
 }
 
-/* Liens — SEULEMENT hors composants Bootstrap */
-a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item) {
+/* Liens — hors composants Bootstrap pour ne rien casser */
+a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item):not(.footer-link) {
   color: var(--vg-primary);
   transition: color var(--vg-transition);
 }
-a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item):hover,
-a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item):focus-visible {
+a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item):not(.footer-link):hover,
+a:not(.nav-link):not(.navbar-brand):not(.btn):not(.breadcrumb-item > a):not(.page-link):not(.dropdown-item):not(.footer-link):focus-visible {
   color: var(--vg-primary-dark);
 }
 
-/* Focus ring sur les champs → couleur primaire */
+/* Focus ring champs → couleur primaire */
 .form-control:focus,
 .form-select:focus {
   border-color: var(--vg-primary-light);
   box-shadow: 0 0 0 0.2rem rgba(181,69,27,0.2);
 }
 
-/* ---------- TYPOGRAPHIE ---------- */
+/* Checkbox / radio couleur primaire */
+.form-check-input:checked {
+  background-color: var(--vg-primary);
+  border-color: var(--vg-primary);
+}
+.form-check-input:focus {
+  border-color: var(--vg-primary-light);
+  box-shadow: 0 0 0 0.2rem rgba(181,69,27,0.2);
+}
+
+/* Range couleur primaire */
+.form-range::-webkit-slider-thumb {
+  background: var(--vg-primary);
+}
+.form-range::-moz-range-thumb {
+  background: var(--vg-primary);
+}
+
+/* ==========================================================
+   TYPOGRAPHIE
+   ========================================================== */
 body {
   font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
   color: var(--vg-text);
@@ -110,7 +134,9 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   border-radius: 2px;
 }
 
-/* ---------- ACCESSIBILITÉ (RGAA) ---------- */
+/* ==========================================================
+   ACCESSIBILITÉ (RGAA)
+   ========================================================== */
 
 /* Skip link */
 .skip-link {
@@ -149,7 +175,9 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   outline-offset: 2px;
 }
 
-/* ---------- HEADER (compatible navbar Bootstrap) ---------- */
+/* ==========================================================
+   HEADER — COMMUN AUX DEUX VARIANTES
+   ========================================================== */
 .site-header {
   background: var(--vg-bg);
   border-bottom: 1px solid var(--vg-border);
@@ -159,12 +187,81 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   box-shadow: var(--vg-shadow-sm);
 }
 
-/* Style des liens nav Bootstrap avec la charte V&G */
+/* ==========================================================
+   HEADER VARIANTE A — Custom (index.html, menus.html…)
+   Classes : .header-inner, .logo, .nav-list, .menu-toggle,
+             .header-actions
+   ========================================================== */
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  gap: 1rem;
+}
+
+/* Logo texte */
+.logo {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--vg-primary);
+  letter-spacing: 0.02em;
+}
+.logo:hover .logo-text,
+.logo:focus-visible .logo-text {
+  color: var(--vg-primary-dark);
+}
+
+/* Navigation custom */
+.main-nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Bouton hamburger — masqué en desktop */
+.menu-toggle {
+  display: none;
+  padding: 0.5rem;
+  color: var(--vg-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Zone auth */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================
+   HEADER VARIANTE B — Bootstrap navbar (contact.html…)
+   Classes : .navbar, .navbar-expand-lg, .navbar-nav
+   On ne redéfinit rien de structurel, juste les couleurs.
+   ========================================================== */
+
+/* Style des .nav-link DANS les deux variantes */
 .site-header .nav-link {
   color: var(--vg-text);
   font-weight: 500;
   border-radius: var(--vg-radius);
   transition: background var(--vg-transition), color var(--vg-transition);
+  text-decoration: none;
 }
 .site-header .nav-link:hover,
 .site-header .nav-link:focus-visible {
@@ -178,7 +275,15 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   background: var(--vg-primary-bg);
 }
 
-/* Breadcrumb — lien couleur primaire */
+/* Padding spécifique au header custom (le Bootstrap gère le sien) */
+.header-inner .nav-link {
+  padding: 0.5rem 1rem;
+  display: block;
+}
+
+/* ==========================================================
+   BREADCRUMB
+   ========================================================== */
 .breadcrumb-item a {
   color: var(--vg-primary);
 }
@@ -190,7 +295,9 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   color: var(--vg-text-muted);
 }
 
-/* ---------- SECTIONS ---------- */
+/* ==========================================================
+   SECTIONS
+   ========================================================== */
 .section {
   padding: 4rem 0;
 }
@@ -198,7 +305,19 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   background-color: var(--vg-bg-alt);
 }
 
-/* ---------- CARDS CUSTOM ---------- */
+/* Page header (menus, etc.) */
+.page-header {
+  background-color: var(--vg-bg-alt);
+  padding: 2rem 0 1.5rem;
+  margin-bottom: 0;
+}
+.page-header .lead {
+  color: var(--vg-text-light);
+}
+
+/* ==========================================================
+   CARDS
+   ========================================================== */
 .card {
   border: 1px solid var(--vg-border);
   border-radius: var(--vg-radius-lg);
@@ -216,7 +335,9 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   margin-bottom: 0.75rem;
 }
 
-/* ---------- BOUTONS CUSTOM (hors Bootstrap) ---------- */
+/* ==========================================================
+   BOUTONS CUSTOM (hors Bootstrap)
+   ========================================================== */
 .btn-hero,
 .btn-cta {
   background-color: var(--vg-primary);
@@ -239,12 +360,51 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   transform: translateY(-2px);
 }
 
-/* ---------- FOOTER ---------- */
+/* ==========================================================
+   FOOTER — Variante custom (footer-grid)
+   ========================================================== */
 .site-footer {
   background: var(--vg-bg-dark);
   color: #d4cfc9;
 }
 
+/* Footer custom avec grid (index, menus…) */
+.site-footer .footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-top: 2rem;
+}
+
+.footer-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #fff;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.footer-link {
+  display: block;
+  color: #d4cfc9;
+  padding: 0.2rem 0;
+  transition: color var(--vg-transition);
+  text-decoration: none;
+}
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: #fff;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #8a827a;
+}
+
+/* Footer Bootstrap (contact…) — surcharges couleurs */
 .site-footer h3 {
   color: #fff;
   font-family: 'Playfair Display', Georgia, serif;
@@ -264,7 +424,13 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   border-color: rgba(255,255,255,0.1);
 }
 
-/* ---------- LOADING / SPINNER ---------- */
+.site-footer p {
+  margin-bottom: 0.5rem;
+}
+
+/* ==========================================================
+   LOADING / SPINNER
+   ========================================================== */
 .loading-overlay {
   text-align: center;
   padding: 2rem;
@@ -285,7 +451,9 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   to { transform: rotate(360deg); }
 }
 
-/* ---------- TOAST / NOTIFICATIONS ---------- */
+/* ==========================================================
+   TOAST / NOTIFICATIONS
+   ========================================================== */
 .toast-container {
   position: fixed;
   top: 80px;
@@ -323,7 +491,9 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* ---------- UTILITAIRES ---------- */
+/* ==========================================================
+   UTILITAIRES
+   ========================================================== */
 .text-primary { color: var(--vg-primary) !important; }
 .bg-primary   { background-color: var(--vg-primary) !important; }
 .bg-alt       { background-color: var(--vg-bg-alt); }
@@ -335,12 +505,56 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   border: none;
 }
 
-/* ---------- RESPONSIVE ---------- */
+/* ==========================================================
+   RESPONSIVE — Header custom mobile
+   ========================================================== */
+@media (max-width: 991.98px) {
+  /* Hamburger visible */
+  .menu-toggle {
+    display: block;
+  }
+
+  /* Nav custom en colonne mobile */
+  .nav-list {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 72px;
+    left: 0;
+    right: 0;
+    background: var(--vg-bg);
+    border-bottom: 1px solid var(--vg-border);
+    box-shadow: var(--vg-shadow-md);
+    padding: 1rem;
+    z-index: 1029;
+  }
+
+  .nav-list.is-open {
+    display: flex;
+  }
+
+  .header-inner .nav-link {
+    padding: 0.75rem 1rem;
+  }
+
+  .header-actions {
+    gap: 0.35rem;
+  }
+  .header-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.65rem;
+  }
+}
+
 @media (max-width: 575.98px) {
   .section {
     padding: 2.5rem 0;
   }
   .section-title {
     margin-bottom: 1.75rem;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
