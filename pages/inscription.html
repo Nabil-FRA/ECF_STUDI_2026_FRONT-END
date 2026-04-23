@@ -3,430 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Créez votre compte — Vite &amp; Gourmand, traiteur événementiel à Bordeaux.">
+  <meta name="description" content="Créez votre compte Vite &amp; Gourmand pour commander.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta name="csrf-token" content=""><!-- Rempli dynamiquement par js/security.js -->
+  <meta name="csrf-token" content="">
   <title>Inscription — Vite &amp; Gourmand</title>
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-  <!-- CSS commun -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="../css/main.css">
-  <!-- CSS spécifique à cette page -->
   <link rel="stylesheet" href="../css/inscription.css">
 </head>
 <body>
 
-  <!-- Lien d'évitement — RGAA 12.7 -->
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
-  <!-- ====== HEADER ====== -->
+  <!-- HEADER -->
   <header class="site-header" role="banner">
     <div class="container header-inner">
-      <a href="../index.html" class="logo" aria-label="Vite et Gourmand — Accueil">
-        <span class="logo-text" aria-hidden="true">V&amp;G</span>
-        <span class="sr-only">Vite et Gourmand</span>
-      </a>
-
+      <a href="../index.html" class="logo" aria-label="Vite et Gourmand — Accueil"><span class="logo-text" aria-hidden="true">V&amp;G</span><span class="sr-only">Vite et Gourmand</span></a>
       <nav class="main-nav" aria-label="Navigation principale">
-        <button
-          type="button"
-          class="menu-toggle"
-          id="menu-toggle"
-          aria-expanded="false"
-          aria-controls="nav-list"
-          aria-label="Ouvrir le menu de navigation"
-        >
-          <svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-        </button>
-
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="nav-list" aria-label="Ouvrir le menu de navigation"><svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <ul class="nav-list" id="nav-list">
           <li><a href="../index.html" class="nav-link">Accueil</a></li>
           <li><a href="menus.html" class="nav-link">Nos menus</a></li>
           <li><a href="contact.html" class="nav-link">Contact</a></li>
         </ul>
       </nav>
-
-      <div class="header-actions" id="auth-area">
-        <a href="connexion.html" class="btn btn-secondary btn-sm">Connexion</a>
-        <a href="inscription.html" class="btn btn-primary btn-sm" aria-current="page">Inscription</a>
-      </div>
+      <div class="header-actions" id="auth-area"></div>
     </div>
   </header>
 
-  <!-- ====== CONTENU PRINCIPAL ====== -->
+  <!-- CONTENU -->
   <main id="main-content" role="main">
-
-    <!-- En-tête de page -->
-    <section class="page-header" aria-labelledby="page-title">
-      <div class="container">
-        <h1 id="page-title">Créer un compte</h1>
-        <p class="lead">Inscrivez-vous pour passer vos commandes en quelques clics.</p>
-      </div>
-    </section>
-
-    <!-- Zone d'alerte globale -->
-    <div
-      id="alert-global"
-      class="container mt-3"
-      role="alert"
-      aria-live="assertive"
-      aria-atomic="true"
-    >
-      <!-- Contenu injecté dynamiquement -->
-    </div>
-
-    <!-- ====== FORMULAIRE D'INSCRIPTION ====== -->
-    <section class="container my-5" aria-labelledby="form-title">
+    <div class="container my-5">
       <div class="row justify-content-center">
-        <div class="col-sm-10 col-md-8 col-lg-6">
+        <div class="col-lg-7 col-xl-6">
 
-          <div class="card register-card">
-            <div class="card-body p-4">
-              <h2 id="form-title" class="card-title text-center mb-4">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16" class="register-icon">
-                  <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                </svg>
-                <span class="d-block mt-2">Inscription</span>
-              </h2>
-
-              <form
-                id="form-inscription"
-                novalidate
-                aria-label="Formulaire d'inscription"
-              >
-                <!-- Token CSRF -->
-                <input type="hidden" id="csrf-token-field" name="_csrf" value="">
-
-                <!-- Prénom et Nom sur la même ligne -->
-                <div class="row g-3 mb-3">
-                  <!-- Prénom -->
-                  <div class="col-sm-6">
-                    <label for="prenom" class="form-label">
-                      Prénom <span class="text-danger" aria-hidden="true">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="prenom"
-                      name="prenom"
-                      autocomplete="given-name"
-                      required
-                      aria-required="true"
-                      aria-describedby="prenom-error"
-                      maxlength="50"
-                      placeholder="Jean"
-                    >
-                    <div
-                      id="prenom-error"
-                      class="invalid-feedback"
-                      role="alert"
-                      aria-live="polite"
-                    >
-                      Veuillez saisir votre prénom.
-                    </div>
-                  </div>
-
-                  <!-- Nom -->
-                  <div class="col-sm-6">
-                    <label for="nom" class="form-label">
-                      Nom <span class="text-danger" aria-hidden="true">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="nom"
-                      name="nom"
-                      autocomplete="family-name"
-                      required
-                      aria-required="true"
-                      aria-describedby="nom-error"
-                      maxlength="50"
-                      placeholder="Dupont"
-                    >
-                    <div
-                      id="nom-error"
-                      class="invalid-feedback"
-                      role="alert"
-                      aria-live="polite"
-                    >
-                      Veuillez saisir votre nom.
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Email -->
-                <div class="mb-3">
-                  <label for="email" class="form-label">
-                    Adresse e-mail <span class="text-danger" aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    class="form-control"
-                    id="email"
-                    name="email"
-                    autocomplete="email"
-                    required
-                    aria-required="true"
-                    aria-describedby="email-error email-hint"
-                    maxlength="254"
-                    placeholder="jean.dupont@email.fr"
-                  >
-                  <div id="email-hint" class="form-text">
-                    Vous recevrez vos confirmations de commande à cette adresse.
-                  </div>
-                  <div
-                    id="email-error"
-                    class="invalid-feedback"
-                    role="alert"
-                    aria-live="polite"
-                  >
-                    Veuillez saisir une adresse e-mail valide.
-                  </div>
-                </div>
-
-                <!-- Téléphone -->
-                <div class="mb-3">
-                  <label for="gsm" class="form-label">
-                    Numéro de téléphone <span class="text-danger" aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    class="form-control"
-                    id="gsm"
-                    name="gsm"
-                    autocomplete="tel"
-                    required
-                    aria-required="true"
-                    aria-describedby="gsm-error gsm-hint"
-                    pattern="^(\+33|0033|0)[1-9](\d{2}){4}$"
-                    maxlength="20"
-                    placeholder="06 12 34 56 78"
-                  >
-                  <div id="gsm-hint" class="form-text">
-                    Pour vous contacter en cas de besoin concernant votre commande.
-                  </div>
-                  <div
-                    id="gsm-error"
-                    class="invalid-feedback"
-                    role="alert"
-                    aria-live="polite"
-                  >
-                    Veuillez saisir un numéro de téléphone valide.
-                  </div>
-                </div>
-
-                <!-- Mot de passe -->
-                <div class="mb-3">
-                  <label for="password" class="form-label">
-                    Mot de passe <span class="text-danger" aria-hidden="true">*</span>
-                  </label>
-                  <div class="input-group">
-                    <input
-                      type="password"
-                      class="form-control"
-                      id="password"
-                      name="password"
-                      autocomplete="new-password"
-                      required
-                      aria-required="true"
-                      aria-describedby="password-error password-hint"
-                      minlength="8"
-                      placeholder="••••••••"
-                    >
-                    <button
-                      type="button"
-                      class="btn btn-outline-secondary"
-                      id="toggle-password"
-                      aria-label="Afficher le mot de passe"
-                      aria-pressed="false"
-                    >
-                      <svg id="icon-eye" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                      </svg>
-                      <svg id="icon-eye-slash" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="d-none">
-                        <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/>
-                        <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/>
-                        <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/>
-                      </svg>
-                    </button>
-                  </div>
-                  <div id="password-hint" class="form-text">
-                    Minimum 8 caractères, avec au moins une majuscule et un chiffre.
-                  </div>
-                  <div
-                    id="password-error"
-                    class="invalid-feedback"
-                    role="alert"
-                    aria-live="polite"
-                  >
-                    Veuillez saisir un mot de passe valide.
-                  </div>
-                  <!-- Indicateur de force du mot de passe -->
-                  <div id="password-strength" class="password-strength mt-2 d-none">
-                    <div class="strength-bar">
-                      <div class="strength-fill" id="strength-fill"></div>
-                    </div>
-                    <small id="strength-text" class="strength-text"></small>
-                  </div>
-                </div>
-
-                <!-- Confirmation mot de passe -->
-                <div class="mb-3">
-                  <label for="password-confirm" class="form-label">
-                    Confirmer le mot de passe <span class="text-danger" aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    id="password-confirm"
-                    name="password_confirm"
-                    autocomplete="new-password"
-                    required
-                    aria-required="true"
-                    aria-describedby="password-confirm-error"
-                    minlength="8"
-                    placeholder="••••••••"
-                  >
-                  <div
-                    id="password-confirm-error"
-                    class="invalid-feedback"
-                    role="alert"
-                    aria-live="polite"
-                  >
-                    Les mots de passe ne correspondent pas.
-                  </div>
-                </div>
-
-                <!-- Acceptation CGV et mentions légales -->
-                <div class="form-check mb-3">
-                  <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="accepte-cgv"
-                    name="accepte_cgv"
-                    required
-                    aria-required="true"
-                    aria-describedby="accepte-cgv-error"
-                  >
-                  <label class="form-check-label" for="accepte-cgv">
-                    J'accepte les <a href="cgv.html" target="_blank" rel="noopener">conditions générales de vente</a>
-                    et la <a href="mentions-legales.html" target="_blank" rel="noopener">politique de confidentialité</a>
-                    <span class="text-danger" aria-hidden="true">*</span>
-                  </label>
-                  <div
-                    id="accepte-cgv-error"
-                    class="invalid-feedback"
-                    role="alert"
-                    aria-live="polite"
-                  >
-                    Vous devez accepter les conditions pour vous inscrire.
-                  </div>
-                </div>
-
-                <!-- Newsletter (optionnel) -->
-                <div class="form-check mb-4">
-                  <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="newsletter"
-                    name="newsletter"
-                  >
-                  <label class="form-check-label" for="newsletter">
-                    Je souhaite recevoir les offres et nouveautés par e-mail
-                  </label>
-                </div>
-
-                <!-- Note champs obligatoires -->
-                <p class="text-muted small mb-3">
-                  <span class="text-danger" aria-hidden="true">*</span>
-                  <span>Champs obligatoires</span>
-                </p>
-
-                <!-- Bouton d'inscription -->
-                <button
-                  type="submit"
-                  class="btn btn-primary btn-lg w-100 mb-3"
-                  id="btn-inscription"
-                >
-                  Créer mon compte
-                </button>
-
-              </form><!-- /form-inscription -->
-            </div>
-          </div><!-- /card -->
-
-          <!-- Lien vers connexion -->
-          <div class="text-center mt-4">
-            <p class="mb-0">
-              Déjà inscrit ?
-              <a href="connexion.html" class="fw-semibold">Se connecter</a>
-            </p>
+          <div class="text-center mb-4">
+            <h1>Créer un compte</h1>
+            <p class="text-muted">Rejoignez Vite &amp; Gourmand pour commander vos menus en ligne.</p>
           </div>
 
-        </div><!-- /col -->
-      </div><!-- /row -->
-    </section>
+          <!-- Message d'erreur global -->
+          <div id="erreur-globale" class="alert alert-danger d-none" role="alert" aria-live="assertive"></div>
 
+          <!-- Message de succès -->
+          <div id="succes-inscription" class="alert alert-success d-none text-center" role="status" aria-live="polite">
+            <i class="bi bi-check-circle-fill display-5 d-block mb-2" aria-hidden="true"></i>
+            <h2 class="h5">Compte créé avec succès !</h2>
+            <p>Un e-mail de bienvenue a été envoyé à votre adresse. Vous allez être redirigé vers votre espace.</p>
+          </div>
+
+          <!-- FORMULAIRE -->
+          <form id="inscription-form" novalidate aria-label="Formulaire d'inscription">
+
+            <!-- Nom & Prénom -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="nom" class="form-label">Nom <span class="text-danger" aria-hidden="true">*</span></label>
+                <input type="text" id="nom" name="nom" class="form-control" required maxlength="50" autocomplete="family-name" placeholder="Martin">
+                <div class="invalid-feedback" role="alert"></div>
+              </div>
+              <div class="col-md-6">
+                <label for="prenom" class="form-label">Prénom <span class="text-danger" aria-hidden="true">*</span></label>
+                <input type="text" id="prenom" name="prenom" class="form-control" required maxlength="50" autocomplete="given-name" placeholder="Julie">
+                <div class="invalid-feedback" role="alert"></div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Adresse e-mail <span class="text-danger" aria-hidden="true">*</span></label>
+              <input type="email" id="email" name="email" class="form-control" required maxlength="254" autocomplete="email" placeholder="julie@exemple.fr">
+              <div class="invalid-feedback" role="alert"></div>
+            </div>
+
+            <!-- Téléphone -->
+            <div class="mb-3">
+              <label for="gsm" class="form-label">Numéro de GSM <span class="text-danger" aria-hidden="true">*</span></label>
+              <input type="tel" id="gsm" name="gsm" class="form-control" required maxlength="20" autocomplete="tel" placeholder="06 12 34 56 78">
+              <div class="invalid-feedback" role="alert"></div>
+            </div>
+
+            <!-- Adresse postale (obligatoire selon l'énoncé) -->
+            <div class="mb-3">
+              <label for="adresse" class="form-label">Adresse postale <span class="text-danger" aria-hidden="true">*</span></label>
+              <input type="text" id="adresse" name="adresse" class="form-control" required maxlength="200" autocomplete="street-address" placeholder="12 rue Sainte-Catherine">
+              <div class="invalid-feedback" role="alert"></div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label for="code-postal" class="form-label">Code postal <span class="text-danger" aria-hidden="true">*</span></label>
+                <input type="text" id="code-postal" name="code_postal" class="form-control" required maxlength="5" pattern="[0-9]{5}" autocomplete="postal-code" placeholder="33000">
+                <div class="invalid-feedback" role="alert"></div>
+              </div>
+              <div class="col-md-8">
+                <label for="ville" class="form-label">Ville <span class="text-danger" aria-hidden="true">*</span></label>
+                <input type="text" id="ville" name="ville" class="form-control" required maxlength="100" autocomplete="address-level2" placeholder="Bordeaux">
+                <div class="invalid-feedback" role="alert"></div>
+              </div>
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="mb-3">
+              <label for="password" class="form-label">Mot de passe <span class="text-danger" aria-hidden="true">*</span></label>
+              <div class="input-group">
+                <input type="password" id="password" name="password" class="form-control" required minlength="10" autocomplete="new-password" aria-describedby="password-help">
+                <button type="button" class="btn btn-outline-secondary toggle-password" data-target="password" aria-label="Afficher le mot de passe"><i class="bi bi-eye" aria-hidden="true"></i></button>
+              </div>
+              <div id="password-help" class="form-text">10 caractères minimum : 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial</div>
+              <!-- Barre de force -->
+              <div class="progress mt-2" style="height:6px;" role="progressbar" aria-label="Force du mot de passe">
+                <div id="password-strength" class="progress-bar" style="width:0%;"></div>
+              </div>
+              <small id="password-strength-text" class="text-muted"></small>
+              <div class="invalid-feedback" role="alert"></div>
+            </div>
+
+            <!-- Confirmation mot de passe -->
+            <div class="mb-3">
+              <label for="confirm-password" class="form-label">Confirmer le mot de passe <span class="text-danger" aria-hidden="true">*</span></label>
+              <div class="input-group">
+                <input type="password" id="confirm-password" name="confirm_password" class="form-control" required minlength="10" autocomplete="new-password">
+                <button type="button" class="btn btn-outline-secondary toggle-password" data-target="confirm-password" aria-label="Afficher la confirmation"><i class="bi bi-eye" aria-hidden="true"></i></button>
+              </div>
+              <div class="invalid-feedback" role="alert"></div>
+            </div>
+
+            <!-- CGV -->
+            <div class="mb-3 form-check">
+              <input type="checkbox" id="cgv" name="cgv" class="form-check-input" required>
+              <label for="cgv" class="form-check-label">
+                J'accepte les <a href="cgv.html" target="_blank" rel="noopener">Conditions Générales de Vente</a> et la <a href="politique-confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>. <span class="text-danger" aria-hidden="true">*</span>
+              </label>
+              <div class="invalid-feedback" role="alert"></div>
+            </div>
+
+            <!-- Bouton -->
+            <button type="submit" class="btn btn-primary w-100 py-2">
+              <i class="bi bi-person-plus" aria-hidden="true"></i> Créer mon compte
+            </button>
+
+            <p class="text-center mt-3 small text-muted">
+              Déjà un compte ? <a href="connexion.html">Se connecter</a>
+            </p>
+          </form>
+
+        </div>
+      </div>
+    </div>
   </main>
-  <!-- /main -->
 
-  <!-- ====== FOOTER ====== -->
+  <!-- FOOTER -->
   <footer class="site-footer" role="contentinfo">
     <div class="container">
       <div class="footer-grid">
-        <div>
-          <h3 class="footer-title">Horaires</h3>
-          <div id="horaires-footer">
-            <p>Lun - Ven : 8h00 - 19h00</p>
-            <p>Samedi : 9h00 - 17h00</p>
-            <p>Dimanche : Fermé</p>
-          </div>
-        </div>
-        <div>
-          <h3 class="footer-title">Contact</h3>
-          <p>Bordeaux, Gironde</p>
-          <p><a href="tel:+33556781234" class="footer-link">05 56 78 12 34</a></p>
-          <p><a href="mailto:contact@viteetgourmand.fr" class="footer-link">contact@viteetgourmand.fr</a></p>
-        </div>
-        <div>
-          <h3 class="footer-title">Navigation</h3>
-          <nav aria-label="Navigation du pied de page">
-            <a href="menus.html" class="footer-link">Nos menus</a>
-            <a href="contact.html" class="footer-link">Contact</a>
-            <a href="mentions-legales.html" class="footer-link">Mentions légales</a>
-            <a href="cgv.html" class="footer-link">Conditions générales de vente</a>
-          </nav>
-        </div>
+        <div><h3 class="footer-title">Horaires</h3><p>Lun - Ven : 8h00 - 19h00</p><p>Samedi : 9h00 - 17h00</p><p>Dimanche : Fermé</p></div>
+        <div><h3 class="footer-title">Contact</h3><p>Bordeaux, Gironde</p><p><a href="tel:+33556781234" class="footer-link">05 56 78 12 34</a></p></div>
+        <div><h3 class="footer-title">Navigation</h3><nav aria-label="Navigation du pied de page"><a href="menus.html" class="footer-link">Nos menus</a><a href="contact.html" class="footer-link">Contact</a><a href="mentions-legales.html" class="footer-link">Mentions légales</a><a href="cgv.html" class="footer-link">CGV</a></nav></div>
       </div>
-      <div class="footer-bottom">
-        <p>&copy; <span id="current-year"></span> Vite &amp; Gourmand — Tous droits réservés</p>
-      </div>
+      <div class="footer-bottom"><p>&copy; <span id="current-year"></span> Vite &amp; Gourmand — Tous droits réservés</p></div>
     </div>
   </footer>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmkhjxPPDaJH2jqM3OkxcDFMK7K" crossorigin="anonymous"></script>
-
-  <!-- JS communs -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <script src="../js/security.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/main.js"></script>
-  <!-- JS spécifique à cette page -->
   <script src="../js/inscription.js"></script>
-
 </body>
 </html>

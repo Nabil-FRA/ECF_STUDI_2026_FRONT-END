@@ -5,354 +5,175 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Espace administration — Vite &amp; Gourmand.">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="">
   <title>Administration — Vite &amp; Gourmand</title>
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/NPq0unNn0lSzMO0kzGHqKO7v5soGqs" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/espace.css">
 </head>
 <body>
 
-  <a href="#contenu-principal" class="visually-hidden-focusable skip-link">Aller au contenu principal</a>
+  <a href="#contenu-principal" class="skip-link">Aller au contenu principal</a>
 
-  <!-- HEADER admin -->
   <header class="site-header" role="banner">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Navigation administration">
-      <div class="container-fluid px-4">
-        <a class="navbar-brand" href="../index.html">
-          <img src="../images/logo.svg" alt="Vite &amp; Gourmand" height="40">
-        </a>
-        <span class="badge bg-danger ms-2">Admin</span>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-          data-bs-target="#nav-admin" aria-controls="nav-admin" aria-expanded="false"
-          aria-label="Menu">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="nav-admin">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="espace-employe.html">
-                <i class="bi bi-clipboard-check" aria-hidden="true"></i> Commandes
-              </a>
-            </li>
-            <li class="nav-item">
-              <button id="btn-deconnexion" class="btn btn-outline-light btn-sm ms-2">
-                <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Déconnexion
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <!-- CONTENU PRINCIPAL -->
-  <main id="contenu-principal" class="container-fluid px-4 my-4" role="main">
-
-    <h1 class="page-titre mb-4">
-      <i class="bi bi-speedometer2" aria-hidden="true"></i>
-      Tableau de bord
-    </h1>
-
-    <!-- ── Stats rapides ───────────────────────────────────── -->
-    <div class="row g-3 mb-4">
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card text-center">
-          <div class="card-body">
-            <i class="bi bi-people display-6 text-primary" aria-hidden="true"></i>
-            <div class="stat-nombre" id="stat-utilisateurs">0</div>
-            <div class="stat-label">Utilisateurs</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card text-center">
-          <div class="card-body">
-            <i class="bi bi-book display-6 text-success" aria-hidden="true"></i>
-            <div class="stat-nombre" id="stat-menus">0</div>
-            <div class="stat-label">Menus actifs</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card text-center">
-          <div class="card-body">
-            <i class="bi bi-bag-check display-6 text-warning" aria-hidden="true"></i>
-            <div class="stat-nombre" id="stat-commandes-mois">0</div>
-            <div class="stat-label">Commandes ce mois</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card text-center">
-          <div class="card-body">
-            <i class="bi bi-currency-euro display-6 text-danger" aria-hidden="true"></i>
-            <div class="stat-nombre" id="stat-ca-mois">0 €</div>
-            <div class="stat-label">CA ce mois</div>
-          </div>
-        </div>
+    <div class="container header-inner">
+      <a href="../index.html" class="logo" aria-label="Vite et Gourmand — Accueil"><span class="logo-text" aria-hidden="true">V&amp;G</span><span class="sr-only">Vite et Gourmand</span></a>
+      <nav class="main-nav" aria-label="Navigation admin">
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="nav-list" aria-label="Menu"><svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <ul class="nav-list" id="nav-list">
+          <li><a href="../index.html" class="nav-link">Accueil</a></li>
+          <li><a href="espace-employe.html" class="nav-link">Commandes</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <span class="badge bg-danger">Admin</span>
+        <button id="btn-deconnexion" class="btn btn-outline-danger btn-sm ms-2"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Déconnexion</button>
       </div>
     </div>
+  </header>
 
-    <!-- ── Onglets de gestion ──────────────────────────────── -->
+  <main id="contenu-principal" class="container my-4" role="main">
+    <h1 class="page-titre mb-4"><i class="bi bi-speedometer2" aria-hidden="true"></i> Tableau de bord</h1>
+
+    <!-- STATS -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-xl-3"><div class="card stat-card text-center"><div class="card-body"><i class="bi bi-people display-6 text-primary" aria-hidden="true"></i><div class="stat-nombre" id="stat-utilisateurs">0</div><div class="stat-label">Utilisateurs</div></div></div></div>
+      <div class="col-sm-6 col-xl-3"><div class="card stat-card text-center"><div class="card-body"><i class="bi bi-book display-6 text-success" aria-hidden="true"></i><div class="stat-nombre" id="stat-menus">0</div><div class="stat-label">Menus actifs</div></div></div></div>
+      <div class="col-sm-6 col-xl-3"><div class="card stat-card text-center"><div class="card-body"><i class="bi bi-bag-check display-6 text-warning" aria-hidden="true"></i><div class="stat-nombre" id="stat-commandes-mois">0</div><div class="stat-label">Commandes ce mois</div></div></div></div>
+      <div class="col-sm-6 col-xl-3"><div class="card stat-card text-center"><div class="card-body"><i class="bi bi-currency-euro display-6 text-danger" aria-hidden="true"></i><div class="stat-nombre" id="stat-ca-mois">0 €</div><div class="stat-label">CA ce mois</div></div></div></div>
+    </div>
+
+    <!-- ONGLETS -->
     <ul class="nav nav-tabs" id="admin-tabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-menus" data-bs-toggle="tab"
-          data-bs-target="#panel-menus" type="button" role="tab"
-          aria-controls="panel-menus" aria-selected="true">
-          <i class="bi bi-book" aria-hidden="true"></i> Menus
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-utilisateurs" data-bs-toggle="tab"
-          data-bs-target="#panel-utilisateurs" type="button" role="tab"
-          aria-controls="panel-utilisateurs" aria-selected="false">
-          <i class="bi bi-people" aria-hidden="true"></i> Utilisateurs
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-commandes" data-bs-toggle="tab"
-          data-bs-target="#panel-commandes" type="button" role="tab"
-          aria-controls="panel-commandes" aria-selected="false">
-          <i class="bi bi-bag" aria-hidden="true"></i> Commandes
-        </button>
-      </li>
+      <li class="nav-item" role="presentation"><button class="nav-link active" id="tab-menus" data-bs-toggle="tab" data-bs-target="#panel-menus" type="button" role="tab"><i class="bi bi-book" aria-hidden="true"></i> <span>Menus</span></button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" id="tab-utilisateurs" data-bs-toggle="tab" data-bs-target="#panel-utilisateurs" type="button" role="tab"><i class="bi bi-people" aria-hidden="true"></i> <span>Utilisateurs</span></button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" id="tab-commandes" data-bs-toggle="tab" data-bs-target="#panel-commandes" type="button" role="tab"><i class="bi bi-bag" aria-hidden="true"></i> <span>Commandes</span></button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link" id="tab-stats" data-bs-toggle="tab" data-bs-target="#panel-stats" type="button" role="tab"><i class="bi bi-bar-chart" aria-hidden="true"></i> <span>Statistiques</span></button></li>
     </ul>
 
     <div class="tab-content mt-4" id="admin-contenu">
 
-      <!-- ── Onglet Menus ────────────────────────────────── -->
-      <div class="tab-pane fade show active" id="panel-menus" role="tabpanel"
-        aria-labelledby="tab-menus">
-
+      <!-- ONGLET MENUS -->
+      <div class="tab-pane fade show active" id="panel-menus" role="tabpanel">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h2 class="h5 mb-0">Gestion des menus</h2>
-          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-menu">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i> Nouveau menu
-          </button>
+          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-menu"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nouveau menu</button>
         </div>
-
         <div class="table-responsive">
           <table class="table table-hover align-middle" aria-label="Liste des menus">
-            <thead>
-              <tr>
-                <th scope="col">Nom</th>
-                <th scope="col">Thème</th>
-                <th scope="col">Prix/pers</th>
-                <th scope="col">Convives</th>
-                <th scope="col">Stock</th>
-                <th scope="col">Statut</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="menus-body">
-              <!-- JS injecte les lignes -->
-            </tbody>
+            <thead><tr><th>Nom</th><th>Thème</th><th>Prix/pers</th><th>Convives</th><th>Stock</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="menus-body"></tbody>
           </table>
         </div>
-
-        <div id="menus-chargement" class="text-center py-3">
-          <div class="spinner-border spinner-border-sm" role="status">
-            <span class="visually-hidden">Chargement...</span>
-          </div>
-        </div>
+        <div id="menus-chargement" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Chargement...</span></div></div>
       </div>
 
-      <!-- ── Onglet Utilisateurs ─────────────────────────── -->
-      <div class="tab-pane fade" id="panel-utilisateurs" role="tabpanel"
-        aria-labelledby="tab-utilisateurs">
-
-        <h2 class="h5 mb-3">Gestion des utilisateurs</h2>
-
-        <!-- filtre par rôle — corrigé : ajout label + aria-label pour RGAA -->
+      <!-- ONGLET UTILISATEURS -->
+      <div class="tab-pane fade" id="panel-utilisateurs" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Gestion des utilisateurs</h2>
+          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-employe"><i class="bi bi-person-plus" aria-hidden="true"></i> Créer un employé</button>
+        </div>
         <div class="mb-3">
           <label for="filtre-role" class="visually-hidden">Filtrer par rôle</label>
-          <select id="filtre-role" class="form-select form-select-sm"
-            style="width: auto; display: inline-block;"
-            aria-label="Filtrer par rôle">
-            <option value="tous">Tous les rôles</option>
-            <option value="client">Clients</option>
-            <option value="employe">Employés</option>
-            <option value="admin">Administrateurs</option>
+          <select id="filtre-role" class="form-select form-select-sm d-inline-block" style="width:auto;" aria-label="Filtrer par rôle">
+            <option value="tous">Tous les rôles</option><option value="client">Clients</option><option value="employe">Employés</option><option value="admin">Administrateurs</option>
           </select>
         </div>
-
         <div class="table-responsive">
           <table class="table table-hover align-middle" aria-label="Liste des utilisateurs">
-            <thead>
-              <tr>
-                <th scope="col">Nom</th>
-                <th scope="col">E-mail</th>
-                <th scope="col">Rôle</th>
-                <th scope="col">Inscription</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="utilisateurs-body">
-              <!-- JS injecte les lignes -->
-            </tbody>
+            <thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th>Statut</th><th>Inscription</th><th>Actions</th></tr></thead>
+            <tbody id="utilisateurs-body"></tbody>
           </table>
         </div>
-
-        <div id="utilisateurs-chargement" class="text-center py-3">
-          <div class="spinner-border spinner-border-sm" role="status">
-            <span class="visually-hidden">Chargement...</span>
-          </div>
-        </div>
+        <div id="utilisateurs-chargement" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Chargement...</span></div></div>
       </div>
 
-      <!-- ── Onglet Commandes (toutes) ───────────────────── -->
-      <div class="tab-pane fade" id="panel-commandes" role="tabpanel"
-        aria-labelledby="tab-commandes">
-
+      <!-- ONGLET COMMANDES -->
+      <div class="tab-pane fade" id="panel-commandes" role="tabpanel">
         <h2 class="h5 mb-3">Toutes les commandes</h2>
-
         <div class="d-flex gap-2 mb-3 flex-wrap">
-          <!-- filtre statut — corrigé : ajout label + aria-label pour RGAA -->
-          <label for="filtre-statut-admin" class="visually-hidden">Filtrer par statut</label>
-          <select id="filtre-statut-admin" class="form-select form-select-sm"
-            style="width: auto;"
-            aria-label="Filtrer par statut">
-            <option value="tous">Tous les statuts</option>
-            <option value="En attente">En attente</option>
-            <option value="Confirmée">Confirmée</option>
-            <option value="Livrée">Livrée</option>
-            <option value="Annulée">Annulée</option>
-          </select>
-
-          <!-- date début — corrigé : ajout label + aria-label pour RGAA -->
-          <label for="filtre-date-debut" class="visually-hidden">Date de début</label>
-          <input type="date" id="filtre-date-debut" class="form-control form-control-sm"
-            style="width: auto;"
-            aria-label="Date de début">
-
+          <label for="filtre-statut-admin" class="visually-hidden">Statut</label>
+          <select id="filtre-statut-admin" class="form-select form-select-sm" style="width:auto;" aria-label="Filtrer par statut"><option value="tous">Tous</option><option value="En attente">En attente</option><option value="Confirmée">Confirmée</option><option value="Livrée">Livrée</option><option value="Terminée">Terminée</option><option value="Annulée">Annulée</option></select>
+          <label for="filtre-date-debut" class="visually-hidden">Date début</label>
+          <input type="date" id="filtre-date-debut" class="form-control form-control-sm" style="width:auto;" aria-label="Date début">
           <span class="align-self-center" aria-hidden="true">à</span>
-
-          <!-- date fin — corrigé : ajout label + aria-label pour RGAA -->
-          <label for="filtre-date-fin" class="visually-hidden">Date de fin</label>
-          <input type="date" id="filtre-date-fin" class="form-control form-control-sm"
-            style="width: auto;"
-            aria-label="Date de fin">
-
+          <label for="filtre-date-fin" class="visually-hidden">Date fin</label>
+          <input type="date" id="filtre-date-fin" class="form-control form-control-sm" style="width:auto;" aria-label="Date fin">
           <button id="btn-filtrer-commandes" class="btn btn-sm btn-primary">Filtrer</button>
         </div>
-
         <div class="table-responsive">
-          <table class="table table-hover table-sm align-middle" aria-label="Toutes les commandes">
-            <thead>
-              <tr>
-                <th scope="col">N°</th>
-                <th scope="col">Date</th>
-                <th scope="col">Client</th>
-                <th scope="col">Menu</th>
-                <th scope="col">Total</th>
-                <th scope="col">Statut</th>
-              </tr>
-            </thead>
-            <tbody id="all-commandes-body">
-              <!-- JS injecte -->
-            </tbody>
-          </table>
+          <table class="table table-hover table-sm align-middle" aria-label="Toutes les commandes"><thead><tr><th>N°</th><th>Date</th><th>Client</th><th>Menu</th><th>Total</th><th>Statut</th></tr></thead><tbody id="all-commandes-body"></tbody></table>
         </div>
-
-        <div id="all-commandes-chargement" class="text-center py-3">
-          <div class="spinner-border spinner-border-sm" role="status">
-            <span class="visually-hidden">Chargement...</span>
-          </div>
-        </div>
+        <div id="all-commandes-chargement" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Chargement...</span></div></div>
       </div>
 
+      <!-- ONGLET STATISTIQUES (graphique + CA) -->
+      <div class="tab-pane fade" id="panel-stats" role="tabpanel">
+        <h2 class="h5 mb-3">Statistiques &amp; Chiffre d'affaires</h2>
+        <p class="text-muted small">Données issues de la base NoSQL (MongoDB en production).</p>
+        <div id="graphique-container">
+          <div class="text-center py-4"><div class="spinner-border" role="status"><span class="visually-hidden">Chargement...</span></div></div>
+        </div>
+      </div>
     </div>
-
   </main>
 
-  <!-- ── Modal : Créer/Modifier un menu ──────────────────── -->
+  <!-- MODAL MENU -->
   <div class="modal fade" id="modal-menu" tabindex="-1" aria-labelledby="modal-menu-titre" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title h5" id="modal-menu-titre">Nouveau menu</h2>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-        </div>
-        <div class="modal-body">
-          <form id="form-menu" novalidate>
-            <input type="hidden" id="menu-id" name="id">
-
-            <div class="row g-3">
-              <div class="col-md-8">
-                <label for="menu-nom" class="form-label">Nom du menu *</label>
-                <input type="text" id="menu-nom" name="nom" class="form-control" required maxlength="100">
-              </div>
-              <div class="col-md-4">
-                <label for="menu-prix" class="form-label">Prix/personne (€) *</label>
-                <input type="number" id="menu-prix" name="prix" class="form-control"
-                  required min="1" step="0.01">
-              </div>
-              <div class="col-md-6">
-                <label for="menu-theme" class="form-label">Thème *</label>
-                <select id="menu-theme" name="theme" class="form-select" required>
-                  <option value="">— Choisir —</option>
-                  <option value="Cocktail">Cocktail</option>
-                  <option value="Buffet">Buffet</option>
-                  <option value="Repas assis">Repas assis</option>
-                  <option value="Brunch">Brunch</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label for="menu-regime" class="form-label">Régime</label>
-                <select id="menu-regime" name="regime" class="form-select">
-                  <option value="Classique">Classique</option>
-                  <option value="Végétarien">Végétarien</option>
-                  <option value="Végan">Végan</option>
-                  <option value="Sans gluten">Sans gluten</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label for="menu-convives-min" class="form-label">Convives min *</label>
-                <input type="number" id="menu-convives-min" name="nbConvivesMin" class="form-control"
-                  required min="1">
-              </div>
-              <div class="col-md-4">
-                <label for="menu-convives-max" class="form-label">Convives max *</label>
-                <input type="number" id="menu-convives-max" name="nbConvivesMax" class="form-control"
-                  required min="1">
-              </div>
-              <div class="col-md-4">
-                <label for="menu-stock" class="form-label">Stock</label>
-                <input type="number" id="menu-stock" name="stock" class="form-control" min="0">
-              </div>
-              <div class="col-12">
-                <label for="menu-description" class="form-label">Description</label>
-                <textarea id="menu-description" name="description" class="form-control"
-                  rows="3" maxlength="500"></textarea>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-primary" id="btn-sauvegarder-menu">
-            <i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer
-          </button>
-        </div>
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header"><h2 class="modal-title h5" id="modal-menu-titre">Nouveau menu</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+      <div class="modal-body">
+        <form id="form-menu" novalidate><input type="hidden" id="menu-id" name="id">
+          <div class="row g-3">
+            <div class="col-md-8"><label for="menu-nom" class="form-label">Nom *</label><input type="text" id="menu-nom" class="form-control" required maxlength="100"></div>
+            <div class="col-md-4"><label for="menu-prix" class="form-label">Prix/pers (€) *</label><input type="number" id="menu-prix" class="form-control" required min="1" step="0.01"></div>
+            <div class="col-md-6"><label for="menu-theme" class="form-label">Thème *</label><select id="menu-theme" class="form-select" required><option value="">— Choisir —</option><option value="noel">Noël</option><option value="paques">Pâques</option><option value="classique">Classique</option><option value="evenement">Événement</option></select></div>
+            <div class="col-md-6"><label for="menu-regime" class="form-label">Régime</label><select id="menu-regime" class="form-select"><option value="classique">Classique</option><option value="vegetarien">Végétarien</option><option value="vegan">Végan</option><option value="sans-gluten">Sans gluten</option></select></div>
+            <div class="col-md-4"><label for="menu-convives-min" class="form-label">Convives min *</label><input type="number" id="menu-convives-min" class="form-control" required min="1"></div>
+            <div class="col-md-4"><label for="menu-convives-max" class="form-label">Convives max *</label><input type="number" id="menu-convives-max" class="form-control" required min="1"></div>
+            <div class="col-md-4"><label for="menu-stock" class="form-label">Stock</label><input type="number" id="menu-stock" class="form-control" min="0"></div>
+            <div class="col-12"><label for="menu-description" class="form-label">Description</label><textarea id="menu-description" class="form-control" rows="3" maxlength="500"></textarea></div>
+          </div>
+        </form>
       </div>
-    </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button type="button" class="btn btn-primary" id="btn-sauvegarder-menu"><i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer</button></div>
+    </div></div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="site-footer bg-dark text-light" role="contentinfo">
-    <div class="container py-3">
-      <p class="text-center small mb-0">
-        &copy; 2026 Vite &amp; Gourmand — Administration
-      </p>
-    </div>
+  <!-- MODAL CRÉER EMPLOYÉ -->
+  <div class="modal fade" id="modal-employe" tabindex="-1" aria-labelledby="modal-employe-titre" aria-hidden="true">
+    <div class="modal-dialog"><div class="modal-content">
+      <div class="modal-header"><h2 class="modal-title h5" id="modal-employe-titre">Créer un compte employé</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button></div>
+      <div class="modal-body">
+        <p class="text-muted small">L'employé recevra un mail l'informant de la création de son compte. Le mot de passe ne sera pas communiqué dans le mail — il devra se rapprocher de l'administrateur pour l'obtenir.</p>
+        <form id="form-employe" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6"><label for="new-employe-prenom" class="form-label">Prénom</label><input type="text" id="new-employe-prenom" class="form-control" maxlength="50"></div>
+            <div class="col-md-6"><label for="new-employe-nom" class="form-label">Nom</label><input type="text" id="new-employe-nom" class="form-control" maxlength="50"></div>
+            <div class="col-12"><label for="new-employe-email" class="form-label">E-mail (identifiant) <span class="text-danger">*</span></label><input type="email" id="new-employe-email" class="form-control" required maxlength="254"></div>
+            <div class="col-12"><label for="new-employe-mdp" class="form-label">Mot de passe <span class="text-danger">*</span></label><input type="password" id="new-employe-mdp" class="form-control" required minlength="10"><div class="form-text">10 caractères min, 1 majuscule, 1 minuscule, 1 chiffre, 1 spécial</div></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button type="button" class="btn btn-primary" id="btn-creer-employe"><i class="bi bi-person-plus" aria-hidden="true"></i> Créer le compte</button></div>
+    </div></div>
+  </div>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container"><div class="footer-bottom py-3"><p class="text-center small mb-0">&copy; <span id="current-year"></span> Vite &amp; Gourmand — Administration</p></div></div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
-  <script src="../JS/espace-admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/espace-admin.js"></script>
 </body>
 </html>

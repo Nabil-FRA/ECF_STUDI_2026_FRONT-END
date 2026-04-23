@@ -5,270 +5,276 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Votre espace client — Vite &amp; Gourmand.">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="">
   <title>Mon espace — Vite &amp; Gourmand</title>
-
-  <!-- Bootstrap 5 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/NPq0unNn0lSzMO0kzGHqKO7v5soGqs" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/espace.css">
 </head>
 <body>
 
-  <a href="#contenu-principal" class="visually-hidden-focusable skip-link">Aller au contenu principal</a>
+  <a href="#contenu-principal" class="skip-link">Aller au contenu principal</a>
 
   <!-- HEADER -->
   <header class="site-header" role="banner">
-    <nav class="navbar navbar-expand-lg" aria-label="Navigation principale">
-      <div class="container">
-        <a class="navbar-brand" href="../index.html">
-          <img src="../images/logo.svg" alt="Vite &amp; Gourmand — Accueil" height="48">
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-          data-bs-target="#nav-principal" aria-controls="nav-principal" aria-expanded="false"
-          aria-label="Ouvrir le menu de navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="nav-principal">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="../index.html">Accueil</a></li>
-            <li class="nav-item"><a class="nav-link" href="menus.html">Nos menus</a></li>
-            <li class="nav-item"><a class="nav-link" href="commande.html">Commander</a></li>
-            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
-            <li class="nav-item">
-              <a class="nav-link active" href="espace-client.html" aria-current="page">
-                <i class="bi bi-person-circle" aria-hidden="true"></i>
-                <span>Mon espace</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <div class="container header-inner">
+      <a href="../index.html" class="logo" aria-label="Vite et Gourmand — Accueil"><span class="logo-text" aria-hidden="true">V&amp;G</span><span class="sr-only">Vite et Gourmand</span></a>
+      <nav class="main-nav" aria-label="Navigation principale">
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="nav-list" aria-label="Ouvrir le menu de navigation"><svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <ul class="nav-list" id="nav-list">
+          <li><a href="../index.html" class="nav-link">Accueil</a></li>
+          <li><a href="menus.html" class="nav-link">Nos menus</a></li>
+          <li><a href="commande.html" class="nav-link">Commander</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions" id="auth-area"></div>
+    </div>
   </header>
 
   <!-- FIL D'ARIANE -->
   <nav aria-label="Fil d'Ariane" class="container mt-3">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="../index.html">Accueil</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Mon espace</li>
-    </ol>
+    <ol class="breadcrumb"><li class="breadcrumb-item"><a href="../index.html">Accueil</a></li><li class="breadcrumb-item active" aria-current="page">Mon espace</li></ol>
   </nav>
 
-  <!-- CONTENU PRINCIPAL -->
+  <!-- CONTENU -->
   <main id="contenu-principal" class="container my-4" role="main">
 
-    <!-- en-tête avec nom du client -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h1 class="page-titre">Mon espace</h1>
         <p class="text-muted mb-0">Bienvenue, <strong id="client-prenom">—</strong> !</p>
       </div>
-      <button id="btn-deconnexion" class="btn btn-outline-danger btn-sm">
-        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-        Déconnexion
-      </button>
+      <button id="btn-deconnexion" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Déconnexion</button>
     </div>
 
-    <!-- onglets navigation -->
+    <!-- ONGLETS -->
     <ul class="nav nav-tabs" id="espace-tabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-commandes" data-bs-toggle="tab"
-          data-bs-target="#panel-commandes" type="button" role="tab"
-          aria-controls="panel-commandes" aria-selected="true">
-          <i class="bi bi-bag-check" aria-hidden="true"></i>
-          Mes commandes
-        </button>
+        <button class="nav-link active" id="tab-commandes" data-bs-toggle="tab" data-bs-target="#panel-commandes" type="button" role="tab" aria-controls="panel-commandes" aria-selected="true"><i class="bi bi-bag-check" aria-hidden="true"></i> <span>Mes commandes</span></button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-profil" data-bs-toggle="tab"
-          data-bs-target="#panel-profil" type="button" role="tab"
-          aria-controls="panel-profil" aria-selected="false">
-          <i class="bi bi-person" aria-hidden="true"></i>
-          Mon profil
-        </button>
+        <button class="nav-link" id="tab-profil" data-bs-toggle="tab" data-bs-target="#panel-profil" type="button" role="tab" aria-controls="panel-profil" aria-selected="false"><i class="bi bi-person" aria-hidden="true"></i> <span>Mon profil</span></button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-securite" data-bs-toggle="tab"
-          data-bs-target="#panel-securite" type="button" role="tab"
-          aria-controls="panel-securite" aria-selected="false">
-          <i class="bi bi-shield-lock" aria-hidden="true"></i>
-          Sécurité
-        </button>
+        <button class="nav-link" id="tab-securite" data-bs-toggle="tab" data-bs-target="#panel-securite" type="button" role="tab" aria-controls="panel-securite" aria-selected="false"><i class="bi bi-shield-lock" aria-hidden="true"></i> <span>Sécurité</span></button>
       </li>
     </ul>
 
-    <!-- contenu des onglets -->
     <div class="tab-content mt-4" id="espace-contenu">
 
-      <!-- ── Onglet 1 : Mes commandes ──────────────────────── -->
-      <div class="tab-pane fade show active" id="panel-commandes" role="tabpanel"
-        aria-labelledby="tab-commandes">
-
-        <!-- état vide -->
+      <!-- ONGLET COMMANDES -->
+      <div class="tab-pane fade show active" id="panel-commandes" role="tabpanel" aria-labelledby="tab-commandes">
         <div id="commandes-vide" class="text-center py-5 d-none">
           <i class="bi bi-bag display-1 text-muted" aria-hidden="true"></i>
           <p class="mt-3 text-muted">Vous n'avez pas encore de commande.</p>
           <a href="menus.html" class="btn btn-primary">Découvrir nos menus</a>
         </div>
 
-        <!-- tableau des commandes -->
         <div id="commandes-tableau" class="table-responsive">
           <table class="table table-hover align-middle" aria-label="Historique des commandes">
             <thead>
               <tr>
-                <th scope="col">N°</th>
-                <th scope="col">Date</th>
-                <th scope="col">Menu</th>
-                <th scope="col">Convives</th>
-                <th scope="col">Total</th>
-                <th scope="col">Statut</th>
-                <th scope="col"><span class="visually-hidden">Actions</span></th>
+                <th scope="col">N°</th><th scope="col">Date</th><th scope="col">Menu</th>
+                <th scope="col">Convives</th><th scope="col">Total</th><th scope="col">Statut</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
-            <tbody id="commandes-body">
-              <!-- JS injecte les lignes ici -->
-            </tbody>
+            <tbody id="commandes-body"></tbody>
           </table>
         </div>
-
-        <!-- chargement -->
         <div id="commandes-chargement" class="text-center py-4">
-          <div class="spinner-border spinner-border-sm text-primary" role="status">
-            <span class="visually-hidden">Chargement des commandes...</span>
-          </div>
+          <div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Chargement...</span></div>
         </div>
       </div>
 
-      <!-- ── Onglet 2 : Mon profil ─────────────────────────── -->
-      <div class="tab-pane fade" id="panel-profil" role="tabpanel"
-        aria-labelledby="tab-profil">
-
+      <!-- ONGLET PROFIL -->
+      <div class="tab-pane fade" id="panel-profil" role="tabpanel" aria-labelledby="tab-profil">
         <form id="form-profil" novalidate aria-label="Modifier mon profil">
           <div class="row g-3">
             <div class="col-md-6">
               <label for="profil-prenom" class="form-label">Prénom</label>
-              <input type="text" id="profil-prenom" name="prenom" class="form-control"
-                required maxlength="50" autocomplete="given-name">
+              <input type="text" id="profil-prenom" name="prenom" class="form-control" required maxlength="50" autocomplete="given-name">
             </div>
             <div class="col-md-6">
               <label for="profil-nom" class="form-label">Nom</label>
-              <input type="text" id="profil-nom" name="nom" class="form-control"
-                required maxlength="50" autocomplete="family-name">
+              <input type="text" id="profil-nom" name="nom" class="form-control" required maxlength="50" autocomplete="family-name">
             </div>
             <div class="col-md-6">
               <label for="profil-email" class="form-label">E-mail</label>
-              <input type="email" id="profil-email" name="email" class="form-control"
-                required maxlength="200" autocomplete="email">
+              <input type="email" id="profil-email" name="email" class="form-control" required maxlength="200" autocomplete="email">
             </div>
             <div class="col-md-6">
               <label for="profil-tel" class="form-label">Téléphone</label>
-              <input type="tel" id="profil-tel" name="telephone" class="form-control"
-                maxlength="20" autocomplete="tel">
+              <input type="tel" id="profil-tel" name="telephone" class="form-control" maxlength="20" autocomplete="tel">
+            </div>
+            <div class="col-12">
+              <label for="profil-adresse" class="form-label">Adresse postale</label>
+              <input type="text" id="profil-adresse" name="adresse" class="form-control" maxlength="200" autocomplete="street-address">
+            </div>
+            <div class="col-md-4">
+              <label for="profil-cp" class="form-label">Code postal</label>
+              <input type="text" id="profil-cp" name="codePostal" class="form-control" maxlength="5" autocomplete="postal-code">
+            </div>
+            <div class="col-md-8">
+              <label for="profil-ville" class="form-label">Ville</label>
+              <input type="text" id="profil-ville" name="ville" class="form-control" maxlength="100" autocomplete="address-level2">
             </div>
           </div>
-
-          <div id="profil-succes" class="alert alert-success d-none mt-3" role="status">
-            Profil mis à jour avec succès.
-          </div>
-          <div id="profil-erreur" class="alert alert-danger d-none mt-3" role="alert">
-          </div>
-
-          <button type="submit" class="btn btn-primary mt-3">
-            <i class="bi bi-check-lg" aria-hidden="true"></i>
-            Enregistrer
-          </button>
+          <div id="profil-succes" class="alert alert-success d-none mt-3" role="status">Profil mis à jour avec succès.</div>
+          <div id="profil-erreur" class="alert alert-danger d-none mt-3" role="alert"></div>
+          <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer</button>
         </form>
       </div>
 
-      <!-- ── Onglet 3 : Sécurité ──────────────────────────── -->
-      <div class="tab-pane fade" id="panel-securite" role="tabpanel"
-        aria-labelledby="tab-securite">
-
+      <!-- ONGLET SÉCURITÉ -->
+      <div class="tab-pane fade" id="panel-securite" role="tabpanel" aria-labelledby="tab-securite">
         <h2 class="h5 mb-3">Modifier mon mot de passe</h2>
-
         <form id="form-mdp" novalidate aria-label="Modifier mon mot de passe" class="col-md-6">
           <div class="mb-3">
             <label for="mdp-actuel" class="form-label">Mot de passe actuel</label>
-            <input type="password" id="mdp-actuel" name="mdpActuel" class="form-control"
-              required autocomplete="current-password">
+            <input type="password" id="mdp-actuel" class="form-control" required autocomplete="current-password">
             <div id="erreur-mdp-actuel" class="invalid-feedback" role="alert"></div>
           </div>
           <div class="mb-3">
             <label for="mdp-nouveau" class="form-label">Nouveau mot de passe</label>
-            <input type="password" id="mdp-nouveau" name="mdpNouveau" class="form-control"
-              required minlength="8" autocomplete="new-password">
-            <div class="form-text">8 caractères minimum, 1 majuscule, 1 chiffre</div>
+            <input type="password" id="mdp-nouveau" class="form-control" required minlength="10" autocomplete="new-password">
+            <div class="form-text">10 caractères minimum, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial</div>
             <div id="erreur-mdp-nouveau" class="invalid-feedback" role="alert"></div>
           </div>
           <div class="mb-3">
             <label for="mdp-confirmer" class="form-label">Confirmer le nouveau mot de passe</label>
-            <input type="password" id="mdp-confirmer" name="mdpConfirmer" class="form-control"
-              required autocomplete="new-password">
+            <input type="password" id="mdp-confirmer" class="form-control" required autocomplete="new-password">
             <div id="erreur-mdp-confirmer" class="invalid-feedback" role="alert"></div>
           </div>
-
-          <div id="mdp-succes" class="alert alert-success d-none" role="status">
-            Mot de passe modifié avec succès.
-          </div>
+          <div id="mdp-succes" class="alert alert-success d-none" role="status">Mot de passe modifié.</div>
           <div id="mdp-erreur" class="alert alert-danger d-none" role="alert"></div>
-
-          <button type="submit" class="btn btn-primary">
-            <i class="bi bi-lock" aria-hidden="true"></i>
-            Modifier le mot de passe
-          </button>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-lock" aria-hidden="true"></i> Modifier</button>
         </form>
-
         <hr class="my-4">
-
-        <!-- suppression de compte -->
         <div class="text-danger">
           <h2 class="h5 mb-2">Supprimer mon compte</h2>
-          <p class="small">Cette action est irréversible. Toutes vos données seront supprimées.</p>
-          <button id="btn-supprimer-compte" class="btn btn-outline-danger btn-sm">
-            <i class="bi bi-trash" aria-hidden="true"></i>
-            Supprimer mon compte
-          </button>
+          <p class="small">Cette action est irréversible.</p>
+          <button id="btn-supprimer-compte" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash" aria-hidden="true"></i> Supprimer mon compte</button>
         </div>
       </div>
-
     </div>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="site-footer" role="contentinfo">
-    <div class="container py-4">
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <h3 class="h6">Vite &amp; Gourmand</h3>
-          <p class="small">Traiteur événementiel à Bordeaux depuis 25 ans.</p>
+  <!-- ══ MODAL SUIVI COMMANDE ═══════════════════════════════ -->
+  <div class="modal fade" id="modal-suivi" tabindex="-1" aria-labelledby="modal-suivi-titre" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modal-suivi-titre">Suivi de la commande</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
         </div>
-        <div class="col-md-4 mb-3">
-          <h3 class="h6">Liens utiles</h3>
-          <ul class="list-unstyled small">
-            <li><a href="menus.html">Nos menus</a></li>
-            <li><a href="commande.html">Commander</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
-        </div>
-        <div class="col-md-4 mb-3">
-          <h3 class="h6">Légal</h3>
-          <ul class="list-unstyled small">
-            <li><a href="mentions-legales.html">Mentions légales</a></li>
-            <li><a href="cgv.html">CGV</a></li>
-            <li><a href="politique-confidentialite.html">Politique de confidentialité</a></li>
-          </ul>
+        <div class="modal-body" id="modal-suivi-contenu"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
         </div>
       </div>
-      <hr>
-      <p class="text-center small mb-0">&copy; 2026 Vite &amp; Gourmand — Tous droits réservés</p>
+    </div>
+  </div>
+
+  <!-- ══ MODAL MODIFIER COMMANDE ════════════════════════════ -->
+  <div class="modal fade" id="modal-modifier" tabindex="-1" aria-labelledby="modal-modifier-titre" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modal-modifier-titre">Modifier la commande</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="modif-cmd-id">
+          <p id="modif-menu-info" class="alert alert-info small"></p>
+          <div class="mb-3">
+            <label for="modif-nb-personnes" class="form-label">Nombre de personnes</label>
+            <input type="number" id="modif-nb-personnes" class="form-control" min="1">
+          </div>
+          <div class="mb-3">
+            <label for="modif-date" class="form-label">Date de prestation</label>
+            <input type="date" id="modif-date" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="modif-heure" class="form-label">Heure de livraison</label>
+            <input type="time" id="modif-heure" class="form-control" min="08:00" max="20:00">
+          </div>
+          <div class="mb-3">
+            <label for="modif-adresse" class="form-label">Adresse</label>
+            <input type="text" id="modif-adresse" class="form-control">
+          </div>
+          <div class="row g-2">
+            <div class="col-4">
+              <label for="modif-cp" class="form-label">Code postal</label>
+              <input type="text" id="modif-cp" class="form-control" maxlength="5">
+            </div>
+            <div class="col-8">
+              <label for="modif-ville" class="form-label">Ville</label>
+              <input type="text" id="modif-ville" class="form-control">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="sauvegarderModification()"><i class="bi bi-check-lg" aria-hidden="true"></i> Sauvegarder</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL AVIS ═════════════════════════════════════════ -->
+  <div class="modal fade" id="modal-avis" tabindex="-1" aria-labelledby="modal-avis-titre" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modal-avis-titre">Donner votre avis</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="avis-cmd-id">
+          <div class="mb-3">
+            <label for="avis-note" class="form-label">Note</label>
+            <div class="d-flex align-items-center gap-3">
+              <input type="range" id="avis-note" class="form-range" min="1" max="5" value="5" oninput="document.getElementById('avis-stars-display').textContent = '★'.repeat(this.value) + '☆'.repeat(5 - this.value)">
+              <span id="avis-stars-display" class="fs-4" style="color: var(--vg-warning, #b8860b);">★★★★★</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="avis-commentaire" class="form-label">Commentaire</label>
+            <textarea id="avis-commentaire" class="form-control" rows="4" maxlength="500" placeholder="Partagez votre expérience..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="soumettreAvis()"><i class="bi bi-star" aria-hidden="true"></i> Envoyer mon avis</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div><h3 class="footer-title">Horaires</h3><p>Lun - Ven : 8h00 - 19h00</p><p>Samedi : 9h00 - 17h00</p><p>Dimanche : Fermé</p></div>
+        <div><h3 class="footer-title">Contact</h3><p>Bordeaux, Gironde</p><p><a href="tel:+33556781234" class="footer-link">05 56 78 12 34</a></p></div>
+        <div><h3 class="footer-title">Navigation</h3><nav aria-label="Navigation du pied de page"><a href="menus.html" class="footer-link">Nos menus</a><a href="contact.html" class="footer-link">Contact</a><a href="mentions-legales.html" class="footer-link">Mentions légales</a><a href="cgv.html" class="footer-link">CGV</a></nav></div>
+      </div>
+      <div class="footer-bottom"><p>&copy; <span id="current-year"></span> Vite &amp; Gourmand — Tous droits réservés</p></div>
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
-  <script src="../JS/espace-client.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/espace-client.js"></script>
 </body>
 </html>
