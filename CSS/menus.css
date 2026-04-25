@@ -328,3 +328,32 @@
     height: 150px;
   }
 }
+
+/* Sur mobile : cacher le panneau filtres par défaut */
+@media (max-width: 991.98px) {
+  #filters-panel {
+    display: none;
+  }
+ 
+  /* quand on clique sur le bouton toggle, la classe d-block l'affiche */
+  #filters-panel.d-block {
+    display: block !important;
+  }
+ 
+  /* le panneau prend toute la largeur sur mobile */
+  #filters-panel .filters-card {
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+}
+ 
+/* Sur desktop : toujours visible, pas besoin du toggle */
+@media (min-width: 992px) {
+  #filters-panel {
+    display: block !important;
+  }
+ 
+  #filters-toggle {
+    display: none !important;
+  }
+}
