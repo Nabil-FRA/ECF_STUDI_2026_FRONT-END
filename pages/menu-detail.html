@@ -5,82 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Détail du menu — Vite &amp; Gourmand, traiteur événementiel à Bordeaux.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="csrf-token" content="">
   <title>Détail du menu — Vite &amp; Gourmand</title>
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <!-- Bootstrap 5 -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/NPq0unNn0lSzMO0kzGHqKO7v5soGqs"
-    crossorigin="anonymous"
-  >
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
   <!-- Bootstrap Icons -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-  >
-  <!-- CSS global -->
-  <link rel="stylesheet" href="../css/style.css">
-  <!-- CSS spécifique -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- CSS corrigé : main.css (pas style.css qui n'existe pas) -->
+  <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/menu-detail.css">
 </head>
 <body>
 
-  <!-- skip link pour l'accessibilité -->
-  <a href="#contenu-principal" class="visually-hidden-focusable skip-link">
-    Aller au contenu principal
-  </a>
+  <!-- skip link -->
+  <a href="#contenu-principal" class="skip-link">Aller au contenu principal</a>
 
-  <!-- ════════════════════════════════════════════════════════
-       HEADER (même que les autres pages)
-       ════════════════════════════════════════════════════════ -->
+  <!-- ====== HEADER (uniforme avec les autres pages) ====== -->
   <header class="site-header" role="banner">
-    <nav class="navbar navbar-expand-lg" aria-label="Navigation principale">
-      <div class="container">
-        <a class="navbar-brand" href="../index.html">
-          <img src="../images/logo.svg" alt="Vite &amp; Gourmand — Accueil" height="48">
-        </a>
+    <div class="container header-inner">
+      <a href="../index.html" class="logo" aria-label="Vite et Gourmand — Accueil">
+        <span class="logo-text" aria-hidden="true">V&amp;G</span>
+        <span class="sr-only">Vite et Gourmand</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Navigation principale">
         <button
-          class="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#nav-principal"
-          aria-controls="nav-principal"
+          class="menu-toggle"
+          id="menu-toggle"
           aria-expanded="false"
+          aria-controls="nav-list"
           aria-label="Ouvrir le menu de navigation"
         >
-          <span class="navbar-toggler-icon"></span>
+          <svg aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
         </button>
-        <div class="collapse navbar-collapse" id="nav-principal">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="../index.html">Accueil</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="menus.html">Nos menus</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="commande.html">Commander</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="contact.html">Contact</a>
-            </li>
-            <!-- lien connexion / espace client (géré par JS) -->
-            <li class="nav-item" id="nav-auth">
-              <a class="nav-link" href="connexion.html">
-                <i class="bi bi-person-circle" aria-hidden="true"></i>
-                <span>Connexion</span>
-              </a>
-            </li>
-          </ul>
-        </div>
+
+        <ul class="nav-list" id="nav-list">
+          <li><a href="../index.html" class="nav-link">Accueil</a></li>
+          <li><a href="menus.html" class="nav-link">Nos menus</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions" id="auth-area">
+        <a href="connexion.html" class="btn btn-secondary btn-sm">Connexion</a>
+        <a href="inscription.html" class="btn btn-primary btn-sm">Inscription</a>
       </div>
-    </nav>
+    </div>
   </header>
 
-  <!-- ════════════════════════════════════════════════════════
-       FIL D'ARIANE
-       ════════════════════════════════════════════════════════ -->
+  <!-- FIL D'ARIANE -->
   <nav aria-label="Fil d'Ariane" class="container mt-3">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="../index.html">Accueil</a></li>
@@ -92,9 +77,7 @@
     </ol>
   </nav>
 
-  <!-- ════════════════════════════════════════════════════════
-       CONTENU PRINCIPAL
-       ════════════════════════════════════════════════════════ -->
+  <!-- ====== CONTENU PRINCIPAL ====== -->
   <main id="contenu-principal" class="container my-4" role="main">
 
     <!-- état de chargement -->
@@ -259,7 +242,6 @@
                   Allergènes
                 </h3>
                 <p id="menu-allergenes" class="card-text">
-                  <!-- JS injecte la liste des allergènes -->
                   Aucun allergène signalé.
                 </p>
               </div>
@@ -302,49 +284,49 @@
 
   </main>
 
-  <!-- ════════════════════════════════════════════════════════
-       FOOTER
-       ════════════════════════════════════════════════════════ -->
+  <!-- ====== FOOTER (uniforme avec les autres pages) ====== -->
   <footer class="site-footer" role="contentinfo">
-    <div class="container py-4">
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <h3 class="h6">Vite &amp; Gourmand</h3>
-          <p class="small">Traiteur événementiel à Bordeaux depuis 25 ans.</p>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">Horaires</h3>
+          <p>Lun - Ven : 8h00 - 19h00</p>
+          <p>Samedi : 9h00 - 17h00</p>
+          <p>Dimanche : Fermé</p>
         </div>
-        <div class="col-md-4 mb-3">
-          <h3 class="h6">Liens utiles</h3>
-          <ul class="list-unstyled small">
-            <li><a href="menus.html">Nos menus</a></li>
-            <li><a href="commande.html">Commander</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
+        <div>
+          <h3 class="footer-title">Contact</h3>
+          <p>Bordeaux, Gironde</p>
+          <p><a href="tel:+33556781234" class="footer-link">05 56 78 12 34</a></p>
+          <p><a href="mailto:contact@viteetgourmand.fr" class="footer-link">contact@viteetgourmand.fr</a></p>
         </div>
-        <div class="col-md-4 mb-3">
-          <h3 class="h6">Légal</h3>
-          <ul class="list-unstyled small">
-            <li><a href="mentions-legales.html">Mentions légales</a></li>
-            <li><a href="cgv.html">CGV</a></li>
-            <li><a href="politique-confidentialite.html">Politique de confidentialité</a></li>
-          </ul>
+        <div>
+          <h3 class="footer-title">Navigation</h3>
+          <nav aria-label="Navigation du pied de page">
+            <a href="menus.html" class="footer-link">Nos menus</a>
+            <a href="contact.html" class="footer-link">Contact</a>
+            <a href="mentions-legales.html" class="footer-link">Mentions légales</a>
+            <a href="cgv.html" class="footer-link">CGV</a>
+            <a href="politique-confidentialite.html" class="footer-link">Politique de confidentialité</a>
+          </nav>
         </div>
       </div>
-      <hr>
-      <p class="text-center small mb-0">
-        &copy; 2026 Vite &amp; Gourmand — Tous droits réservés
-      </p>
+      <div class="footer-bottom">
+        <p>&copy; <span id="current-year"></span> Vite &amp; Gourmand — Tous droits réservés</p>
+      </div>
     </div>
   </footer>
 
   <!-- Bootstrap JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"
-  ></script>
-  <!-- JS global (si t'en as un) -->
-  <!-- <script src="../JS/global.js"></script> -->
-  <!-- JS spécifique -->
-  <script src="../JS/menu-detail.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+  <!-- JS globaux (corrigé : ../js/ minuscule + les 5 scripts ajoutés) -->
+  <script src="../js/security.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/main.js"></script>
+  <!-- JS spécifique (corrigé : ../js/ minuscule, pas ../JS/) -->
+  <script src="../js/menu-detail.js"></script>
 </body>
 </html>
