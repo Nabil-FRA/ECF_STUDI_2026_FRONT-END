@@ -1,16 +1,17 @@
-// page menus.js
+// menus.js
 // gestion de la liste des menus avec filtres
-// fait par moi le 15/04/2026
+// corrigé : IDs synchronisés avec menus.html
+// corrigé : fourchette de prix (min + max)
+// corrigé : bouton toggle filtres mobile câblé
 
 // variables globales
-let tousLesMenus = []; // tous les menus chargés depuis l'API
-let menusFiltres = []; // menus après filtrage
-let pageCourante = 1;
-const MENUS_PAR_PAGE = 9; // 3x3 sur desktop
+var tousLesMenus = [];
+var menusFiltres = [];
+var pageCourante = 1;
+var MENUS_PAR_PAGE = 9; // 3x3 sur desktop
 
 // ---- fonctions utilitaires ----
 
-// pour éviter les injections xss
 function echapper(str) {
   if (!str) return '';
   return str
@@ -21,7 +22,6 @@ function echapper(str) {
     .replace(/'/g, '&#039;');
 }
 
-// formate un prix en euros
 function formatPrix(montant) {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
@@ -29,165 +29,149 @@ function formatPrix(montant) {
   }).format(montant);
 }
 
-// affiche une alerte
-function afficherAlerte(msg, type) {
-  const zone = document.getElementById('alert-global');
-  zone.innerHTML = `
-    <div class="alert alert-${type} alert-dismissible" role="alert">
-      ${echapper(msg)}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer l'alerte"></button>
-    </div>
-  `;
-}
-
 // ---- chargement des menus ----
 async function chargerMenus() {
-  const loadingState = document.getElementById('loading-state');
-  const emptyState = document.getElementById('empty-state');
-  const grid = document.getElementById('menus-grid');
+  var chargement = document.getElementById('menus-chargement');
+  var vide = document.getElementById('menus-vide');
+  var container = document.getElementById('menus-container');
 
-  loadingState.classList.remove('d-none');
-  emptyState.classList.add('d-none');
-  grid.innerHTML = '';
+  chargement.classList.remove('d-none');
+  vide.classList.add('d-none');
+  container.innerHTML = '';
 
   try {
-    const data = await fetchAPI('/menus');
+    var data = await fetchAPI('/menus');
     tousLesMenus = data.menus || [];
 
     console.log('menus chargés:', tousLesMenus.length);
 
-    // j'applique les filtres (au début aucun filtre donc tous les menus)
+    // on applique les filtres (au début aucun filtre = tous les menus)
     appliquerFiltres();
 
   } catch(e) {
     console.error('erreur chargement menus', e);
-    afficherAlerte('Impossible de charger les menus. Veuillez réessayer.', 'danger');
-    loadingState.classList.add('d-none');
+    chargement.classList.add('d-none');
+
+    // on affiche un toast si la fonction existe
+    if (typeof afficherToast === 'function') {
+      afficherToast('Impossible de charger les menus.', 'danger');
+    }
   }
 }
 
 // ---- appliquer les filtres ----
+// IDs synchronisés avec menus.html :
+//   filtre-recherche, filtre-prix-min, filtre-prix-max,
+//   filtre-theme, filtre-regime, filtre-personnes
 function appliquerFiltres() {
   console.log('application des filtres...');
 
-  // je récupère les valeurs des filtres
-  const recherche = document.getElementById('recherche').value.trim().toLowerCase();
-  const prixMax = parseInt(document.getElementById('prix-max').value);
-  const nbPersonnes = document.getElementById('nb-personnes').value;
-  const tri = document.getElementById('tri').value;
+  // recherche texte
+  var rechercheEl = document.getElementById('filtre-recherche');
+  var recherche = rechercheEl ? rechercheEl.value.trim().toLowerCase() : '';
 
-  // thèmes sélectionnés
-  const themesChecked = [];
-  document.querySelectorAll('input[name="theme"]:checked').forEach(function(cb) {
-    if (cb.value) themesChecked.push(cb.value);
-  });
+  // fourchette de prix
+  var prixMinEl = document.getElementById('filtre-prix-min');
+  var prixMaxEl = document.getElementById('filtre-prix-max');
+  var prixMin = prixMinEl ? parseInt(prixMinEl.value) : 0;
+  var prixMax = prixMaxEl ? parseInt(prixMaxEl.value) : 100;
 
-  // régimes sélectionnés
-  const regimesChecked = [];
-  document.querySelectorAll('input[name="regime"]:checked').forEach(function(cb) {
-    if (cb.value) regimesChecked.push(cb.value);
-  });
+  // thème (select)
+  var themeEl = document.getElementById('filtre-theme');
+  var themeChoisi = themeEl ? themeEl.value : '';
 
-  // je filtre les menus
+  // régime (select)
+  var regimeEl = document.getElementById('filtre-regime');
+  var regimeChoisi = regimeEl ? regimeEl.value : '';
+
+  // nombre de personnes
+  var personnesEl = document.getElementById('filtre-personnes');
+  var nbPersonnes = personnesEl ? personnesEl.value : '';
+
+  // on filtre
   menusFiltres = tousLesMenus.filter(function(menu) {
-    // filtre recherche
-    if (recherche && !menu.titre.toLowerCase().includes(recherche)) {
+    // filtre recherche (sur le titre et la description)
+    if (recherche) {
+      var titre = (menu.titre || '').toLowerCase();
+      var desc = (menu.description_courte || menu.description || '').toLowerCase();
+      if (!titre.includes(recherche) && !desc.includes(recherche)) {
+        return false;
+      }
+    }
+
+    // filtre fourchette de prix
+    if (menu.prix_base < prixMin || menu.prix_base > prixMax) {
       return false;
     }
 
-    // filtre prix
-    if (menu.prix_base > prixMax) {
-      return false;
-    }
-
-    // filtre nb personnes
-    if (nbPersonnes && menu.nb_personnes_min > parseInt(nbPersonnes)) {
-      return false;
-    }
-
-    // filtre thème (si au moins un thème coché)
-    if (themesChecked.length > 0 && !themesChecked.includes(menu.theme)) {
+    // filtre thème
+    if (themeChoisi && menu.theme !== themeChoisi) {
       return false;
     }
 
     // filtre régime
-    if (regimesChecked.length > 0 && !regimesChecked.includes(menu.regime)) {
+    if (regimeChoisi && menu.regime !== regimeChoisi) {
+      return false;
+    }
+
+    // filtre nb personnes (le menu doit accepter ce nombre)
+    if (nbPersonnes && menu.nb_personnes_min > parseInt(nbPersonnes)) {
       return false;
     }
 
     return true;
   });
 
-  // je trie les menus
-  menusFiltres.sort(function(a, b) {
-    switch(tri) {
-      case 'prix-asc':
-        return a.prix_base - b.prix_base;
-      case 'prix-desc':
-        return b.prix_base - a.prix_base;
-      case 'nom-asc':
-        return a.titre.localeCompare(b.titre);
-      case 'nom-desc':
-        return b.titre.localeCompare(a.titre);
-      case 'populaire':
-      default:
-        // on suppose qu'il y a un champ popularite ou on garde l'ordre d'origine
-        return (b.popularite || 0) - (a.popularite || 0);
-    }
-  });
-
   console.log('menus après filtrage:', menusFiltres.length);
 
-  // je reviens à la page 1
+  // retour page 1
   pageCourante = 1;
 
-  // j'affiche les résultats
+  // afficher
   afficherMenus();
 }
 
 // ---- afficher les menus ----
 function afficherMenus() {
-  const loadingState = document.getElementById('loading-state');
-  const emptyState = document.getElementById('empty-state');
-  const grid = document.getElementById('menus-grid');
-  const nbResultats = document.getElementById('nb-resultats');
+  var chargement = document.getElementById('menus-chargement');
+  var vide = document.getElementById('menus-vide');
+  var container = document.getElementById('menus-container');
+  var countEl = document.getElementById('menus-count');
 
-  loadingState.classList.add('d-none');
+  chargement.classList.add('d-none');
 
-  // mise à jour du compteur
-  nbResultats.textContent = menusFiltres.length;
+  // compteur de résultats
+  if (countEl) {
+    countEl.textContent = menusFiltres.length + ' menu' + (menusFiltres.length > 1 ? 's' : '') + ' trouvé' + (menusFiltres.length > 1 ? 's' : '');
+  }
 
-  // si aucun résultat
+  // aucun résultat
   if (menusFiltres.length === 0) {
-    emptyState.classList.remove('d-none');
-    grid.innerHTML = '';
-    document.getElementById('pagination').classList.add('d-none');
+    vide.classList.remove('d-none');
+    container.innerHTML = '';
     return;
   }
 
-  emptyState.classList.add('d-none');
+  vide.classList.add('d-none');
 
   // pagination
-  const debut = (pageCourante - 1) * MENUS_PAR_PAGE;
-  const fin = debut + MENUS_PAR_PAGE;
-  const menusPage = menusFiltres.slice(debut, fin);
+  var debut = (pageCourante - 1) * MENUS_PAR_PAGE;
+  var fin = debut + MENUS_PAR_PAGE;
+  var menusPage = menusFiltres.slice(debut, fin);
 
-  // génération du HTML des cards
-  let html = '';
+  // génération HTML
+  var html = '';
   menusPage.forEach(function(menu) {
     html += genererCardMenu(menu);
   });
 
-  grid.innerHTML = html;
-
-  // mise à jour de la pagination
-  afficherPagination();
+  container.innerHTML = html;
 }
 
 // ---- générer une card menu ----
 function genererCardMenu(menu) {
-  // badge pour le régime
-  let badgeRegime = '';
+  // badge régime
+  var badgeRegime = '';
   if (menu.regime === 'vegetarien') {
     badgeRegime = '<span class="badge bg-success">Végétarien</span>';
   } else if (menu.regime === 'vegan') {
@@ -197,212 +181,107 @@ function genererCardMenu(menu) {
   }
 
   // badge stock
-  let badgeStock = '';
+  var badgeStock = '';
   if (menu.stock !== undefined && menu.stock <= 0) {
     badgeStock = '<span class="badge bg-danger position-absolute top-0 end-0 m-2">Épuisé</span>';
   } else if (menu.stock !== undefined && menu.stock <= 3) {
     badgeStock = '<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Stock limité</span>';
   }
 
-  // image placeholder si pas d'image
-  const image = menu.image || '../images/placeholder-menu.jpg';
+  var image = menu.image || '../images/placeholder-menu.jpg';
 
-  return `
-    <article class="col" role="listitem">
-      <div class="card menu-card h-100">
-        <div class="menu-card-img-wrapper">
-          <img
-            src="${echapper(image)}"
-            class="card-img-top menu-card-img"
-            alt="${echapper(menu.titre)}"
-            loading="lazy"
-          >
-          ${badgeStock}
-        </div>
-        <div class="card-body d-flex flex-column">
-          <div class="menu-card-badges mb-2">
-            <span class="badge bg-secondary">${echapper(menu.theme)}</span>
-            ${badgeRegime}
-          </div>
-          <h3 class="card-title h5">${echapper(menu.titre)}</h3>
-          <p class="card-text text-muted small flex-grow-1">
-            ${echapper(menu.description_courte || '')}
-          </p>
-          <div class="menu-card-meta">
-            <span class="menu-card-personnes">
-              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
-                <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
-              </svg>
-              ${menu.nb_personnes_min} pers. min
-            </span>
-            <span class="menu-card-prix">${formatPrix(menu.prix_base)}</span>
-          </div>
-        </div>
-        <div class="card-footer bg-transparent border-0 pt-0">
-          <a href="menu-detail.html?id=${menu.id}" class="btn btn-primary w-100">
-            Voir le menu
-          </a>
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-// ---- pagination ----
-function afficherPagination() {
-  const paginationNav = document.getElementById('pagination');
-  const paginationUl = paginationNav.querySelector('ul');
-
-  const totalPages = Math.ceil(menusFiltres.length / MENUS_PAR_PAGE);
-
-  if (totalPages <= 1) {
-    paginationNav.classList.add('d-none');
-    return;
-  }
-
-  paginationNav.classList.remove('d-none');
-
-  let html = '';
-
-  // bouton précédent
-  html += `
-    <li class="page-item ${pageCourante === 1 ? 'disabled' : ''}">
-      <a class="page-link" href="#" data-page="${pageCourante - 1}" aria-label="Page précédente">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
-    </li>
-  `;
-
-  // numéros de page
-  for (let i = 1; i <= totalPages; i++) {
-    // je n'affiche pas toutes les pages si y en a trop
-    if (totalPages > 7) {
-      if (i !== 1 && i !== totalPages && Math.abs(i - pageCourante) > 1) {
-        if (i === 2 || i === totalPages - 1) {
-          html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-        }
-        continue;
-      }
-    }
-
-    html += `
-      <li class="page-item ${i === pageCourante ? 'active' : ''}">
-        <a class="page-link" href="#" data-page="${i}" ${i === pageCourante ? 'aria-current="page"' : ''}>
-          ${i}
-        </a>
-      </li>
-    `;
-  }
-
-  // bouton suivant
-  html += `
-    <li class="page-item ${pageCourante === totalPages ? 'disabled' : ''}">
-      <a class="page-link" href="#" data-page="${pageCourante + 1}" aria-label="Page suivante">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>
-  `;
-
-  paginationUl.innerHTML = html;
-}
-
-// ---- gestion clic pagination ----
-function initPagination() {
-  document.getElementById('pagination').addEventListener('click', function(e) {
-    e.preventDefault();
-
-    const link = e.target.closest('a[data-page]');
-    if (!link) return;
-
-    const page = parseInt(link.dataset.page);
-    const totalPages = Math.ceil(menusFiltres.length / MENUS_PAR_PAGE);
-
-    if (page < 1 || page > totalPages) return;
-
-    pageCourante = page;
-    afficherMenus();
-
-    // scroll vers le haut de la grille
-    document.getElementById('menus-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-}
-
-// ---- gestion du slider de prix ----
-function initSliderPrix() {
-  const slider = document.getElementById('prix-max');
-  const valueDisplay = document.getElementById('prix-max-value');
-
-  slider.addEventListener('input', function() {
-    valueDisplay.textContent = this.value + ' €';
-  });
-}
-
-// ---- gestion des checkboxes "Tous" ----
-function initCheckboxTous() {
-  // pour les thèmes
-  const themeTous = document.getElementById('theme-tous');
-  const themesAutres = document.querySelectorAll('input[name="theme"]:not(#theme-tous)');
-
-  themeTous.addEventListener('change', function() {
-    if (this.checked) {
-      themesAutres.forEach(cb => cb.checked = false);
-    }
-  });
-
-  themesAutres.forEach(function(cb) {
-    cb.addEventListener('change', function() {
-      if (this.checked) {
-        themeTous.checked = false;
-      }
-      // si aucun n'est coché, on recoche "Tous"
-      const auMoinsUnCoche = Array.from(themesAutres).some(c => c.checked);
-      if (!auMoinsUnCoche) {
-        themeTous.checked = true;
-      }
-    });
-  });
-
-  // pareil pour les régimes
-  const regimeTous = document.getElementById('regime-tous');
-  const regimesAutres = document.querySelectorAll('input[name="regime"]:not(#regime-tous)');
-
-  regimeTous.addEventListener('change', function() {
-    if (this.checked) {
-      regimesAutres.forEach(cb => cb.checked = false);
-    }
-  });
-
-  regimesAutres.forEach(function(cb) {
-    cb.addEventListener('change', function() {
-      if (this.checked) {
-        regimeTous.checked = false;
-      }
-      const auMoinsUnCoche = Array.from(regimesAutres).some(c => c.checked);
-      if (!auMoinsUnCoche) {
-        regimeTous.checked = true;
-      }
-    });
-  });
+  return '<article class="col-md-6 col-lg-4">' +
+    '<div class="card menu-card h-100">' +
+      '<div class="menu-card-img-wrapper">' +
+        '<img src="' + echapper(image) + '" class="card-img-top menu-card-img" alt="' + echapper(menu.titre) + '" loading="lazy">' +
+        badgeStock +
+      '</div>' +
+      '<div class="card-body d-flex flex-column">' +
+        '<div class="menu-card-badges mb-2">' +
+          '<span class="badge bg-secondary">' + echapper(menu.theme) + '</span> ' +
+          badgeRegime +
+        '</div>' +
+        '<h3 class="card-title h5">' + echapper(menu.titre) + '</h3>' +
+        '<p class="card-text text-muted small flex-grow-1">' + echapper(menu.description_courte || '') + '</p>' +
+        '<div class="menu-card-meta">' +
+          '<span class="menu-card-personnes">' +
+            '<i class="bi bi-people" aria-hidden="true"></i> ' +
+            menu.nb_personnes_min + ' pers. min' +
+          '</span>' +
+          '<span class="menu-card-prix">' + formatPrix(menu.prix_base) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-footer bg-transparent border-0 pt-0">' +
+        '<a href="menu-detail.html?id=' + menu.id + '" class="btn btn-primary w-100">Voir le menu</a>' +
+      '</div>' +
+    '</div>' +
+  '</article>';
 }
 
 // ---- réinitialiser les filtres ----
 function reinitialiserFiltres() {
-  document.getElementById('recherche').value = '';
-  document.getElementById('prix-max').value = 100;
-  document.getElementById('prix-max-value').textContent = '100 €';
-  document.getElementById('nb-personnes').value = '';
-  document.getElementById('tri').value = 'populaire';
+  var rechercheEl = document.getElementById('filtre-recherche');
+  var prixMinEl = document.getElementById('filtre-prix-min');
+  var prixMaxEl = document.getElementById('filtre-prix-max');
+  var themeEl = document.getElementById('filtre-theme');
+  var regimeEl = document.getElementById('filtre-regime');
+  var personnesEl = document.getElementById('filtre-personnes');
 
-  // reset checkboxes
-  document.getElementById('theme-tous').checked = true;
-  document.querySelectorAll('input[name="theme"]:not(#theme-tous)').forEach(cb => cb.checked = false);
-  document.getElementById('regime-tous').checked = true;
-  document.querySelectorAll('input[name="regime"]:not(#regime-tous)').forEach(cb => cb.checked = false);
+  if (rechercheEl) rechercheEl.value = '';
+  if (prixMinEl) { prixMinEl.value = 0; }
+  if (prixMaxEl) { prixMaxEl.value = 100; }
+  if (themeEl) themeEl.value = '';
+  if (regimeEl) regimeEl.value = '';
+  if (personnesEl) personnesEl.value = '';
+
+  // mettre à jour les affichages de prix
+  mettreAJourAffichagePrix();
 
   appliquerFiltres();
   console.log('filtres réinitialisés');
+}
+
+// ---- mettre à jour l'affichage des sliders de prix ----
+function mettreAJourAffichagePrix() {
+  var prixMinEl = document.getElementById('filtre-prix-min');
+  var prixMaxEl = document.getElementById('filtre-prix-max');
+  var prixMinVal = document.getElementById('prix-min-val');
+  var prixMaxVal = document.getElementById('prix-max-val');
+
+  if (prixMinEl && prixMinVal) {
+    prixMinVal.textContent = prixMinEl.value + ' €';
+  }
+  if (prixMaxEl && prixMaxVal) {
+    prixMaxVal.textContent = prixMaxEl.value + ' €';
+  }
+}
+
+// ---- toggle filtres mobile ----
+function initToggleFiltres() {
+  var btnToggle = document.getElementById('filters-toggle');
+  var panneauFiltres = document.getElementById('filters-panel');
+
+  if (!btnToggle || !panneauFiltres) return;
+
+  btnToggle.addEventListener('click', function() {
+    var estOuvert = btnToggle.getAttribute('aria-expanded') === 'true';
+
+    if (estOuvert) {
+      // on ferme
+      panneauFiltres.classList.add('d-none');
+      panneauFiltres.classList.remove('d-block');
+      btnToggle.setAttribute('aria-expanded', 'false');
+      btnToggle.innerHTML = '<i class="bi bi-funnel" aria-hidden="true"></i> Filtres';
+    } else {
+      // on ouvre
+      panneauFiltres.classList.remove('d-none');
+      panneauFiltres.classList.add('d-block');
+      btnToggle.setAttribute('aria-expanded', 'true');
+      btnToggle.innerHTML = '<i class="bi bi-x-lg" aria-hidden="true"></i> Fermer';
+    }
+  });
+
+  console.log('toggle filtres mobile initialisé');
 }
 
 // ---- initialisation ----
@@ -412,33 +291,74 @@ document.addEventListener('DOMContentLoaded', async function() {
   // 1. charger les menus
   await chargerMenus();
 
-  // 2. init slider prix
-  initSliderPrix();
+  // 2. toggle filtres mobile
+  initToggleFiltres();
 
-  // 3. init checkboxes "Tous"
-  initCheckboxTous();
+  // 3. événements sliders prix
+  var prixMinEl = document.getElementById('filtre-prix-min');
+  var prixMaxEl = document.getElementById('filtre-prix-max');
 
-  // 4. init pagination
-  initPagination();
+  if (prixMinEl) {
+    prixMinEl.addEventListener('input', function() {
+      mettreAJourAffichagePrix();
+      // s'assurer que min ne dépasse pas max
+      if (prixMaxEl && parseInt(prixMinEl.value) > parseInt(prixMaxEl.value)) {
+        prixMaxEl.value = prixMinEl.value;
+        mettreAJourAffichagePrix();
+      }
+    });
+    // appliquer les filtres quand on relâche le slider
+    prixMinEl.addEventListener('change', appliquerFiltres);
+  }
 
-  // 5. événements filtres
-  document.getElementById('btn-appliquer-filtres').addEventListener('click', appliquerFiltres);
-  document.getElementById('btn-reinitialiser').addEventListener('click', reinitialiserFiltres);
-  document.getElementById('btn-reset-filtres').addEventListener('click', reinitialiserFiltres);
+  if (prixMaxEl) {
+    prixMaxEl.addEventListener('input', function() {
+      mettreAJourAffichagePrix();
+      // s'assurer que max ne descend pas sous min
+      if (prixMinEl && parseInt(prixMaxEl.value) < parseInt(prixMinEl.value)) {
+        prixMinEl.value = prixMaxEl.value;
+        mettreAJourAffichagePrix();
+      }
+    });
+    prixMaxEl.addEventListener('change', appliquerFiltres);
+  }
 
-  // 6. recherche en appuyant sur Entrée
-  document.getElementById('recherche').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      appliquerFiltres();
-    }
-  });
+  // 4. événements selects (filtrage instantané)
+  var themeEl = document.getElementById('filtre-theme');
+  var regimeEl = document.getElementById('filtre-regime');
 
-  // 7. bouton recherche
-  document.getElementById('recherche-btn').addEventListener('click', appliquerFiltres);
+  if (themeEl) themeEl.addEventListener('change', appliquerFiltres);
+  if (regimeEl) regimeEl.addEventListener('change', appliquerFiltres);
 
-  // 8. tri instantané
-  document.getElementById('tri').addEventListener('change', appliquerFiltres);
+  // 5. événement nombre de personnes (filtrage à la saisie)
+  var personnesEl = document.getElementById('filtre-personnes');
+  if (personnesEl) {
+    personnesEl.addEventListener('input', appliquerFiltres);
+  }
+
+  // 6. recherche texte — filtre en appuyant sur Entrée ou après 300ms de pause
+  var rechercheEl = document.getElementById('filtre-recherche');
+  var rechercheTimer = null;
+
+  if (rechercheEl) {
+    rechercheEl.addEventListener('input', function() {
+      clearTimeout(rechercheTimer);
+      rechercheTimer = setTimeout(appliquerFiltres, 300);
+    });
+    rechercheEl.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(rechercheTimer);
+        appliquerFiltres();
+      }
+    });
+  }
+
+  // 7. bouton réinitialiser
+  var btnReset = document.getElementById('btn-reset-filtres');
+  if (btnReset) {
+    btnReset.addEventListener('click', reinitialiserFiltres);
+  }
 
   console.log('menus.js initialisé');
 });
