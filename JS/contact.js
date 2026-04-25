@@ -1,6 +1,7 @@
 // contact.js
 // gestion du formulaire de contact
-// fait par moi le 15/04/2026
+// corrigé : champ titre = input text (plus un select)
+// corrigé : utilise getUtilisateurConnecte() de auth.js au lieu d'accéder directement au localStorage
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -18,16 +19,16 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ── pré-remplir si l'utilisateur est connecté ─────────────
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
-  if (user) {
-    if (user.nom && user.prenom) {
-      document.getElementById('contact-nom').value = user.prenom + ' ' + user.nom;
-    }
-    if (user.email) {
-      document.getElementById('contact-email').value = user.email;
-    }
-    if (user.telephone) {
-      document.getElementById('contact-tel').value = user.telephone;
+  // on utilise la fonction globale de auth.js
+  if (typeof getUtilisateurConnecte === 'function') {
+    var user = getUtilisateurConnecte();
+    if (user) {
+      if (user.nom && user.prenom) {
+        document.getElementById('contact-nom').value = user.prenom + ' ' + user.nom;
+      }
+      if (user.email) {
+        document.getElementById('contact-email').value = user.email;
+      }
     }
   }
 
@@ -41,17 +42,17 @@ document.addEventListener('DOMContentLoaded', function() {
     succesEnvoi.classList.add('d-none');
 
     // validation
-    let valide = true;
+    var valide = true;
 
     // nom
-    const nom = document.getElementById('contact-nom');
+    var nom = document.getElementById('contact-nom');
     if (!nom.value.trim()) {
       afficherErreur(nom, 'erreur-nom', 'Veuillez saisir votre nom.');
       valide = false;
     }
 
     // email
-    const email = document.getElementById('contact-email');
+    var email = document.getElementById('contact-email');
     if (!email.value.trim()) {
       afficherErreur(email, 'erreur-email', 'Veuillez saisir votre adresse e-mail.');
       valide = false;
@@ -60,14 +61,14 @@ document.addEventListener('DOMContentLoaded', function() {
       valide = false;
     }
 
-    // sujet
-    const sujet = document.getElementById('contact-sujet');
-    if (!sujet.value) {
-      afficherErreur(sujet, 'erreur-sujet', 'Veuillez choisir un sujet.');
+    // titre (c'est maintenant un input text, pas un select)
+    var sujet = document.getElementById('contact-sujet');
+    if (!sujet.value.trim()) {
+      afficherErreur(sujet, 'erreur-sujet', 'Veuillez saisir un titre pour votre message.');
       valide = false;
     }
 
-    // message
+    // message (description)
     if (!messageInput.value.trim()) {
       afficherErreur(messageInput, 'erreur-message', 'Veuillez saisir votre message.');
       valide = false;
@@ -84,26 +85,33 @@ document.addEventListener('DOMContentLoaded', function() {
     btnEnvoyer.querySelector('.btn-spinner').classList.remove('d-none');
 
     try {
-      // TODO: remplacer par la vraie URL de l'API
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          nom: nom.value.trim(),
-          email: email.value.trim(),
-          telephone: document.getElementById('contact-tel').value.trim(),
-          sujet: sujet.value,
-          message: messageInput.value.trim()
-        })
-      });
+      // on utilise fetchAPI si disponible (de api.js), sinon fetch natif
+      var donnees = {
+        nom: nom.value.trim(),
+        email: email.value.trim(),
+        sujet: sujet.value.trim(),
+        message: messageInput.value.trim()
+      };
 
-      if (!response.ok) {
-        if (response.status === 429) {
-          throw new Error('Trop de messages envoyés. Réessayez dans quelques minutes.');
+      if (typeof fetchAPI === 'function') {
+        await fetchAPI('/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(donnees)
+        });
+      } else {
+        var response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(donnees)
+        });
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            throw new Error('Trop de messages envoyés. Réessayez dans quelques minutes.');
+          }
+          throw new Error('Erreur lors de l\'envoi. Veuillez réessayer.');
         }
-        throw new Error('Erreur lors de l\'envoi. Veuillez réessayer.');
       }
 
       // succès : afficher le message et vider le formulaire
@@ -113,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
       compteur.textContent = '0';
 
     } catch (erreur) {
-      erreurGlobale.textContent = erreur.message;
+      erreurGlobale.textContent = erreur.message || 'Une erreur est survenue.';
       erreurGlobale.classList.remove('d-none');
     } finally {
       btnEnvoyer.disabled = false;
