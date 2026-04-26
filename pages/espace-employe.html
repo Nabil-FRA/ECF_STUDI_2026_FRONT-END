@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Espace employé — Gestion des commandes et des avis.">
+  <meta name="description" content="Espace employé — Gestion des commandes, menus, horaires et avis.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="csrf-token" content="">
   <title>Espace employé — Vite &amp; Gourmand</title>
@@ -47,19 +47,25 @@
       <div class="col-sm-6 col-lg-3"><div class="card text-center stat-card stat-livree"><div class="card-body"><div class="stat-nombre" id="stat-livree">0</div><div class="stat-label">Livrées / Terminées</div></div></div></div>
     </div>
 
-    <!-- ONGLETS (aria-label ajoutés) -->
+    <!-- ══════ ONGLETS ══════ -->
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="tab-commandes" data-bs-toggle="tab" data-bs-target="#panel-commandes" type="button" role="tab" aria-label="Commandes" aria-controls="panel-commandes" aria-selected="true"><i class="bi bi-bag" aria-hidden="true"></i> <span>Commandes</span></button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-avis" data-bs-toggle="tab" data-bs-target="#panel-avis" type="button" role="tab" aria-label="Avis clients" aria-controls="panel-avis" aria-selected="false"><i class="bi bi-star" aria-hidden="true"></i> <span>Avis clients</span></button>
+        <button class="nav-link" id="tab-menus" data-bs-toggle="tab" data-bs-target="#panel-menus" type="button" role="tab" aria-label="Menus" aria-controls="panel-menus" aria-selected="false"><i class="bi bi-book" aria-hidden="true"></i> <span>Menus</span></button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-horaires" data-bs-toggle="tab" data-bs-target="#panel-horaires" type="button" role="tab" aria-label="Horaires" aria-controls="panel-horaires" aria-selected="false"><i class="bi bi-clock" aria-hidden="true"></i> <span>Horaires</span></button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-avis" data-bs-toggle="tab" data-bs-target="#panel-avis" type="button" role="tab" aria-label="Avis clients" aria-controls="panel-avis" aria-selected="false"><i class="bi bi-star" aria-hidden="true"></i> <span>Avis</span></button>
       </li>
     </ul>
 
     <div class="tab-content mt-4">
 
-      <!-- ONGLET COMMANDES -->
+      <!-- ══════ ONGLET COMMANDES ══════ -->
       <div class="tab-pane fade show active" id="panel-commandes" role="tabpanel" aria-labelledby="tab-commandes">
 
         <!-- Filtres -->
@@ -84,7 +90,7 @@
           <input type="date" id="filtre-date" class="form-control form-control-sm" style="width:auto;" aria-label="Filtrer par date">
         </div>
 
-        <!-- Tableau -->
+        <!-- Tableau commandes -->
         <div class="table-responsive">
           <table class="table table-hover align-middle" aria-label="Liste des commandes">
             <thead class="table-dark">
@@ -102,20 +108,58 @@
         <div id="commandes-vide" class="text-center py-5 d-none"><i class="bi bi-calendar-x display-1 text-muted" aria-hidden="true"></i><p class="mt-3 text-muted">Aucune commande trouvée.</p></div>
       </div>
 
-      <!-- ONGLET AVIS -->
+      <!-- ══════ ONGLET MENUS (CRUD) ══════ -->
+      <div class="tab-pane fade" id="panel-menus" role="tabpanel" aria-labelledby="tab-menus">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Gestion des menus</h2>
+          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-menu-emp"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nouveau menu</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle" aria-label="Liste des menus">
+            <thead><tr><th>Nom</th><th>Thème</th><th>Prix/pers</th><th>Convives</th><th>Stock</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="emp-menus-body"></tbody>
+          </table>
+        </div>
+        <div id="emp-menus-chargement" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Chargement...</span></div></div>
+      </div>
+
+      <!-- ══════ ONGLET HORAIRES ══════ -->
+      <div class="tab-pane fade" id="panel-horaires" role="tabpanel" aria-labelledby="tab-horaires">
+        <h2 class="h5 mb-3">Gestion des horaires</h2>
+        <p class="text-muted small">Modifiez les horaires d'ouverture affichés sur le site.</p>
+        <form id="form-horaires" novalidate aria-label="Formulaire de modification des horaires">
+          <div class="row g-3">
+            <div class="col-md-6"><label for="h-lundi" class="form-label fw-bold">Lundi</label><input type="text" id="h-lundi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
+            <div class="col-md-6"><label for="h-mardi" class="form-label fw-bold">Mardi</label><input type="text" id="h-mardi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
+            <div class="col-md-6"><label for="h-mercredi" class="form-label fw-bold">Mercredi</label><input type="text" id="h-mercredi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
+            <div class="col-md-6"><label for="h-jeudi" class="form-label fw-bold">Jeudi</label><input type="text" id="h-jeudi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
+            <div class="col-md-6"><label for="h-vendredi" class="form-label fw-bold">Vendredi</label><input type="text" id="h-vendredi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
+            <div class="col-md-6"><label for="h-samedi" class="form-label fw-bold">Samedi</label><input type="text" id="h-samedi" class="form-control" value="9h00 - 17h00" maxlength="50"></div>
+            <div class="col-md-6"><label for="h-dimanche" class="form-label fw-bold">Dimanche</label><input type="text" id="h-dimanche" class="form-control" value="Fermé" maxlength="50"></div>
+          </div>
+          <div id="horaires-succes" class="alert alert-success d-none mt-3" role="status">Horaires mis à jour avec succès.</div>
+          <div id="horaires-erreur" class="alert alert-danger d-none mt-3" role="alert"></div>
+          <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer les horaires</button>
+        </form>
+      </div>
+
+      <!-- ══════ ONGLET AVIS ══════ -->
       <div class="tab-pane fade" id="panel-avis" role="tabpanel" aria-labelledby="tab-avis">
         <h2 class="h5 mb-3">Validation des avis clients</h2>
+        <div id="avis-vide" class="text-center py-4 d-none"><i class="bi bi-chat-square-text display-3 text-muted" aria-hidden="true"></i><p class="mt-2 text-muted">Aucun avis en attente de validation.</p></div>
         <div class="table-responsive">
-          <table class="table table-hover align-middle" aria-label="Avis clients">
-            <thead><tr><th>Auteur</th><th>Note</th><th>Commentaire</th><th>Statut</th><th>Actions</th></tr></thead>
+          <table class="table table-hover align-middle" aria-label="Avis clients en attente" id="table-avis">
+            <thead><tr><th>Auteur</th><th>Menu</th><th>Note</th><th>Commentaire</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
             <tbody id="avis-body"></tbody>
           </table>
         </div>
+        <div id="avis-chargement" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Chargement...</span></div></div>
       </div>
+
     </div>
   </main>
 
-  <!-- MODAL ANNULATION AVEC MOTIF -->
+  <!-- ══════ MODAL ANNULATION AVEC MOTIF ══════ -->
   <div class="modal fade" id="modal-annulation" tabindex="-1" aria-labelledby="modal-annul-titre" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -140,10 +184,74 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retour</button>
-          <button type="button" class="btn btn-danger" onclick="confirmerAnnulation()"><i class="bi bi-x-lg" aria-hidden="true"></i> Confirmer l'annulation</button>
+          <button type="button" class="btn btn-danger" id="btn-confirmer-annulation"><i class="bi bi-x-lg" aria-hidden="true"></i> Confirmer l'annulation</button>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ══════ MODAL MENU (créer / modifier) ══════ -->
+  <div class="modal fade" id="modal-menu-emp" tabindex="-1" aria-labelledby="modal-menu-emp-titre" aria-hidden="true">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title h5" id="modal-menu-emp-titre">Nouveau menu</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-menu-emp" novalidate>
+          <input type="hidden" id="emp-menu-id" name="id">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label for="emp-menu-nom" class="form-label">Nom du menu <span class="text-danger">*</span></label>
+              <input type="text" id="emp-menu-nom" class="form-control" required maxlength="100">
+            </div>
+            <div class="col-md-4">
+              <label for="emp-menu-prix" class="form-label">Prix/pers (€) <span class="text-danger">*</span></label>
+              <input type="number" id="emp-menu-prix" class="form-control" required min="1" step="0.01">
+            </div>
+            <div class="col-md-6">
+              <label for="emp-menu-theme" class="form-label">Thème <span class="text-danger">*</span></label>
+              <select id="emp-menu-theme" class="form-select" required>
+                <option value="">— Choisir —</option>
+                <option value="noel">Noël</option>
+                <option value="paques">Pâques</option>
+                <option value="classique">Classique</option>
+                <option value="evenement">Événement</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="emp-menu-regime" class="form-label">Régime</label>
+              <select id="emp-menu-regime" class="form-select">
+                <option value="classique">Classique</option>
+                <option value="vegetarien">Végétarien</option>
+                <option value="vegan">Végan</option>
+                <option value="sans-gluten">Sans gluten</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="emp-menu-convives-min" class="form-label">Convives min <span class="text-danger">*</span></label>
+              <input type="number" id="emp-menu-convives-min" class="form-control" required min="1">
+            </div>
+            <div class="col-md-4">
+              <label for="emp-menu-convives-max" class="form-label">Convives max <span class="text-danger">*</span></label>
+              <input type="number" id="emp-menu-convives-max" class="form-control" required min="1">
+            </div>
+            <div class="col-md-4">
+              <label for="emp-menu-stock" class="form-label">Stock</label>
+              <input type="number" id="emp-menu-stock" class="form-control" min="0">
+            </div>
+            <div class="col-12">
+              <label for="emp-menu-description" class="form-label">Description</label>
+              <textarea id="emp-menu-description" class="form-control" rows="3" maxlength="500"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" id="btn-sauvegarder-menu-emp"><i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer</button>
+      </div>
+    </div></div>
   </div>
 
   <footer class="site-footer" role="contentinfo">
