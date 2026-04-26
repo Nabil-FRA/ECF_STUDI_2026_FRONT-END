@@ -1,10 +1,11 @@
 // page inscription.js
 // gestion du formulaire d'inscription
-// fait par moi le 15/04/2026
+// corrigé : mot de passe 10 caractères + caractère spécial obligatoire
+// corrigé : envoi de l'adresse postale (exigé par l'énoncé)
+// corrigé : IDs synchronisés avec inscription.html
 
 // ---- fonctions utilitaires ----
 
-// pour éviter les injections xss
 function echapper(str) {
   if (!str) return '';
   return str
@@ -15,51 +16,63 @@ function echapper(str) {
     .replace(/'/g, '&#039;');
 }
 
-// affiche une alerte en haut de page
 function afficherAlerte(msg, type) {
-  const zone = document.getElementById('alert-global');
-  zone.innerHTML = `
-    <div class="alert alert-${type} alert-dismissible" role="alert">
-      ${echapper(msg)}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer l'alerte"></button>
-    </div>
-  `;
-  // je scroll vers l'alerte pour que l'utilisateur la voie
+  var zone = document.getElementById('erreur-globale');
+  if (!zone) return;
+
+  if (type === 'success') {
+    // pour le succès on utilise le bloc dédié
+    var succesBloc = document.getElementById('succes-inscription');
+    if (succesBloc) {
+      succesBloc.classList.remove('d-none');
+      return;
+    }
+  }
+
+  zone.textContent = msg;
+  zone.classList.remove('d-none');
   zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function effacerAlerte() {
-  document.getElementById('alert-global').innerHTML = '';
+  var zone = document.getElementById('erreur-globale');
+  if (zone) {
+    zone.textContent = '';
+    zone.classList.add('d-none');
+  }
 }
 
 // ---- toggle afficher/masquer mot de passe ----
-function initTogglePassword() {
-  const btn = document.getElementById('toggle-password');
-  const input = document.getElementById('password');
-  const inputConfirm = document.getElementById('password-confirm');
-  const iconEye = document.getElementById('icon-eye');
-  const iconEyeSlash = document.getElementById('icon-eye-slash');
+function initTogglePasswords() {
+  var toggleBtns = document.querySelectorAll('.toggle-password');
 
-  btn.addEventListener('click', function() {
-    const isPassword = input.type === 'password';
+  toggleBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var targetId = btn.getAttribute('data-target');
+      var input = document.getElementById(targetId);
+      if (!input) return;
 
-    if (isPassword) {
-      input.type = 'text';
-      inputConfirm.type = 'text'; // je change aussi la confirmation
-      btn.setAttribute('aria-label', 'Masquer le mot de passe');
-      btn.setAttribute('aria-pressed', 'true');
-      iconEye.classList.add('d-none');
-      iconEyeSlash.classList.remove('d-none');
-    } else {
-      input.type = 'password';
-      inputConfirm.type = 'password';
-      btn.setAttribute('aria-label', 'Afficher le mot de passe');
-      btn.setAttribute('aria-pressed', 'false');
-      iconEye.classList.remove('d-none');
-      iconEyeSlash.classList.add('d-none');
-    }
+      var icon = btn.querySelector('i');
+      var isPassword = input.type === 'password';
 
-    input.focus();
+      if (isPassword) {
+        input.type = 'text';
+        btn.setAttribute('aria-label', 'Masquer le mot de passe');
+        if (icon) {
+          icon.classList.remove('bi-eye');
+          icon.classList.add('bi-eye-slash');
+        }
+      } else {
+        input.type = 'password';
+        btn.setAttribute('aria-label', 'Afficher le mot de passe');
+        if (icon) {
+          icon.classList.remove('bi-eye-slash');
+          icon.classList.add('bi-eye');
+        }
+      }
+
+      input.focus();
+    });
   });
 
   console.log('toggle password initialisé');
@@ -67,28 +80,33 @@ function initTogglePassword() {
 
 // ---- indicateur de force du mot de passe ----
 function initPasswordStrength() {
-  const input = document.getElementById('password');
-  const strengthDiv = document.getElementById('password-strength');
-  const strengthFill = document.getElementById('strength-fill');
-  const strengthText = document.getElementById('strength-text');
+  var input = document.getElementById('password');
+  var strengthBar = document.getElementById('password-strength');
+  var strengthText = document.getElementById('password-strength-text');
+
+  if (!input || !strengthBar) return;
 
   input.addEventListener('input', function() {
-    const pwd = input.value;
+    var pwd = input.value;
 
     if (pwd.length === 0) {
-      strengthDiv.classList.add('d-none');
+      strengthBar.style.width = '0%';
+      strengthBar.className = 'progress-bar';
+      if (strengthText) strengthText.textContent = '';
       return;
     }
 
-    strengthDiv.classList.remove('d-none');
-
-    // je calcule la force du mot de passe
-    let score = 0;
-    let feedback = [];
+    // calcul du score
+    var score = 0;
+    var feedback = [];
 
     // longueur
-    if (pwd.length >= 8) score++;
-    if (pwd.length >= 12) score++;
+    if (pwd.length >= 10) {
+      score++;
+    } else {
+      feedback.push(10 - pwd.length + ' caractère(s) de plus');
+    }
+    if (pwd.length >= 14) score++;
 
     // majuscule
     if (/[A-Z]/.test(pwd)) {
@@ -111,39 +129,47 @@ function initPasswordStrength() {
       feedback.push('un chiffre');
     }
 
-    // caractère spécial
+    // caractère spécial (corrigé : obligatoire selon l'énoncé)
     if (/[^A-Za-z0-9]/.test(pwd)) {
       score++;
+    } else {
+      feedback.push('un caractère spécial (!@#$%...)');
     }
 
-    // j'affiche le résultat
-    let width, color, text;
+    // affichage
+    var width, couleur, texte;
 
     if (score <= 2) {
-      width = '25%';
-      color = '#dc3545'; // rouge
-      text = 'Faible';
+      width = '20%';
+      couleur = 'bg-danger';
+      texte = 'Faible';
+    } else if (score <= 3) {
+      width = '40%';
+      couleur = 'bg-warning';
+      texte = 'Moyen';
     } else if (score <= 4) {
-      width = '50%';
-      color = '#ffc107'; // jaune
-      text = 'Moyen';
+      width = '60%';
+      couleur = 'bg-info';
+      texte = 'Bon';
     } else if (score <= 5) {
-      width = '75%';
-      color = '#0dcaf0'; // bleu
-      text = 'Bon';
+      width = '80%';
+      couleur = 'bg-primary';
+      texte = 'Très bon';
     } else {
       width = '100%';
-      color = '#198754'; // vert
-      text = 'Excellent';
+      couleur = 'bg-success';
+      texte = 'Excellent';
     }
 
-    strengthFill.style.width = width;
-    strengthFill.style.backgroundColor = color;
+    strengthBar.style.width = width;
+    strengthBar.className = 'progress-bar ' + couleur;
 
-    if (feedback.length > 0 && score < 5) {
-      strengthText.textContent = text + ' — Ajoutez : ' + feedback.join(', ');
-    } else {
-      strengthText.textContent = text;
+    if (strengthText) {
+      if (feedback.length > 0 && score < 6) {
+        strengthText.textContent = texte + ' — Ajoutez : ' + feedback.join(', ');
+      } else {
+        strengthText.textContent = texte;
+      }
     }
   });
 
@@ -152,16 +178,23 @@ function initPasswordStrength() {
 
 // ---- validation du formulaire ----
 function validerFormulaire() {
-  const champs = document.querySelectorAll('#form-inscription input[required]');
-  let ok = true;
+  var form = document.getElementById('inscription-form');
+  var champs = form.querySelectorAll('input[required]');
+  var ok = true;
 
   // reset toutes les erreurs
   champs.forEach(function(champ) {
     champ.classList.remove('is-invalid', 'is-valid');
+    var fb = champ.parentElement.querySelector('.invalid-feedback') ||
+             champ.closest('.mb-3').querySelector('.invalid-feedback');
+    if (fb) fb.textContent = '';
   });
 
-  // validation de chaque champ
+  // validation HTML5 de base pour chaque champ requis
   champs.forEach(function(champ) {
+    // on ignore les checkboxes ici (traité séparément)
+    if (champ.type === 'checkbox') return;
+
     if (!champ.checkValidity()) {
       champ.classList.add('is-invalid');
       ok = false;
@@ -170,50 +203,70 @@ function validerFormulaire() {
     }
   });
 
-  // validation custom du mot de passe
-  const password = document.getElementById('password');
-  const pwdValue = password.value;
+  // ── validation custom du mot de passe (10 chars + 4 critères) ──
+  var password = document.getElementById('password');
+  var pwdValue = password.value;
 
-  if (pwdValue.length < 8) {
+  if (pwdValue.length < 10) {
+    password.classList.remove('is-valid');
     password.classList.add('is-invalid');
-    document.getElementById('password-error').textContent = 
-      'Le mot de passe doit contenir au moins 8 caractères.';
+    setErreur(password, 'Le mot de passe doit contenir au moins 10 caractères.');
     ok = false;
   } else if (!/[A-Z]/.test(pwdValue)) {
+    password.classList.remove('is-valid');
     password.classList.add('is-invalid');
-    document.getElementById('password-error').textContent = 
-      'Le mot de passe doit contenir au moins une majuscule.';
+    setErreur(password, 'Le mot de passe doit contenir au moins une majuscule.');
+    ok = false;
+  } else if (!/[a-z]/.test(pwdValue)) {
+    password.classList.remove('is-valid');
+    password.classList.add('is-invalid');
+    setErreur(password, 'Le mot de passe doit contenir au moins une minuscule.');
     ok = false;
   } else if (!/[0-9]/.test(pwdValue)) {
+    password.classList.remove('is-valid');
     password.classList.add('is-invalid');
-    document.getElementById('password-error').textContent = 
-      'Le mot de passe doit contenir au moins un chiffre.';
+    setErreur(password, 'Le mot de passe doit contenir au moins un chiffre.');
+    ok = false;
+  } else if (!/[^A-Za-z0-9]/.test(pwdValue)) {
+    // corrigé : caractère spécial obligatoire
+    password.classList.remove('is-valid');
+    password.classList.add('is-invalid');
+    setErreur(password, 'Le mot de passe doit contenir au moins un caractère spécial (!@#$%&*...).');
     ok = false;
   }
 
-  // vérification que les mots de passe correspondent
-  const passwordConfirm = document.getElementById('password-confirm');
-  if (password.value !== passwordConfirm.value) {
-    passwordConfirm.classList.add('is-invalid');
-    document.getElementById('password-confirm-error').textContent = 
-      'Les mots de passe ne correspondent pas.';
+  // ── confirmation mot de passe ──
+  var confirmPassword = document.getElementById('confirm-password');
+  if (password.value !== confirmPassword.value) {
+    confirmPassword.classList.remove('is-valid');
+    confirmPassword.classList.add('is-invalid');
+    setErreur(confirmPassword, 'Les mots de passe ne correspondent pas.');
     ok = false;
   }
 
-  // vérification checkbox CGV
-  const checkbox = document.getElementById('accepte-cgv');
-  if (!checkbox.checked) {
-    checkbox.classList.add('is-invalid');
+  // ── checkbox CGV ──
+  var cgv = document.getElementById('cgv');
+  if (cgv && !cgv.checked) {
+    cgv.classList.add('is-invalid');
     ok = false;
   }
 
   if (!ok) {
-    // focus sur le premier champ en erreur
-    const premierErreur = document.querySelector('.is-invalid');
+    var premierErreur = form.querySelector('.is-invalid');
     if (premierErreur) premierErreur.focus();
   }
 
   return ok;
+}
+
+// met le message d'erreur dans le bon .invalid-feedback
+function setErreur(input, message) {
+  // cherche le .invalid-feedback le plus proche
+  var fb = input.parentElement.querySelector('.invalid-feedback');
+  if (!fb) {
+    fb = input.closest('.mb-3').querySelector('.invalid-feedback');
+  }
+  if (fb) fb.textContent = message;
 }
 
 // ---- soumission du formulaire ----
@@ -226,28 +279,31 @@ async function soumettreInscription(e) {
     return;
   }
 
-  const btn = document.getElementById('btn-inscription');
+  var btn = e.target.querySelector('button[type="submit"]');
 
-  // je désactive le bouton
+  // désactive le bouton
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');
-  btn.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span> Création du compte...';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Création du compte...';
 
-  // je récupère les valeurs
-  const data = {
+  // données à envoyer (corrigé : inclut adresse postale)
+  var data = {
     prenom: document.getElementById('prenom').value.trim(),
     nom: document.getElementById('nom').value.trim(),
     email: document.getElementById('email').value.trim(),
     gsm: document.getElementById('gsm').value.trim(),
-    password: document.getElementById('password').value,
-    newsletter: document.getElementById('newsletter').checked
+    adresse: document.getElementById('adresse').value.trim(),
+    code_postal: document.getElementById('code-postal').value.trim(),
+    ville: document.getElementById('ville').value.trim(),
+    password: document.getElementById('password').value
   };
 
-  // je récupère le token csrf
-  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  // token csrf
+  var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  var csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
   try {
-    const response = await fetchAPI('/auth/register', {
+    var response = await fetchAPI('/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -258,36 +314,37 @@ async function soumettreInscription(e) {
 
     console.log('inscription réussie !', response);
 
-    // je connecte automatiquement l'utilisateur
+    // connecte automatiquement l'utilisateur
     if (response.user && response.token) {
       setUtilisateurConnecte(response.user, response.token);
     }
 
-    // message de succès
-    afficherAlerte('Compte créé avec succès ! Redirection...', 'success');
+    // affiche le succès
+    afficherAlerte('', 'success');
 
-    // redirection après 1.5 secondes
+    // cache le formulaire
+    var form = document.getElementById('inscription-form');
+    if (form) form.classList.add('d-none');
+
+    // redirection après 2 secondes
     setTimeout(function() {
-      // je vérifie s'il y a une URL de retour
-      const params = new URLSearchParams(window.location.search);
-      const retour = params.get('retour');
+      var params = new URLSearchParams(window.location.search);
+      var retour = params.get('retour');
 
       if (retour) {
         window.location.href = decodeURIComponent(retour);
       } else {
-        // sinon je vais à l'accueil
         window.location.href = '../index.html';
       }
-    }, 1500);
+    }, 2000);
 
   } catch(err) {
     console.error('erreur inscription', err);
 
-    let message = 'Une erreur est survenue, veuillez réessayer.';
+    var message = 'Une erreur est survenue, veuillez réessayer.';
 
     if (err.status === 409) {
-      message = 'Cette adresse e-mail est déjà utilisée. Voulez-vous vous connecter ?';
-      // je mets le focus sur l'email
+      message = 'Cette adresse e-mail est déjà utilisée.';
       document.getElementById('email').classList.add('is-invalid');
       document.getElementById('email').focus();
     } else if (err.status === 400) {
@@ -300,24 +357,51 @@ async function soumettreInscription(e) {
 
     afficherAlerte(message, 'danger');
 
-    // je réactive le bouton
     btn.disabled = false;
     btn.removeAttribute('aria-busy');
-    btn.textContent = 'Créer mon compte';
+    btn.innerHTML = '<i class="bi bi-person-plus" aria-hidden="true"></i> Créer mon compte';
   }
 }
 
 // ---- vérifier si déjà connecté ----
 function checkDejaConnecte() {
-  const user = getUtilisateurConnecte();
+  if (typeof getUtilisateurConnecte !== 'function') return;
+
+  var user = getUtilisateurConnecte();
   if (user) {
     console.log('utilisateur déjà connecté:', user.email);
-    afficherAlerte(
-      'Vous êtes déjà connecté en tant que ' + echapper(user.email) + '. ' +
-      '<a href="../index.html" class="alert-link">Retour à l\'accueil</a>',
-      'info'
-    );
+    var zone = document.getElementById('erreur-globale');
+    if (zone) {
+      zone.innerHTML =
+        'Vous êtes déjà connecté en tant que ' + echapper(user.email) + '. ' +
+        '<a href="../index.html" class="alert-link">Retour à l\'accueil</a>';
+      zone.classList.remove('d-none');
+      zone.classList.remove('alert-danger');
+      zone.classList.add('alert-info');
+    }
   }
+}
+
+// ---- vérification en temps réel de la confirmation ----
+function initConfirmationTempsReel() {
+  var confirmInput = document.getElementById('confirm-password');
+  if (!confirmInput) return;
+
+  confirmInput.addEventListener('input', function() {
+    var pwd = document.getElementById('password').value;
+    var pwdConfirm = confirmInput.value;
+
+    confirmInput.classList.remove('is-invalid', 'is-valid');
+
+    if (pwdConfirm.length > 0) {
+      if (pwd === pwdConfirm) {
+        confirmInput.classList.add('is-valid');
+      } else {
+        confirmInput.classList.add('is-invalid');
+        setErreur(confirmInput, 'Les mots de passe ne correspondent pas.');
+      }
+    }
+  });
 }
 
 // ---- initialisation au chargement ----
@@ -327,34 +411,20 @@ document.addEventListener('DOMContentLoaded', function() {
   // 1. vérifier si déjà connecté
   checkDejaConnecte();
 
-  // 2. injecter le token csrf
-  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  document.getElementById('csrf-token-field').value = csrf;
+  // 2. toggle passwords
+  initTogglePasswords();
 
-  // 3. initialiser le toggle password
-  initTogglePassword();
-
-  // 4. initialiser l'indicateur de force du mot de passe
+  // 3. indicateur de force
   initPasswordStrength();
 
-  // 5. événement de soumission
-  document.getElementById('form-inscription').addEventListener('submit', soumettreInscription);
+  // 4. confirmation en temps réel
+  initConfirmationTempsReel();
 
-  // 6. vérification en temps réel de la confirmation du mot de passe
-  document.getElementById('password-confirm').addEventListener('input', function() {
-    const pwd = document.getElementById('password').value;
-    const pwdConfirm = this.value;
-
-    this.classList.remove('is-invalid', 'is-valid');
-
-    if (pwdConfirm.length > 0) {
-      if (pwd === pwdConfirm) {
-        this.classList.add('is-valid');
-      } else {
-        this.classList.add('is-invalid');
-      }
-    }
-  });
+  // 5. soumission
+  var form = document.getElementById('inscription-form');
+  if (form) {
+    form.addEventListener('submit', soumettreInscription);
+  }
 
   console.log('inscription.js initialisé');
 });
