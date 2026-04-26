@@ -52,7 +52,7 @@
       <button id="btn-deconnexion" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Déconnexion</button>
     </div>
 
-    <!-- ONGLETS (aria-label ajoutés) -->
+    <!-- ══════ ONGLETS ══════ -->
     <ul class="nav nav-tabs" id="espace-tabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" id="tab-commandes" data-bs-toggle="tab" data-bs-target="#panel-commandes" type="button" role="tab" aria-label="Mes commandes" aria-controls="panel-commandes" aria-selected="true"><i class="bi bi-bag-check" aria-hidden="true"></i> <span>Mes commandes</span></button>
@@ -67,7 +67,7 @@
 
     <div class="tab-content mt-4" id="espace-contenu">
 
-      <!-- ONGLET COMMANDES -->
+      <!-- ══════ ONGLET COMMANDES ══════ -->
       <div class="tab-pane fade show active" id="panel-commandes" role="tabpanel" aria-labelledby="tab-commandes">
         <div id="commandes-vide" class="text-center py-5 d-none">
           <i class="bi bi-bag display-1 text-muted" aria-hidden="true"></i>
@@ -92,7 +92,7 @@
         </div>
       </div>
 
-      <!-- ONGLET PROFIL -->
+      <!-- ══════ ONGLET PROFIL ══════ -->
       <div class="tab-pane fade" id="panel-profil" role="tabpanel" aria-labelledby="tab-profil">
         <form id="form-profil" novalidate aria-label="Modifier mon profil">
           <div class="row g-3">
@@ -131,7 +131,7 @@
         </form>
       </div>
 
-      <!-- ONGLET SÉCURITÉ -->
+      <!-- ══════ ONGLET SÉCURITÉ ══════ -->
       <div class="tab-pane fade" id="panel-securite" role="tabpanel" aria-labelledby="tab-securite">
         <h2 class="h5 mb-3">Modifier mon mot de passe</h2>
         <form id="form-mdp" novalidate aria-label="Modifier mon mot de passe" class="col-md-6">
@@ -165,7 +165,7 @@
     </div>
   </main>
 
-  <!-- MODAL SUIVI COMMANDE -->
+  <!-- ══════ MODAL SUIVI COMMANDE (timeline) ══════ -->
   <div class="modal fade" id="modal-suivi" tabindex="-1" aria-labelledby="modal-suivi-titre" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -173,7 +173,9 @@
           <h2 class="modal-title h5" id="modal-suivi-titre">Suivi de la commande</h2>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
         </div>
-        <div class="modal-body" id="modal-suivi-contenu"></div>
+        <div class="modal-body" id="modal-suivi-contenu">
+          <!-- JS injecte la timeline ici -->
+        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
         </div>
@@ -181,7 +183,7 @@
     </div>
   </div>
 
-  <!-- MODAL MODIFIER COMMANDE -->
+  <!-- ══════ MODAL MODIFIER COMMANDE ══════ -->
   <div class="modal fade" id="modal-modifier" tabindex="-1" aria-labelledby="modal-modifier-titre" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -192,6 +194,7 @@
         <div class="modal-body">
           <input type="hidden" id="modif-cmd-id">
           <p id="modif-menu-info" class="alert alert-info small"></p>
+          <p class="text-muted small"><i class="bi bi-info-circle" aria-hidden="true"></i> Vous pouvez tout modifier sauf le choix du menu.</p>
           <div class="mb-3">
             <label for="modif-nb-personnes" class="form-label">Nombre de personnes</label>
             <input type="number" id="modif-nb-personnes" class="form-control" min="1">
@@ -221,13 +224,13 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-primary" onclick="sauvegarderModification()"><i class="bi bi-check-lg" aria-hidden="true"></i> Sauvegarder</button>
+          <button type="button" class="btn btn-primary" id="btn-sauvegarder-modif"><i class="bi bi-check-lg" aria-hidden="true"></i> Sauvegarder</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL AVIS -->
+  <!-- ══════ MODAL AVIS ══════ -->
   <div class="modal fade" id="modal-avis" tabindex="-1" aria-labelledby="modal-avis-titre" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -240,7 +243,7 @@
           <div class="mb-3">
             <label for="avis-note" class="form-label">Note</label>
             <div class="d-flex align-items-center gap-3">
-              <input type="range" id="avis-note" class="form-range" min="1" max="5" value="5" oninput="document.getElementById('avis-stars-display').textContent = '★'.repeat(this.value) + '☆'.repeat(5 - this.value)">
+              <input type="range" id="avis-note" class="form-range" min="1" max="5" value="5">
               <span id="avis-stars-display" class="fs-4" style="color: var(--vg-warning, #b8860b);">★★★★★</span>
             </div>
           </div>
@@ -251,7 +254,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-primary" onclick="soumettreAvis()"><i class="bi bi-star" aria-hidden="true"></i> Envoyer mon avis</button>
+          <button type="button" class="btn btn-primary" id="btn-envoyer-avis"><i class="bi bi-star" aria-hidden="true"></i> Envoyer mon avis</button>
         </div>
       </div>
     </div>
