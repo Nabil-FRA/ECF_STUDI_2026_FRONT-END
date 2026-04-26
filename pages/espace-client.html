@@ -52,16 +52,16 @@
       <button id="btn-deconnexion" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Déconnexion</button>
     </div>
 
-    <!-- ONGLETS -->
+    <!-- ONGLETS (aria-label ajoutés) -->
     <ul class="nav nav-tabs" id="espace-tabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="tab-commandes" data-bs-toggle="tab" data-bs-target="#panel-commandes" type="button" role="tab" aria-controls="panel-commandes" aria-selected="true"><i class="bi bi-bag-check" aria-hidden="true"></i> <span>Mes commandes</span></button>
+        <button class="nav-link active" id="tab-commandes" data-bs-toggle="tab" data-bs-target="#panel-commandes" type="button" role="tab" aria-label="Mes commandes" aria-controls="panel-commandes" aria-selected="true"><i class="bi bi-bag-check" aria-hidden="true"></i> <span>Mes commandes</span></button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-profil" data-bs-toggle="tab" data-bs-target="#panel-profil" type="button" role="tab" aria-controls="panel-profil" aria-selected="false"><i class="bi bi-person" aria-hidden="true"></i> <span>Mon profil</span></button>
+        <button class="nav-link" id="tab-profil" data-bs-toggle="tab" data-bs-target="#panel-profil" type="button" role="tab" aria-label="Mon profil" aria-controls="panel-profil" aria-selected="false"><i class="bi bi-person" aria-hidden="true"></i> <span>Mon profil</span></button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="tab-securite" data-bs-toggle="tab" data-bs-target="#panel-securite" type="button" role="tab" aria-controls="panel-securite" aria-selected="false"><i class="bi bi-shield-lock" aria-hidden="true"></i> <span>Sécurité</span></button>
+        <button class="nav-link" id="tab-securite" data-bs-toggle="tab" data-bs-target="#panel-securite" type="button" role="tab" aria-label="Sécurité" aria-controls="panel-securite" aria-selected="false"><i class="bi bi-shield-lock" aria-hidden="true"></i> <span>Sécurité</span></button>
       </li>
     </ul>
 
@@ -165,7 +165,7 @@
     </div>
   </main>
 
-  <!-- ══ MODAL SUIVI COMMANDE ═══════════════════════════════ -->
+  <!-- MODAL SUIVI COMMANDE -->
   <div class="modal fade" id="modal-suivi" tabindex="-1" aria-labelledby="modal-suivi-titre" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -181,7 +181,7 @@
     </div>
   </div>
 
-  <!-- ══ MODAL MODIFIER COMMANDE ════════════════════════════ -->
+  <!-- MODAL MODIFIER COMMANDE -->
   <div class="modal fade" id="modal-modifier" tabindex="-1" aria-labelledby="modal-modifier-titre" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -227,7 +227,7 @@
     </div>
   </div>
 
-  <!-- ══ MODAL AVIS ═════════════════════════════════════════ -->
+  <!-- MODAL AVIS -->
   <div class="modal fade" id="modal-avis" tabindex="-1" aria-labelledby="modal-avis-titre" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
