@@ -129,3 +129,162 @@
     display: none;
   }
 }
+
+/* ============================================================
+   PATCH espace.css — À COLLER À LA FIN de ton espace.css
+   Corrige le responsive mobile pour les 3 espaces
+   ============================================================ */
+
+/* ── MODALS : ne débordent plus sur mobile ─────────────────── */
+@media (max-width: 575.98px) {
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+}
+
+/* ── TABLEAUX : scroll horizontal propre sur mobile ────────── */
+@media (max-width: 767.98px) {
+  .table-responsive {
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* colonnes moins importantes masquées sur très petit écran */
+  .table .col-hide-mobile {
+    display: none;
+  }
+
+  /* cellules plus compactes */
+  .table th,
+  .table td {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  /* le header du tableau reste lisible */
+  .table thead th {
+    font-size: 0.7rem;
+    letter-spacing: 0;
+  }
+}
+
+/* ── ONGLETS : accessibilité quand le texte est masqué ─────── */
+@media (max-width: 768px) {
+  /* on garde les icônes visibles et on masque le texte */
+  .nav-tabs .nav-link {
+    padding: 0.5rem 0.6rem;
+    font-size: 0;
+    line-height: 1;
+  }
+
+  /* mais les icônes restent à taille normale */
+  .nav-tabs .nav-link i {
+    font-size: 1.1rem;
+  }
+
+  /* les onglets prennent la même largeur */
+  .nav-tabs {
+    display: flex;
+  }
+
+  .nav-tabs .nav-item {
+    flex: 1;
+    text-align: center;
+  }
+
+  .nav-tabs .nav-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* ── STATS : compactes sur mobile ──────────────────────────── */
+@media (max-width: 575.98px) {
+  .stat-card .card-body {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .stat-nombre {
+    font-size: 1.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+
+  .stat-card .display-6 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ── FILTRES EMPLOYÉ : empilés sur mobile ──────────────────── */
+@media (max-width: 767.98px) {
+  .d-flex.flex-wrap.gap-2.mb-3 {
+    flex-direction: column;
+  }
+
+  .d-flex.flex-wrap.gap-2.mb-3 .form-select,
+  .d-flex.flex-wrap.gap-2.mb-3 .form-control {
+    width: 100% !important;
+  }
+
+  .d-flex.flex-wrap.gap-2.mb-3 .ms-3 {
+    margin-left: 0 !important;
+    margin-top: 0.5rem;
+  }
+
+  /* le label "Date :" etc. sur sa propre ligne */
+  .d-flex.flex-wrap.gap-2.mb-3 .form-label {
+    width: 100%;
+  }
+}
+
+/* ── BOUTONS D'ACTION : empilés sur mobile ─────────────────── */
+@media (max-width: 575.98px) {
+  /* dans les tableaux, les boutons d'action s'empilent */
+  td .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  /* le d-flex entre titre et bouton déconnexion */
+  .d-flex.justify-content-between.align-items-center.mb-4 {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+  }
+}
+
+/* ── PAGE TITRE : plus petit sur mobile ────────────────────── */
+@media (max-width: 575.98px) {
+  .page-titre {
+    font-size: 1.1rem;
+  }
+
+  .page-titre i {
+    font-size: 1rem;
+  }
+}
