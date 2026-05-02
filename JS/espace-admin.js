@@ -8,6 +8,7 @@
 var tousLesMenus = [];
 var tousLesUtilisateurs = [];
 var toutesLesCommandes = [];
+var commandesParMenuMongo = []; // données MongoDB pour le graphique
 
 // ── échapper le HTML pour éviter les XSS ────────────────────
 function echapper(str) {
@@ -100,6 +101,11 @@ async function chargerStats() {
     document.getElementById('stat-menus').textContent = (data.menus_list || []).length || '—';
     document.getElementById('stat-commandes-mois').textContent = nbCmd;
     document.getElementById('stat-ca-mois').textContent = Number(total).toFixed(2) + ' €';
+
+    // Stocker les données MongoDB pour le graphique
+    if (data.commandes_par_menu && data.commandes_par_menu.length > 0) {
+      commandesParMenuMongo = data.commandes_par_menu;
+    }
   } catch (err) {
     console.error('Erreur stats :', err);
   }
@@ -560,34 +566,25 @@ function dessinerGraphique() {
   var canvas = document.getElementById('chart-commandes-menu');
   if (!canvas) return;
 
-  // données : on compte le nombre de commandes par menu
-  // en mode mock, on utilise les données de api.js
-  var commandesParMenu = {};
   var couleurs = [
     '#b5451b', '#2d7a3a', '#0d6efd', '#ffc107', '#6f42c1', '#20c997',
     '#fd7e14', '#d63384', '#0dcaf0', '#6c757d'
   ];
 
-  // on essaie de charger les commandes si pas déjà fait
-  if (toutesLesCommandes.length === 0) {
-    // données de démonstration pour le graphique
-    var demoData = [
-      { menu: 'Menu Noël Tradition', count: 18 },
-      { menu: 'Menu Pâques Printanier', count: 12 },
-      { menu: 'Menu Classique Bordelais', count: 24 },
-      { menu: 'Menu Végétarien Gourmand', count: 9 },
-      { menu: 'Menu Événement Prestige', count: 15 },
-      { menu: 'Menu Végan Saison', count: 6 }
-    ];
-
-    var labels = demoData.map(function(d) { return d.menu; });
-    var values = demoData.map(function(d) { return d.count; });
-
+  // Priorité 1 : données MongoDB (les plus fiables)
+  if (commandesParMenuMongo.length > 0) {
+    var labels = commandesParMenuMongo.map(function(d) { return d.menu || 'Inconnu'; });
+    var values = commandesParMenuMongo.map(function(d) { return d.count || 0; });
     creerChart(canvas, labels, values, couleurs);
-  } else {
-    // données réelles depuis les commandes chargées
+    return;
+  }
+
+  // Priorité 2 : commandes chargées depuis /admin/commandes
+  if (toutesLesCommandes.length > 0) {
+    var commandesParMenu = {};
     toutesLesCommandes.forEach(function(cmd) {
-      var nomMenu = cmd.menuNom || cmd.menu || 'Inconnu';
+      // champ API : menu_titre (flat) ou menu.titre (objet)
+      var nomMenu = cmd.menu_titre || (cmd.menu && cmd.menu.titre) || cmd.menuNom || 'Inconnu';
       if (!commandesParMenu[nomMenu]) {
         commandesParMenu[nomMenu] = 0;
       }
@@ -596,9 +593,22 @@ function dessinerGraphique() {
 
     var labels = Object.keys(commandesParMenu);
     var values = Object.values(commandesParMenu);
-
     creerChart(canvas, labels, values, couleurs);
+    return;
   }
+
+  // Priorité 3 : données de démonstration (aucune donnée disponible)
+  var demoData = [
+    { menu: 'Menu Noël Tradition', count: 5 },
+    { menu: 'Menu Pâques Printanier', count: 3 },
+    { menu: 'Menu Classique Bordelais', count: 8 },
+    { menu: 'Menu Végétarien Gourmand', count: 2 },
+    { menu: 'Menu Événement Prestige', count: 4 },
+    { menu: 'Menu Végan Saison', count: 1 }
+  ];
+  var labels = demoData.map(function(d) { return d.menu; });
+  var values = demoData.map(function(d) { return d.count; });
+  creerChart(canvas, labels, values, couleurs);
 }
 
 function creerChart(canvas, labels, values, couleurs) {
@@ -682,39 +692,45 @@ function calculerCA() {
     ? toutesLesCommandes
     : getDemoCommandes();
 
-  // filtrer par menu
+  // filtrer par menu (utiliser menu_titre comme identifiant)
   var filtrees = commandes;
   if (menuFiltre !== 'tous') {
+    // menuFiltre peut être un ID (tousLesMenus) ou un titre (demo)
+    var menuTrouvePourFiltre = tousLesMenus.find(function(m) { return m.id == menuFiltre; });
+    var titreFiltreRecherche = menuTrouvePourFiltre ? (menuTrouvePourFiltre.titre || menuTrouvePourFiltre.nom) : null;
+
     filtrees = filtrees.filter(function(cmd) {
+      var titrCmd = cmd.menu_titre || (cmd.menu && cmd.menu.titre) || cmd.menuNom || '';
+      if (titreFiltreRecherche) return titrCmd === titreFiltreRecherche;
       return cmd.menu_id == menuFiltre || cmd.menuId == menuFiltre;
     });
   }
 
-  // filtrer par date
+  // filtrer par date (champ date_prestation)
   if (dateDebut) {
     var debut = new Date(dateDebut);
     filtrees = filtrees.filter(function(cmd) {
-      return new Date(cmd.date) >= debut;
+      return new Date(cmd.date_prestation || cmd.date) >= debut;
     });
   }
   if (dateFin) {
     var fin = new Date(dateFin);
     fin.setHours(23, 59, 59);
     filtrees = filtrees.filter(function(cmd) {
-      return new Date(cmd.date) <= fin;
+      return new Date(cmd.date_prestation || cmd.date) <= fin;
     });
   }
 
   // ne compter que les commandes non annulées
   filtrees = filtrees.filter(function(cmd) {
-    return cmd.statut !== 'Annulée';
+    return cmd.statut !== 'annulée' && cmd.statut !== 'Annulée';
   });
 
   // calculer le total
   var totalCA = 0;
   var nbCommandes = filtrees.length;
   filtrees.forEach(function(cmd) {
-    totalCA += (cmd.total || 0);
+    totalCA += (cmd.prix_total || cmd.total || 0);
   });
 
   // trouver le nom du menu filtré
