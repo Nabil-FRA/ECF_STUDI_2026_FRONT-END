@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f5ede6"/>
+  <rect x="150" y="90" width="100" height="80" rx="8" fill="#d4956a" opacity="0.4"/>
+  <circle cx="200" cy="120" r="25" fill="#b5451b" opacity="0.3"/>
+  <text x="200" y="205" font-family="serif" font-size="16" fill="#7a3010" text-anchor="middle" opacity="0.7">Vite &amp; Gourmand</text>
+  <text x="200" y="225" font-family="sans-serif" font-size="12" fill="#9a5030" text-anchor="middle" opacity="0.5">Photo à venir</text>
+</svg>

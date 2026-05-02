@@ -66,7 +66,7 @@ function afficherMenu(menuBrut) {
   // image principale
   const imgMain = document.getElementById('menu-img-main');
   if (imgMain) {
-    imgMain.src = menu.image || '../images/menu-placeholder.jpg';
+    imgMain.src = menu.image || '../images/menu-placeholder.svg';
     imgMain.alt = 'Photo du menu ' + menu.titre;
   }
 
@@ -292,7 +292,7 @@ function afficherMenusSimilaires(menus) {
 
     col.innerHTML =
       '<div class="card h-100 menu-card">' +
-        '<img src="' + (menu.image || '../images/menu-placeholder.jpg') + '" ' +
+        '<img src="' + (menu.image || '../images/menu-placeholder.svg') + '" ' +
              'class="card-img-top" ' +
              'alt="Photo du menu ' + menu.titre + '">' +
         '<div class="card-body d-flex flex-column">' +

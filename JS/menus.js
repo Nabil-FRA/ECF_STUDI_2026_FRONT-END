@@ -202,7 +202,7 @@ function genererCardMenu(menu) {
     badgeStock = '<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Stock limité</span>';
   }
 
-  var image = menu.image || (menu.images && menu.images[0] && menu.images[0].url) || '../images/placeholder-menu.jpg';
+  var image = menu.image || (menu.images && menu.images[0] && menu.images[0].url) || '../images/placeholder-menu.svg';
 
   return '<article class="col-md-6 col-lg-4">' +
     '<div class="card menu-card h-100">' +
