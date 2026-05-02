@@ -101,7 +101,7 @@ function preremplir(user) {
 async function chargerMenus() {
   try {
     const data = await fetchAPI('/menus');
-    menus = data.menus;
+    menus = Array.isArray(data) ? data : (data.menus || []);
 
     const select = document.getElementById('menu-choisi');
     select.innerHTML = '<option value="">-- Choisissez un menu --</option>';
@@ -109,7 +109,9 @@ async function chargerMenus() {
     menus.forEach(function(menu) {
       const opt = document.createElement('option');
       opt.value = menu.id;
-      opt.textContent = menu.titre + ' - ' + menu.nb_personnes_min + ' pers. min - ' + formatPrix(menu.prix_base);
+      const prixAff = menu.prix_par_personne || menu.prix || 0;
+      const minPers = menu.nombre_personne_minimum || menu.nb_personnes_min || 0;
+      opt.textContent = menu.titre + ' - ' + minPers + ' pers. min - ' + formatPrix(prixAff);
       select.appendChild(opt);
     });
 
@@ -151,44 +153,51 @@ function mettreAJourInfosMenu() {
 
   if (!menuCourant) return;
 
+  // normaliser les champs API → local
+  menuCourant._minPersonnes = menuCourant.nombre_personne_minimum || menuCourant.nb_personnes_min || 1;
+  menuCourant._prix         = menuCourant.prix_par_personne || menuCourant.prix_base || menuCourant.prix || 0;
+  menuCourant._stock        = (menuCourant.quantite_restante !== undefined) ? menuCourant.quantite_restante : menuCourant.stock;
+  menuCourant._theme        = (menuCourant.theme && menuCourant.theme.libelle) ? menuCourant.theme.libelle : (menuCourant.theme || '');
+  menuCourant._regime       = (menuCourant.regime && menuCourant.regime.libelle) ? menuCourant.regime.libelle : (menuCourant.regime || '');
+
   // je mets à jour le champ nombre de personnes
   const inputNbP = document.getElementById('nb-personnes');
-  inputNbP.min = menuCourant.nb_personnes_min;
-  inputNbP.value = menuCourant.nb_personnes_min;
+  inputNbP.min = menuCourant._minPersonnes;
+  inputNbP.value = menuCourant._minPersonnes;
 
   document.getElementById('nb-personnes-hint').textContent =
-    'Minimum pour ce menu : ' + menuCourant.nb_personnes_min + ' personne(s)';
+    'Minimum pour ce menu : ' + menuCourant._minPersonnes + ' personne(s)';
 
   // j'affiche les infos du menu
   infoDiv.classList.remove('d-none');
   infoDiv.innerHTML =
     '<strong>' + echapper(menuCourant.titre) + '</strong><br>' +
-    'Thème : ' + echapper(menuCourant.theme) + ' | ' +
-    'Régime : ' + echapper(menuCourant.regime) + '<br>' +
-    'Prix de base : <strong>' + formatPrix(menuCourant.prix_base) + '</strong>' +
-    ' pour ' + menuCourant.nb_personnes_min + ' pers.';
+    'Thème : ' + echapper(menuCourant._theme) + ' | ' +
+    'Régime : ' + echapper(menuCourant._regime) + '<br>' +
+    'Prix : <strong>' + formatPrix(menuCourant._prix) + '</strong>' +
+    '/pers. — min ' + menuCourant._minPersonnes + ' pers.';
 
   // AJOUT : afficher le stock restant (c'était dans le cahier des charges)
   const btnSuivant = document.getElementById('btn-etape-2-suivant');
-  
-  if (menuCourant.stock !== undefined && menuCourant.stock !== null) {
+
+  if (menuCourant._stock !== undefined && menuCourant._stock !== null) {
     stockDiv.classList.remove('d-none');
-    
-    if (menuCourant.stock <= 0) {
+
+    if (menuCourant._stock <= 0) {
       // plus de stock, on bloque
       stockDiv.className = 'alert alert-danger';
       stockDiv.innerHTML = '<strong>Rupture !</strong> Ce menu n\'est plus disponible pour le moment.';
       btnSuivant.disabled = true;
       console.log('menu en rupture de stock');
-    } else if (menuCourant.stock <= 3) {
+    } else if (menuCourant._stock <= 3) {
       // stock faible, on prévient
       stockDiv.className = 'alert alert-warning';
-      stockDiv.innerHTML = '<strong>Attention :</strong> Plus que ' + menuCourant.stock + ' commande(s) disponible(s) pour ce menu !';
+      stockDiv.innerHTML = '<strong>Attention :</strong> Plus que ' + menuCourant._stock + ' commande(s) disponible(s) pour ce menu !';
       btnSuivant.disabled = false;
     } else {
       // stock ok
       stockDiv.className = 'alert alert-info';
-      stockDiv.innerHTML = 'Stock disponible : ' + menuCourant.stock + ' commande(s).';
+      stockDiv.innerHTML = 'Stock disponible : ' + menuCourant._stock + ' commande(s).';
       btnSuivant.disabled = false;
     }
   } else {
@@ -203,8 +212,8 @@ function calculerPrix() {
   if (!menuCourant) return null;
 
   const nbP = parseInt(document.getElementById('nb-personnes').value);
-  const min = menuCourant.nb_personnes_min;
-  const prixBase = menuCourant.prix_base;
+  const min = menuCourant._minPersonnes;
+  const prixBase = menuCourant._prix;
 
   // prix proportionnel
   // TODO : vérifier avec le client si c'est bien comme ça qu'on calcule
@@ -343,10 +352,10 @@ function validerEtape(num) {
   // vérification custom : nb personnes >= min du menu
   if (num === 2 && menuCourant) {
     const nbP = parseInt(document.getElementById('nb-personnes').value);
-    if (nbP < menuCourant.nb_personnes_min) {
+    if (nbP < menuCourant._minPersonnes) {
       document.getElementById('nb-personnes').classList.add('is-invalid');
       document.getElementById('nb-personnes-error').textContent =
-        'Minimum ' + menuCourant.nb_personnes_min + ' personne(s) pour ce menu.';
+        'Minimum ' + menuCourant._minPersonnes + ' personne(s) pour ce menu.';
       ok = false;
     }
   }
@@ -440,27 +449,28 @@ async function envoyerCommande(e) {
 
   const prix = calculerPrix();
 
-  // je construis l'objet à envoyer
+  // construire lieu_prestation à partir des champs adresse
+  const adresse    = document.getElementById('adresse-livraison').value.trim();
+  const cp         = document.getElementById('code-postal').value.trim();
+  const ville      = document.getElementById('ville').value.trim();
+  const lieuPrestation = [adresse, cp, ville].filter(Boolean).join(', ');
+
+  // je construis l'objet à envoyer (champs attendus par /api/user/commandes)
   const data = {
-    prenom: document.getElementById('prenom').value,
-    nom: document.getElementById('nom').value,
-    email: document.getElementById('email').value,
-    gsm: document.getElementById('gsm').value,
-    adresse: document.getElementById('adresse-livraison').value,
-    code_postal: document.getElementById('code-postal').value,
-    ville: document.getElementById('ville').value,
+    menu_id:         parseInt(document.getElementById('menu-choisi').value),
+    nombre_personne: parseInt(document.getElementById('nb-personnes').value),
     date_prestation: document.getElementById('date-prestation').value,
-    heure: document.getElementById('heure-livraison').value,
-    menu_id: document.getElementById('menu-choisi').value,
-    nb_personnes: document.getElementById('nb-personnes').value,
-    prix_total: prix ? prix.total : 0
+    heure_livraison: document.getElementById('heure-livraison').value,
+    lieu_prestation: lieuPrestation,
+    pret_materiel:   false,
+    distance_km:     cp && !['33000','33100','33200','33300','33800'].includes(cp) ? 10 : 0
   };
 
   // je récupère le token csrf dans la meta
   const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
   try {
-    await fetchAPI('/commandes', {
+    await fetchAPI('/user/commandes', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

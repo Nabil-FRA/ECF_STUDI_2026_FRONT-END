@@ -92,11 +92,14 @@ document.addEventListener('DOMContentLoaded', function() {
 async function chargerStats() {
   try {
     var data = await fetchAPI('/admin/stats');
-    document.getElementById('stat-utilisateurs').textContent = data.utilisateurs || 0;
-    document.getElementById('stat-menus').textContent = data.menusActifs || 0;
-    document.getElementById('stat-commandes-mois').textContent = data.commandesMois || 0;
-    document.getElementById('stat-ca-mois').textContent =
-      (data.caMois || 0).toFixed(2) + ' €';
+    // Le backend retourne : chiffre_affaires, commandes_par_menu, menus_list
+    var ca    = data.chiffre_affaires || {};
+    var total = ca.chiffre_affaires || ca.total || 0;
+    var nbCmd = ca.nombre_commandes || ca.nb_commandes || 0;
+    document.getElementById('stat-utilisateurs').textContent = data.utilisateurs || '—';
+    document.getElementById('stat-menus').textContent = (data.menus_list || []).length || '—';
+    document.getElementById('stat-commandes-mois').textContent = nbCmd;
+    document.getElementById('stat-ca-mois').textContent = Number(total).toFixed(2) + ' €';
   } catch (err) {
     console.error('Erreur stats :', err);
   }
@@ -122,14 +125,17 @@ async function chargerMenus() {
         ? '<span class="badge bg-success">Actif</span>'
         : '<span class="badge bg-secondary">Inactif</span>';
 
-      var prix = menu.prix_base || menu.prix || 0;
+      var prix    = menu.prix_par_personne || menu.prix_base || menu.prix || 0;
+      var themeLib = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '—');
+      var stock    = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '—');
+      var minP     = menu.nombre_personne_minimum || menu.nb_personnes_min || '—';
 
       tr.innerHTML =
         '<td><strong>' + echapper(menu.titre || menu.nom) + '</strong></td>' +
-        '<td>' + echapper(menu.theme || '—') + '</td>' +
-        '<td>' + prix.toFixed(2) + ' €</td>' +
-        '<td>' + (menu.nb_personnes_min || menu.nbConvivesMin || '—') + ' — ' + (menu.nb_personnes_max || menu.nbConvivesMax || '—') + '</td>' +
-        '<td>' + (menu.stock !== undefined ? menu.stock : '—') + '</td>' +
+        '<td>' + echapper(themeLib) + '</td>' +
+        '<td>' + Number(prix).toFixed(2) + ' €</td>' +
+        '<td>' + minP + '</td>' +
+        '<td>' + stock + '</td>' +
         '<td>' + statutBadge + '</td>' +
         '<td>' +
           '<button class="btn btn-sm btn-outline-primary me-1" ' +
@@ -160,12 +166,12 @@ function ouvrirModifierMenu(menuId) {
   document.getElementById('modal-menu-titre').textContent = 'Modifier le menu';
   document.getElementById('menu-id').value = menu.id;
   document.getElementById('menu-nom').value = menu.titre || menu.nom || '';
-  document.getElementById('menu-prix').value = menu.prix_base || menu.prix || '';
-  document.getElementById('menu-theme').value = menu.theme || '';
-  document.getElementById('menu-regime').value = menu.regime || 'classique';
-  document.getElementById('menu-convives-min').value = menu.nb_personnes_min || menu.nbConvivesMin || '';
-  document.getElementById('menu-convives-max').value = menu.nb_personnes_max || menu.nbConvivesMax || '';
-  document.getElementById('menu-stock').value = menu.stock !== undefined ? menu.stock : '';
+  document.getElementById('menu-prix').value = menu.prix_par_personne || menu.prix_base || menu.prix || '';
+  document.getElementById('menu-theme').value = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
+  document.getElementById('menu-regime').value = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || 'classique');
+  document.getElementById('menu-convives-min').value = menu.nombre_personne_minimum || menu.nb_personnes_min || '';
+  document.getElementById('menu-convives-max').value = menu.nombre_personne_maximum || menu.nb_personnes_max || '';
+  document.getElementById('menu-stock').value = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '');
   document.getElementById('menu-description').value = menu.description || '';
 
   var modal = new bootstrap.Modal(document.getElementById('modal-menu'));
@@ -177,14 +183,14 @@ async function sauvegarderMenu() {
   var isModif = !!menuId;
 
   var donnees = {
-    titre: document.getElementById('menu-nom').value.trim(),
-    prix_base: parseFloat(document.getElementById('menu-prix').value),
-    theme: document.getElementById('menu-theme').value,
-    regime: document.getElementById('menu-regime').value,
-    nb_personnes_min: parseInt(document.getElementById('menu-convives-min').value),
-    nb_personnes_max: parseInt(document.getElementById('menu-convives-max').value),
-    stock: parseInt(document.getElementById('menu-stock').value) || 0,
-    description: document.getElementById('menu-description').value.trim()
+    titre:                    document.getElementById('menu-nom').value.trim(),
+    prix_par_personne:        parseFloat(document.getElementById('menu-prix').value),
+    theme:                    document.getElementById('menu-theme').value,
+    regime:                   document.getElementById('menu-regime').value,
+    nombre_personne_minimum:  parseInt(document.getElementById('menu-convives-min').value),
+    nombre_personne_maximum:  parseInt(document.getElementById('menu-convives-max').value),
+    quantite_restante:        parseInt(document.getElementById('menu-stock').value) || 0,
+    description:              document.getElementById('menu-description').value.trim()
   };
 
   if (!donnees.titre || !donnees.prix_base || !donnees.theme) {
@@ -193,7 +199,7 @@ async function sauvegarderMenu() {
   }
 
   try {
-    var url = isModif ? '/menus/' + menuId : '/menus';
+    var url = isModif ? '/admin/menus/' + menuId : '/admin/menus';
     var method = isModif ? 'PUT' : 'POST';
 
     await fetchAPI(url, {
@@ -217,7 +223,7 @@ async function supprimerMenu(menuId) {
   if (!confirm('Supprimer ce menu ? Cette action est irréversible.')) return;
 
   try {
-    await fetchAPI('/menus/' + menuId, { method: 'DELETE' });
+    await fetchAPI('/admin/menus/' + menuId, { method: 'DELETE' });
     chargerMenus();
     chargerStats();
   } catch (err) {
@@ -331,7 +337,10 @@ function filtrerUtilisateurs() {
 
 async function changerRole(userId, nouveauRole) {
   try {
-    await fetchAPI('/admin/utilisateurs/' + userId + '/role', {
+    // Le backend /toggle change le statut actif/désactivé — le changement de rôle
+    // nécessite un endpoint dédié non encore implémenté.
+    // Pour l'instant, on utilise /toggle pour désactiver/réactiver (comportement le plus proche).
+    await fetchAPI('/admin/utilisateurs/' + userId + '/toggle', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role: nouveauRole })
@@ -355,7 +364,7 @@ async function toggleActivation(userId, activer) {
   if (!confirm('Voulez-vous ' + action + ' ce compte ?')) return;
 
   try {
-    await fetchAPI('/admin/utilisateurs/' + userId + '/statut', {
+    await fetchAPI('/admin/utilisateurs/' + userId + '/toggle', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ actif: activer })
@@ -454,18 +463,20 @@ async function chargerToutesCommandes() {
       var tr = document.createElement('tr');
 
       var badgeClass = 'bg-secondary';
-      if (cmd.statut === 'Confirmée') badgeClass = 'bg-success';
-      else if (cmd.statut === 'En attente') badgeClass = 'bg-warning text-dark';
-      else if (cmd.statut === 'Livrée') badgeClass = 'bg-info';
-      else if (cmd.statut === 'Terminée') badgeClass = 'bg-primary';
-      else if (cmd.statut === 'Annulée') badgeClass = 'bg-danger';
+      if (cmd.statut === 'accepté') badgeClass = 'bg-success';
+      else if (cmd.statut === 'en cours') badgeClass = 'bg-warning text-dark';
+      else if (cmd.statut === 'livré') badgeClass = 'bg-info';
+      else if (cmd.statut === 'terminée') badgeClass = 'bg-primary';
+      else if (cmd.statut === 'annulée') badgeClass = 'bg-danger';
+      else if (cmd.statut === 'en préparation') badgeClass = 'bg-info text-dark';
+      else if (cmd.statut === 'en cours de livraison') badgeClass = 'bg-primary';
 
       tr.innerHTML =
-        '<td>' + echapper(cmd.numero || cmd.id) + '</td>' +
-        '<td>' + (cmd.date ? new Date(cmd.date).toLocaleDateString('fr-FR') : '—') + '</td>' +
-        '<td>' + echapper(cmd.clientNom || '—') + '</td>' +
-        '<td>' + echapper(cmd.menuNom || cmd.menu || '—') + '</td>' +
-        '<td class="fw-bold">' + (cmd.total ? cmd.total.toFixed(2) + ' €' : '—') + '</td>' +
+        '<td>' + echapper(cmd.numero_commande || cmd.id) + '</td>' +
+        '<td>' + (cmd.date_prestation ? new Date(cmd.date_prestation).toLocaleDateString('fr-FR') : '—') + '</td>' +
+        '<td>' + echapper(cmd.client_email || '—') + '</td>' +
+        '<td>' + echapper((cmd.menu && cmd.menu.titre) || cmd.menu_titre || '—') + '</td>' +
+        '<td class="fw-bold">' + (cmd.prix_total ? Number(cmd.prix_total).toFixed(2) + ' €' : '—') + '</td>' +
         '<td><span class="badge ' + badgeClass + '">' + echapper(cmd.statut) + '</span></td>';
 
       body.appendChild(tr);

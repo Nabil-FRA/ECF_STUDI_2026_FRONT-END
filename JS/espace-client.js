@@ -130,7 +130,7 @@ async function chargerCommandes() {
   var body = document.getElementById('commandes-body');
 
   try {
-    var data = await fetchAPI('/commandes');
+    var data = await fetchAPI('/user/commandes');
     var commandes = data.commandes || data || [];
     toutesLesCommandesClient = commandes;
 
@@ -154,11 +154,11 @@ async function chargerCommandes() {
       var actions = genererActionsClient(cmd);
 
       tr.innerHTML =
-        '<td><strong>' + echapper(cmd.numero || cmd.id) + '</strong></td>' +
-        '<td>' + formaterDate(cmd.date) + '</td>' +
-        '<td>' + echapper(cmd.menuNom || '—') + '</td>' +
-        '<td>' + (cmd.nbPersonnes || '—') + '</td>' +
-        '<td class="fw-bold">' + (cmd.total ? cmd.total.toFixed(2) + ' €' : '—') + '</td>' +
+        '<td><strong>' + echapper(cmd.numero_commande || cmd.id) + '</strong></td>' +
+        '<td>' + formaterDate(cmd.date_prestation) + '</td>' +
+        '<td>' + echapper((cmd.menu && cmd.menu.titre) || cmd.menu_titre || '—') + '</td>' +
+        '<td>' + (cmd.nombre_personne || '—') + '</td>' +
+        '<td class="fw-bold">' + (cmd.prix_total ? Number(cmd.prix_total).toFixed(2) + ' €' : '—') + '</td>' +
         '<td><span class="badge ' + badgeClass + '">' + echapper(cmd.statut || '—') + '</span></td>' +
         '<td>' + actions + '</td>';
 
@@ -174,14 +174,14 @@ async function chargerCommandes() {
 
 function getBadgeClass(statut) {
   var classes = {
-    'En attente': 'bg-warning text-dark',
-    'Confirmée': 'bg-success',
-    'En préparation': 'bg-info',
-    'En cours de livraison': 'bg-primary',
-    'Livrée': 'bg-info text-dark',
-    'En attente du retour de matériel': 'bg-warning',
-    'Terminée': 'bg-secondary',
-    'Annulée': 'bg-danger'
+    'en cours': 'bg-warning text-dark',
+    'accepté': 'bg-success',
+    'en préparation': 'bg-info',
+    'en cours de livraison': 'bg-primary',
+    'livré': 'bg-info text-dark',
+    'en attente du retour de matériel': 'bg-warning',
+    'terminée': 'bg-secondary',
+    'annulée': 'bg-danger'
   };
   return classes[statut] || 'bg-secondary';
 }
@@ -191,16 +191,16 @@ function genererActionsClient(cmd) {
   var actions = '';
 
   // Bouton Suivi (toujours visible si la commande est acceptée)
-  if (cmd.statut !== 'En attente' && cmd.statut !== 'Annulée') {
+  if (cmd.statut !== 'en cours' && cmd.statut !== 'annulée') {
     actions +=
       '<button class="btn btn-sm btn-outline-info me-1" onclick="ouvrirSuivi(\'' + id + '\')" ' +
-        'aria-label="Suivre la commande ' + echapper(cmd.numero || cmd.id) + '">' +
+        'aria-label="Suivre la commande ' + echapper(cmd.numero_commande || cmd.id) + '">' +
         '<i class="bi bi-geo-alt" aria-hidden="true"></i>' +
       '</button>';
   }
 
   // Bouton Modifier (tant que pas acceptée)
-  if (cmd.statut === 'En attente') {
+  if (cmd.statut === 'en cours') {
     actions +=
       '<button class="btn btn-sm btn-outline-primary me-1" onclick="ouvrirModifier(\'' + id + '\')" ' +
         'aria-label="Modifier la commande">' +
@@ -209,7 +209,7 @@ function genererActionsClient(cmd) {
   }
 
   // Bouton Annuler (tant que pas acceptée)
-  if (cmd.statut === 'En attente') {
+  if (cmd.statut === 'en cours') {
     actions +=
       '<button class="btn btn-sm btn-outline-danger me-1" onclick="annulerCommande(\'' + id + '\')" ' +
         'aria-label="Annuler la commande">' +
@@ -218,7 +218,7 @@ function genererActionsClient(cmd) {
   }
 
   // Bouton Avis (quand commande terminée et pas encore d'avis)
-  if (cmd.statut === 'Terminée' && !cmd.avisDepose) {
+  if (cmd.statut === 'terminée' && !cmd.avis_depose) {
     actions +=
       '<button class="btn btn-sm btn-outline-warning" onclick="ouvrirAvis(\'' + id + '\')" ' +
         'aria-label="Donner un avis">' +
@@ -252,15 +252,16 @@ async function ouvrirSuivi(commandeId) {
 
   titre.textContent = 'Suivi — Commande ' + (cmd ? (cmd.numero || cmd.id) : commandeId);
 
-  // charger l'historique depuis l'API
+  // charger le détail depuis l'API (le suivi MongoDB est inclus)
   contenu.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> Chargement...</div>';
 
   var modal = new bootstrap.Modal(document.getElementById('modal-suivi'));
   modal.show();
 
   try {
-    var data = await fetchAPI('/commandes/' + commandeId + '/historique');
-    var historique = data.historique || data || [];
+    var data = await fetchAPI('/user/commandes/' + commandeId);
+    var cmdDetail = data.commande || data;
+    var historique = (cmdDetail.suivi && cmdDetail.suivi.historique) ? cmdDetail.suivi.historique : [];
 
     afficherTimeline(historique, cmd, contenu);
 
@@ -287,15 +288,15 @@ function afficherTimeline(historique, cmd, contenu) {
 
   var html = '<div class="timeline" role="list" aria-label="Historique des statuts">';
 
-  // les étapes possibles dans l'ordre
+  // les étapes possibles dans l'ordre (valeurs API lowercase)
   var etapesOrdre = [
-    'En attente',
-    'Confirmée',
-    'En préparation',
-    'En cours de livraison',
-    'Livrée',
-    'En attente du retour de matériel',
-    'Terminée'
+    'en cours',
+    'accepté',
+    'en préparation',
+    'en cours de livraison',
+    'livré',
+    'en attente du retour de matériel',
+    'terminée'
   ];
 
   historique.forEach(function(etape, index) {
@@ -329,10 +330,10 @@ function afficherTimeline(historique, cmd, contenu) {
     html +=
       '<hr>' +
       '<div class="row small">' +
-        '<div class="col-6"><strong>Menu :</strong> ' + echapper(cmd.menuNom || '—') + '</div>' +
-        '<div class="col-6"><strong>Convives :</strong> ' + (cmd.nbPersonnes || '—') + '</div>' +
-        '<div class="col-6 mt-1"><strong>Date :</strong> ' + formaterDate(cmd.date) + '</div>' +
-        '<div class="col-6 mt-1"><strong>Total :</strong> ' + (cmd.total ? cmd.total.toFixed(2) + ' €' : '—') + '</div>' +
+        '<div class="col-6"><strong>Menu :</strong> ' + echapper((cmd.menu && cmd.menu.titre) || cmd.menu_titre || '—') + '</div>' +
+        '<div class="col-6"><strong>Convives :</strong> ' + (cmd.nombre_personne || '—') + '</div>' +
+        '<div class="col-6 mt-1"><strong>Date :</strong> ' + formaterDate(cmd.date_prestation) + '</div>' +
+        '<div class="col-6 mt-1"><strong>Total :</strong> ' + (cmd.prix_total ? Number(cmd.prix_total).toFixed(2) + ' €' : '—') + '</div>' +
       '</div>';
   }
 
@@ -343,15 +344,15 @@ function construireHistoriqueMinimal(cmd) {
   if (!cmd) return [];
 
   var etapesOrdre = [
-    'En attente', 'Confirmée', 'En préparation',
-    'En cours de livraison', 'Livrée', 'Terminée'
+    'en cours', 'accepté', 'en préparation',
+    'en cours de livraison', 'livré', 'terminée'
   ];
 
   // cas spécial annulation
-  if (cmd.statut === 'Annulée') {
+  if (cmd.statut === 'annulée') {
     return [
-      { statut: 'En attente', date: cmd.dateCreation || cmd.date, actif: true },
-      { statut: 'Annulée', date: cmd.dateDerniereModif || null, actif: true }
+      { statut: 'en cours', date: cmd.date_commande || cmd.date_prestation, actif: true },
+      { statut: 'annulée', date: null, actif: true }
     ];
   }
 
@@ -362,7 +363,7 @@ function construireHistoriqueMinimal(cmd) {
   for (var i = 0; i <= Math.min(indexActuel, etapesOrdre.length - 1); i++) {
     historique.push({
       statut: etapesOrdre[i],
-      date: i === 0 ? (cmd.dateCreation || cmd.date) : null,
+      date: i === 0 ? (cmd.date_commande || cmd.date_prestation) : null,
       actif: true
     });
   }
@@ -381,14 +382,14 @@ function construireHistoriqueMinimal(cmd) {
 
 function getIconeStatut(statut) {
   var icones = {
-    'En attente': 'bi-hourglass-split',
-    'Confirmée': 'bi-check-lg',
-    'En préparation': 'bi-gear',
-    'En cours de livraison': 'bi-truck',
-    'Livrée': 'bi-check-circle',
-    'En attente du retour de matériel': 'bi-box-seam',
-    'Terminée': 'bi-check-all',
-    'Annulée': 'bi-x-lg',
+    'en cours': 'bi-hourglass-split',
+    'accepté': 'bi-check-lg',
+    'en préparation': 'bi-gear',
+    'en cours de livraison': 'bi-truck',
+    'livré': 'bi-check-circle',
+    'en attente du retour de matériel': 'bi-box-seam',
+    'terminée': 'bi-check-all',
+    'annulée': 'bi-x-lg',
     'Commande passée': 'bi-bag-plus'
   };
   return icones[statut] || 'bi-circle';
@@ -407,13 +408,13 @@ function ouvrirModifier(commandeId) {
 
   document.getElementById('modif-cmd-id').value = cmd.id;
   document.getElementById('modif-menu-info').textContent =
-    'Menu : ' + (cmd.menuNom || '—') + ' (non modifiable)';
-  document.getElementById('modif-nb-personnes').value = cmd.nbPersonnes || '';
-  document.getElementById('modif-date').value = cmd.date ? cmd.date.split('T')[0] : '';
-  document.getElementById('modif-heure').value = cmd.heure || '';
-  document.getElementById('modif-adresse').value = cmd.adresse || '';
-  document.getElementById('modif-cp').value = cmd.codePostal || '';
-  document.getElementById('modif-ville').value = cmd.ville || '';
+    'Menu : ' + ((cmd.menu && cmd.menu.titre) || cmd.menu_titre || '—') + ' (non modifiable)';
+  document.getElementById('modif-nb-personnes').value = cmd.nombre_personne || '';
+  document.getElementById('modif-date').value = cmd.date_prestation ? cmd.date_prestation.split('T')[0] : '';
+  document.getElementById('modif-heure').value = cmd.heure_livraison || '';
+  document.getElementById('modif-adresse').value = cmd.lieu_prestation || '';
+  document.getElementById('modif-cp').value = '';
+  document.getElementById('modif-ville').value = '';
 
   var modal = new bootstrap.Modal(document.getElementById('modal-modifier'));
   modal.show();
@@ -422,22 +423,25 @@ function ouvrirModifier(commandeId) {
 async function sauvegarderModification() {
   var commandeId = document.getElementById('modif-cmd-id').value;
 
+  var adresseMod = document.getElementById('modif-adresse').value.trim();
+  var cpMod      = document.getElementById('modif-cp').value.trim();
+  var villeMod   = document.getElementById('modif-ville').value.trim();
+  var lieuMod    = [adresseMod, cpMod, villeMod].filter(Boolean).join(', ') || adresseMod;
+
   var donnees = {
-    nb_personnes: parseInt(document.getElementById('modif-nb-personnes').value),
-    date: document.getElementById('modif-date').value,
-    heure: document.getElementById('modif-heure').value,
-    adresse: document.getElementById('modif-adresse').value.trim(),
-    code_postal: document.getElementById('modif-cp').value.trim(),
-    ville: document.getElementById('modif-ville').value.trim()
+    nombre_personne: parseInt(document.getElementById('modif-nb-personnes').value),
+    date_prestation: document.getElementById('modif-date').value,
+    heure_livraison: document.getElementById('modif-heure').value,
+    lieu_prestation: lieuMod
   };
 
-  if (!donnees.nb_personnes || !donnees.date || !donnees.adresse) {
+  if (!donnees.nombre_personne || !donnees.date_prestation || !donnees.lieu_prestation) {
     alert('Veuillez remplir tous les champs obligatoires.');
     return;
   }
 
   try {
-    await fetchAPI('/commandes/' + commandeId, {
+    await fetchAPI('/user/commandes/' + commandeId, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(donnees)
@@ -466,15 +470,15 @@ async function annulerCommande(commandeId) {
   if (!confirm('Voulez-vous vraiment annuler cette commande ?')) return;
 
   try {
-    await fetchAPI('/commandes/' + commandeId + '/annuler', {
+    await fetchAPI('/user/commandes/' + commandeId + '/annuler', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ statut: 'Annulée' })
+      body: JSON.stringify({})
     });
 
     // mettre à jour localement
     var cmd = toutesLesCommandesClient.find(function(c) { return c.id == commandeId; });
-    if (cmd) cmd.statut = 'Annulée';
+    if (cmd) cmd.statut = 'annulée';
 
     chargerCommandes();
 
@@ -522,11 +526,10 @@ async function soumettreAvis() {
   }
 
   try {
-    await fetchAPI('/avis', {
+    await fetchAPI('/user/commandes/' + commandeId + '/avis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        commande_id: commandeId,
         note: note,
         commentaire: commentaire
       })
@@ -563,18 +566,21 @@ async function sauvegarderProfil(e) {
   succes.classList.add('d-none');
   erreur.classList.add('d-none');
 
+  // adresse_postale = adresse + CP + ville assemblés
+  var adresse   = document.getElementById('profil-adresse') ? document.getElementById('profil-adresse').value.trim() : '';
+  var cp        = document.getElementById('profil-cp') ? document.getElementById('profil-cp').value.trim() : '';
+  var villeProfil = document.getElementById('profil-ville') ? document.getElementById('profil-ville').value.trim() : '';
+
   var donnees = {
-    prenom: document.getElementById('profil-prenom').value.trim(),
-    nom: document.getElementById('profil-nom').value.trim(),
-    email: document.getElementById('profil-email').value.trim(),
-    telephone: document.getElementById('profil-tel').value.trim(),
-    adresse: document.getElementById('profil-adresse').value.trim(),
-    code_postal: document.getElementById('profil-cp').value.trim(),
-    ville: document.getElementById('profil-ville').value.trim()
+    prenom:          document.getElementById('profil-prenom').value.trim(),
+    nom:             document.getElementById('profil-nom').value.trim(),
+    telephone:       document.getElementById('profil-tel').value.trim(),
+    ville:           villeProfil,
+    adresse_postale: [adresse, cp].filter(Boolean).join(', ')
   };
 
   try {
-    var data = await fetchAPI('/utilisateurs/profil', {
+    var data = await fetchAPI('/user/profile', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(donnees)
@@ -673,12 +679,13 @@ async function changerMotDePasse(e) {
   if (!valide) return;
 
   try {
-    await fetchAPI('/utilisateurs/mot-de-passe', {
+    // Route backend : /api/user/password (à créer si nécessaire)
+    await fetchAPI('/user/password', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        motDePasseActuel: actuel.value,
-        nouveauMotDePasse: nouveau.value
+        current_password: actuel.value,
+        new_password: nouveau.value
       })
     });
 
@@ -711,7 +718,8 @@ async function supprimerCompte() {
   if (confirmation !== 'SUPPRIMER') return;
 
   try {
-    await fetchAPI('/utilisateurs/compte', {
+    // Route backend : /api/user/account (à créer si nécessaire)
+    await fetchAPI('/user/account', {
       method: 'DELETE'
     });
 
