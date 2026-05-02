@@ -1,6 +1,5 @@
 // menu-detail.js
 // gestion de la page détail d'un menu
-// fait par moi le 15/04/2026
 
 // ── récupérer l'ID du menu dans l'URL ───────────────────────
 const params = new URLSearchParams(window.location.search);
@@ -24,111 +23,132 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── charger le menu depuis l'API ────────────────────────────
 async function chargerMenu(id) {
   try {
-    // TODO: remplacer par la vraie URL de l'API
-    const response = await fetch('/api/menus/' + id);
-
-    if (!response.ok) {
-      throw new Error('Menu non trouvé');
-    }
-
-    const menu = await response.json();
+    const menu = await fetchAPI('/menus/' + id);
     afficherMenu(menu);
-
-    // charger aussi les menus similaires
     chargerMenusSimilaires(menu.theme, menu.id);
-
   } catch (erreur) {
     console.error('Erreur chargement menu :', erreur);
     afficherErreur();
   }
 }
 
+// ── normaliser les champs de l'API ──────────────────────────
+function normaliserMenu(menu) {
+  return {
+    id:               menu.id,
+    titre:            menu.titre || menu.nom || '',
+    description:      menu.description || menu.description_courte || '',
+    prix:             menu.prix_par_personne || menu.prix || 0,
+    nbConvivesMin:    menu.nombre_personne_minimum || menu.nbConvivesMin || 0,
+    stock:            (menu.quantite_restante !== undefined) ? menu.quantite_restante : menu.stock,
+    theme:            (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || ''),
+    regime:           (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || ''),
+    image:            menu.image || null,
+    photos:           menu.photos || [],
+    allergenes:       menu.allergenes || [],
+    composition:      menu.composition || null,
+    duree:            menu.duree || null
+  };
+}
+
 // ── afficher le menu dans la page ───────────────────────────
-function afficherMenu(menu) {
+function afficherMenu(menuBrut) {
+  const menu = normaliserMenu(menuBrut);
+
   // cacher le chargement, montrer le contenu
   etatChargement.classList.add('d-none');
   contenuMenu.classList.remove('d-none');
 
   // titre de la page
-  document.title = menu.nom + ' — Vite & Gourmand';
-  breadcrumbMenu.textContent = menu.nom;
+  document.title = menu.titre + ' — Vite & Gourmand';
+  if (breadcrumbMenu) breadcrumbMenu.textContent = menu.titre;
 
   // image principale
   const imgMain = document.getElementById('menu-img-main');
-  imgMain.src = menu.image || '../images/menu-placeholder.jpg';
-  imgMain.alt = 'Photo du menu ' + menu.nom;
+  if (imgMain) {
+    imgMain.src = menu.image || '../images/menu-placeholder.jpg';
+    imgMain.alt = 'Photo du menu ' + menu.titre;
+  }
 
   // miniatures (si plusieurs photos)
   if (menu.photos && menu.photos.length > 1) {
     const thumbnailsDiv = document.getElementById('menu-thumbnails');
-    thumbnailsDiv.classList.remove('d-none');
-    thumbnailsDiv.innerHTML = '';
+    if (thumbnailsDiv) {
+      thumbnailsDiv.classList.remove('d-none');
+      thumbnailsDiv.innerHTML = '';
 
-    menu.photos.forEach(function(photo, index) {
-      const thumb = document.createElement('button');
-      thumb.type = 'button';
-      thumb.className = 'menu-thumb' + (index === 0 ? ' active' : '');
-      thumb.setAttribute('aria-label', 'Voir photo ' + (index + 1));
-      thumb.innerHTML = '<img src="' + photo + '" alt="Photo ' + (index + 1) + ' du menu ' + menu.nom + '">';
+      menu.photos.forEach(function(photo, index) {
+        const thumb = document.createElement('button');
+        thumb.type = 'button';
+        thumb.className = 'menu-thumb' + (index === 0 ? ' active' : '');
+        thumb.setAttribute('aria-label', 'Voir photo ' + (index + 1));
+        thumb.innerHTML = '<img src="' + photo + '" alt="Photo ' + (index + 1) + ' du menu ' + menu.titre + '">';
 
-      // au clic on change l'image principale
-      thumb.addEventListener('click', function() {
-        imgMain.src = photo;
-        imgMain.alt = 'Photo ' + (index + 1) + ' du menu ' + menu.nom;
-        // mettre à jour le bouton actif
-        document.querySelectorAll('.menu-thumb').forEach(function(t) {
-          t.classList.remove('active');
+        thumb.addEventListener('click', function() {
+          imgMain.src = photo;
+          imgMain.alt = 'Photo ' + (index + 1) + ' du menu ' + menu.titre;
+          document.querySelectorAll('.menu-thumb').forEach(function(t) {
+            t.classList.remove('active');
+          });
+          thumb.classList.add('active');
         });
-        thumb.classList.add('active');
-      });
 
-      thumbnailsDiv.appendChild(thumb);
-    });
+        thumbnailsDiv.appendChild(thumb);
+      });
+    }
   }
 
   // titre
-  document.getElementById('menu-titre').textContent = menu.nom;
+  var titreEl = document.getElementById('menu-titre');
+  if (titreEl) titreEl.textContent = menu.titre;
 
   // badges
   const badgesDiv = document.getElementById('menu-badges');
-  badgesDiv.innerHTML = '';
-  // badge thème
-  if (menu.theme) {
-    badgesDiv.innerHTML += '<span class="badge bg-primary me-1">' + menu.theme + '</span>';
-  }
-  // badge régime
-  if (menu.regime && menu.regime !== 'Classique') {
-    badgesDiv.innerHTML += '<span class="badge bg-success me-1">' + menu.regime + '</span>';
+  if (badgesDiv) {
+    badgesDiv.innerHTML = '';
+    if (menu.theme) {
+      badgesDiv.innerHTML += '<span class="badge bg-primary me-1">' + menu.theme + '</span>';
+    }
+    if (menu.regime && menu.regime !== 'Classique') {
+      badgesDiv.innerHTML += '<span class="badge bg-success me-1">' + menu.regime + '</span>';
+    }
   }
 
   // description
-  document.getElementById('menu-description').textContent = menu.description || '';
+  var descEl = document.getElementById('menu-description');
+  if (descEl) descEl.textContent = menu.description;
 
   // prix
-  document.getElementById('menu-prix').textContent = menu.prix.toFixed(2) + ' €';
+  var prixEl = document.getElementById('menu-prix');
+  if (prixEl) prixEl.textContent = Number(menu.prix).toFixed(2) + ' €';
 
   // convives
-  document.getElementById('menu-convives').textContent =
-    'Min ' + menu.nbConvivesMin + ' — Max ' + menu.nbConvivesMax + ' personnes';
+  var convivesEl = document.getElementById('menu-convives');
+  if (convivesEl) {
+    convivesEl.textContent = 'Minimum ' + menu.nbConvivesMin + ' personnes';
+  }
 
   // stock
   afficherStock(menu.stock);
 
   // durée (si dispo)
+  var blocDuree = document.getElementById('bloc-duree');
   if (menu.duree) {
-    document.getElementById('menu-duree').textContent = menu.duree;
-  } else {
-    document.getElementById('bloc-duree').classList.add('d-none');
+    var dureeEl = document.getElementById('menu-duree');
+    if (dureeEl) dureeEl.textContent = menu.duree;
+  } else if (blocDuree) {
+    blocDuree.classList.add('d-none');
   }
 
   // allergènes
   if (menu.allergenes && menu.allergenes.length > 0) {
-    document.getElementById('menu-allergenes').textContent = menu.allergenes.join(', ');
+    var allergenesEl = document.getElementById('menu-allergenes');
+    if (allergenesEl) allergenesEl.textContent = menu.allergenes.join(', ');
   }
 
   // bouton commander → lien vers commande.html?menu=ID
   const btnCommander = document.getElementById('btn-commander');
-  btnCommander.href = 'commande.html?menu=' + menu.id;
+  if (btnCommander) btnCommander.href = 'commande.html?menu=' + menu.id;
 
   // composition du menu (onglets)
   if (menu.composition) {
@@ -143,31 +163,30 @@ function afficherStock(stock) {
   const alerteRupture = document.getElementById('alerte-rupture');
 
   if (stock === undefined || stock === null) {
-    stockSpan.innerHTML = '<span class="text-success">Disponible</span>';
+    if (stockSpan) stockSpan.innerHTML = '<span class="text-success">Disponible</span>';
     return;
   }
 
   if (stock <= 0) {
-    // rupture de stock
-    stockSpan.innerHTML = '<span class="text-danger fw-bold">Rupture de stock</span>';
-    btnCommander.classList.add('disabled');
-    btnCommander.setAttribute('aria-disabled', 'true');
-    btnCommander.removeAttribute('href');
-    alerteRupture.classList.remove('d-none');
+    if (stockSpan) stockSpan.innerHTML = '<span class="text-danger fw-bold">Rupture de stock</span>';
+    if (btnCommander) {
+      btnCommander.classList.add('disabled');
+      btnCommander.setAttribute('aria-disabled', 'true');
+      btnCommander.removeAttribute('href');
+    }
+    if (alerteRupture) alerteRupture.classList.remove('d-none');
   } else if (stock <= 3) {
-    // stock faible
-    stockSpan.innerHTML = '<span class="text-warning fw-bold">Plus que ' + stock + ' commande(s) !</span>';
+    if (stockSpan) stockSpan.innerHTML = '<span class="text-warning fw-bold">Plus que ' + stock + ' commande(s) !</span>';
   } else {
-    // stock ok
-    stockSpan.innerHTML = '<span class="text-success">' + stock + ' commande(s) disponible(s)</span>';
+    if (stockSpan) stockSpan.innerHTML = '<span class="text-success">' + stock + ' commande(s) disponible(s)</span>';
   }
 }
 
 // ── afficher la composition en onglets ──────────────────────
 function afficherComposition(composition) {
-  // composition = { "Entrées": [...], "Plats": [...], "Desserts": [...], ... }
   const tabsContainer = document.getElementById('composition-tabs');
   const panelsContainer = document.getElementById('composition-panels');
+  if (!tabsContainer || !panelsContainer) return;
 
   tabsContainer.innerHTML = '';
   panelsContainer.innerHTML = '';
@@ -179,7 +198,6 @@ function afficherComposition(composition) {
     const panelId = 'panel-' + index;
     const isFirst = index === 0;
 
-    // créer le bouton onglet
     const tabBtn = document.createElement('button');
     tabBtn.className = 'btn ' + (isFirst ? 'btn-primary' : 'btn-outline-primary') + ' me-2 mb-2';
     tabBtn.id = tabId;
@@ -189,17 +207,14 @@ function afficherComposition(composition) {
     tabBtn.textContent = categorie;
 
     tabBtn.addEventListener('click', function() {
-      // désactiver tous les onglets
       tabsContainer.querySelectorAll('[role="tab"]').forEach(function(t) {
         t.classList.remove('btn-primary');
         t.classList.add('btn-outline-primary');
         t.setAttribute('aria-selected', 'false');
       });
-      // cacher tous les panneaux
       panelsContainer.querySelectorAll('[role="tabpanel"]').forEach(function(p) {
         p.classList.add('d-none');
       });
-      // activer celui cliqué
       tabBtn.classList.remove('btn-outline-primary');
       tabBtn.classList.add('btn-primary');
       tabBtn.setAttribute('aria-selected', 'true');
@@ -208,32 +223,26 @@ function afficherComposition(composition) {
 
     tabsContainer.appendChild(tabBtn);
 
-    // créer le panneau
     const panel = document.createElement('div');
     panel.id = panelId;
     panel.setAttribute('role', 'tabpanel');
     panel.setAttribute('aria-labelledby', tabId);
     panel.className = isFirst ? '' : 'd-none';
 
-    // liste des plats de cette catégorie
     const liste = document.createElement('ul');
     liste.className = 'list-group';
 
     composition[categorie].forEach(function(plat) {
       const li = document.createElement('li');
       li.className = 'list-group-item';
-
-      // si le plat a un nom et une description
       if (typeof plat === 'object') {
         li.innerHTML = '<strong>' + plat.nom + '</strong>';
         if (plat.description) {
           li.innerHTML += '<br><small class="text-muted">' + plat.description + '</small>';
         }
       } else {
-        // si c'est juste un string
         li.textContent = plat;
       }
-
       liste.appendChild(li);
     });
 
@@ -243,41 +252,41 @@ function afficherComposition(composition) {
 }
 
 // ── charger les menus similaires ────────────────────────────
-async function chargerMenusSimilaires(theme, idActuel) {
+async function chargerMenusSimilaires(themeObj, idActuel) {
   try {
-    // TODO: remplacer par la vraie URL
-    const response = await fetch('/api/menus?theme=' + encodeURIComponent(theme) + '&limit=4');
+    var themeLibelle = (themeObj && themeObj.libelle) ? themeObj.libelle : (themeObj || '');
+    if (!themeLibelle) return;
 
-    if (!response.ok) return;
+    const menus = await fetchAPI('/menus?theme=' + encodeURIComponent(themeLibelle) + '&limit=4');
+    const data = Array.isArray(menus) ? menus : (menus.menus || []);
 
-    const menus = await response.json();
-
-    // filtrer pour enlever le menu actuel et garder max 3
-    const similaires = menus
+    const similaires = data
       .filter(function(m) { return m.id !== idActuel; })
       .slice(0, 3);
 
     afficherMenusSimilaires(similaires);
-
   } catch (erreur) {
     console.error('Erreur menus similaires :', erreur);
-    // c'est pas grave si ça marche pas, on cache la section
-    document.querySelector('.menus-similaires').classList.add('d-none');
+    var section = document.querySelector('.menus-similaires');
+    if (section) section.classList.add('d-none');
   }
 }
 
 // ── afficher les cards des menus similaires ──────────────────
 function afficherMenusSimilaires(menus) {
   const grille = document.getElementById('grille-similaires');
+  const section = document.querySelector('.menus-similaires');
 
   if (!menus || menus.length === 0) {
-    document.querySelector('.menus-similaires').classList.add('d-none');
+    if (section) section.classList.add('d-none');
     return;
   }
 
+  if (!grille) return;
   grille.innerHTML = '';
 
-  menus.forEach(function(menu) {
+  menus.forEach(function(menuBrut) {
+    var menu = normaliserMenu(menuBrut);
     const col = document.createElement('div');
     col.className = 'col-md-4';
 
@@ -285,14 +294,14 @@ function afficherMenusSimilaires(menus) {
       '<div class="card h-100 menu-card">' +
         '<img src="' + (menu.image || '../images/menu-placeholder.jpg') + '" ' +
              'class="card-img-top" ' +
-             'alt="Photo du menu ' + menu.nom + '">' +
+             'alt="Photo du menu ' + menu.titre + '">' +
         '<div class="card-body d-flex flex-column">' +
-          '<h3 class="card-title h6">' + menu.nom + '</h3>' +
+          '<h3 class="card-title h6">' + menu.titre + '</h3>' +
           '<p class="card-text small text-muted flex-grow-1">' +
             (menu.description ? menu.description.substring(0, 80) + '...' : '') +
           '</p>' +
           '<div class="d-flex justify-content-between align-items-center">' +
-            '<span class="fw-bold prix">' + menu.prix.toFixed(2) + ' €/pers</span>' +
+            '<span class="fw-bold prix">' + Number(menu.prix).toFixed(2) + ' €/pers</span>' +
             '<a href="menu-detail.html?id=' + menu.id + '" class="btn btn-sm btn-outline-primary">' +
               'Voir' +
             '</a>' +
@@ -306,7 +315,7 @@ function afficherMenusSimilaires(menus) {
 
 // ── afficher l'erreur ───────────────────────────────────────
 function afficherErreur() {
-  etatChargement.classList.add('d-none');
-  etatErreur.classList.remove('d-none');
+  if (etatChargement) etatChargement.classList.add('d-none');
+  if (etatErreur) etatErreur.classList.remove('d-none');
   document.title = 'Menu introuvable — Vite & Gourmand';
 }

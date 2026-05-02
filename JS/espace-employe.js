@@ -128,7 +128,7 @@ async function chargerCommandes(date) {
   body.innerHTML = '';
 
   try {
-    var data = await fetchAPI('/commandes?date=' + date);
+    var data = await fetchAPI('/employe/commandes');
     toutesLesCommandes = data.commandes || data || [];
     chargement.classList.add('d-none');
 
@@ -184,13 +184,13 @@ function filtrerCommandes() {
     var actions = genererBoutonsAction(cmd);
 
     tr.innerHTML =
-      '<td><strong>' + echapper(cmd.numero || cmd.id) + '</strong></td>' +
-      '<td>' + echapper(cmd.clientNom || '—') + '</td>' +
-      '<td>' + echapper(cmd.menuNom || '—') + '</td>' +
-      '<td>' + (cmd.nbPersonnes || '—') + '</td>' +
-      '<td>' + echapper(cmd.heure || '—') + '</td>' +
-      '<td class="small">' + echapper(cmd.adresse || '—') + '</td>' +
-      '<td class="fw-bold">' + (cmd.total ? cmd.total.toFixed(2) + ' €' : '—') + '</td>' +
+      '<td><strong>' + echapper(cmd.numero_commande || cmd.id) + '</strong></td>' +
+      '<td>' + echapper(cmd.client_email || '—') + '</td>' +
+      '<td>' + echapper(cmd.menu_titre || '—') + '</td>' +
+      '<td>' + (cmd.nombre_personne || '—') + '</td>' +
+      '<td>' + echapper(cmd.date_prestation || '—') + '</td>' +
+      '<td class="small">' + echapper(cmd.lieu_prestation || '—') + '</td>' +
+      '<td class="fw-bold">' + (cmd.prix_total ? Number(cmd.prix_total).toFixed(2) + ' €' : '—') + '</td>' +
       '<td><span class="badge ' + badgeClass + '">' + echapper(cmd.statut) + '</span></td>' +
       '<td>' + actions + '</td>';
 
@@ -200,14 +200,14 @@ function filtrerCommandes() {
 
 function getBadgeClass(statut) {
   var classes = {
-    'En attente': 'bg-warning text-dark',
-    'Confirmée': 'bg-success',
-    'En préparation': 'bg-info',
-    'En cours de livraison': 'bg-primary',
-    'Livrée': 'bg-info text-dark',
-    'En attente du retour de matériel': 'bg-warning',
-    'Terminée': 'bg-secondary',
-    'Annulée': 'bg-danger'
+    'en cours': 'bg-warning text-dark',
+    'accepté': 'bg-success',
+    'en préparation': 'bg-info',
+    'en cours de livraison': 'bg-primary',
+    'livré': 'bg-info text-dark',
+    'en attente du retour de matériel': 'bg-warning',
+    'terminée': 'bg-secondary',
+    'annulée': 'bg-danger'
   };
   return classes[statut] || 'bg-secondary';
 }
@@ -218,48 +218,43 @@ function genererBoutonsAction(cmd) {
 
   switch (cmd.statut) {
 
-    case 'En attente':
-      // Accepter ou ouvrir la modal d'annulation (avec motif obligatoire)
-      return '<button class="btn btn-sm btn-success me-1" onclick="changerStatut(\'' + id + '\', \'Confirmée\')" ' +
+    case 'en cours':
+      return '<button class="btn btn-sm btn-success me-1" onclick="changerStatut(\'' + id + '\', \'accepté\')" ' +
         'aria-label="Accepter la commande ' + num + '">' +
         '<i class="bi bi-check-lg" aria-hidden="true"></i></button>' +
         '<button class="btn btn-sm btn-danger" onclick="ouvrirModalAnnulation(\'' + id + '\')" ' +
         'aria-label="Annuler la commande ' + num + '">' +
         '<i class="bi bi-x-lg" aria-hidden="true"></i></button>';
 
-    case 'Confirmée':
-      return '<button class="btn btn-sm btn-info" onclick="changerStatut(\'' + id + '\', \'En préparation\')" ' +
+    case 'accepté':
+      return '<button class="btn btn-sm btn-info" onclick="changerStatut(\'' + id + '\', \'en préparation\')" ' +
         'aria-label="Mettre en préparation">' +
         '<i class="bi bi-gear" aria-hidden="true"></i></button>';
 
-    case 'En préparation':
-      return '<button class="btn btn-sm btn-primary" onclick="changerStatut(\'' + id + '\', \'En cours de livraison\')" ' +
+    case 'en préparation':
+      return '<button class="btn btn-sm btn-primary" onclick="changerStatut(\'' + id + '\', \'en cours de livraison\')" ' +
         'aria-label="Passer en livraison">' +
         '<i class="bi bi-truck" aria-hidden="true"></i></button>';
 
-    case 'En cours de livraison':
-      // Deux choix : livré simple ou livré avec prêt de matériel
-      return '<button class="btn btn-sm btn-success me-1" onclick="changerStatut(\'' + id + '\', \'Livrée\')" ' +
-        'aria-label="Marquer comme livrée">' +
+    case 'en cours de livraison':
+      return '<button class="btn btn-sm btn-success me-1" onclick="changerStatut(\'' + id + '\', \'livré\')" ' +
+        'aria-label="Marquer comme livré">' +
         '<i class="bi bi-check-circle" aria-hidden="true"></i></button>';
 
-    case 'Livrée':
-      // Deux choix : terminée (pas de matériel) ou en attente retour matériel
-      return '<button class="btn btn-sm btn-secondary me-1" onclick="changerStatut(\'' + id + '\', \'Terminée\')" ' +
+    case 'livré':
+      return '<button class="btn btn-sm btn-secondary me-1" onclick="changerStatut(\'' + id + '\', \'terminée\')" ' +
         'aria-label="Terminer (sans matériel)">' +
         '<i class="bi bi-check-all" aria-hidden="true"></i></button>' +
-        '<button class="btn btn-sm btn-warning" onclick="changerStatut(\'' + id + '\', \'En attente du retour de matériel\')" ' +
+        '<button class="btn btn-sm btn-warning" onclick="changerStatut(\'' + id + '\', \'en attente du retour de matériel\')" ' +
         'aria-label="En attente retour matériel">' +
         '<i class="bi bi-box-seam" aria-hidden="true"></i></button>';
 
-    case 'En attente du retour de matériel':
-      // Matériel restitué → terminée
-      return '<button class="btn btn-sm btn-success" onclick="changerStatut(\'' + id + '\', \'Terminée\')" ' +
+    case 'en attente du retour de matériel':
+      return '<button class="btn btn-sm btn-success" onclick="changerStatut(\'' + id + '\', \'terminée\')" ' +
         'aria-label="Matériel restitué, terminer">' +
         '<i class="bi bi-check-all" aria-hidden="true"></i> Restitué</button>';
 
     default:
-      // Terminée, Annulée : aucune action
       return '<span class="text-muted small">—</span>';
   }
 }
@@ -269,7 +264,7 @@ async function changerStatut(commandeId, nouveauStatut) {
   if (!confirm('Changer le statut en "' + nouveauStatut + '" ?')) return;
 
   try {
-    await fetchAPI('/commandes/' + commandeId + '/statut', {
+    await fetchAPI('/employe/commandes/' + commandeId + '/statut', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ statut: nouveauStatut })
@@ -313,20 +308,20 @@ async function confirmerAnnulation() {
   }
 
   try {
-    await fetchAPI('/commandes/' + commandeId + '/annuler', {
+    await fetchAPI('/employe/commandes/' + commandeId + '/statut', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        statut: 'Annulée',
-        mode_contact: modeContact,
-        motif: motif
+        statut: 'annulée',
+        mode_contact_client: modeContact,
+        motif_annulation: motif
       })
     });
 
     // mettre à jour localement
     var commande = toutesLesCommandes.find(function(c) { return c.id == commandeId; });
     if (commande) {
-      commande.statut = 'Annulée';
+      commande.statut = 'annulée';
     }
 
     bootstrap.Modal.getInstance(document.getElementById('modal-annulation')).hide();
@@ -346,14 +341,14 @@ async function confirmerAnnulation() {
 function mettreAJourStats(commandes) {
   document.getElementById('stat-total').textContent = commandes.length;
   document.getElementById('stat-attente').textContent =
-    commandes.filter(function(c) { return c.statut === 'En attente'; }).length;
+    commandes.filter(function(c) { return c.statut === 'en cours'; }).length;
   document.getElementById('stat-confirmee').textContent =
     commandes.filter(function(c) {
-      return c.statut === 'Confirmée' || c.statut === 'En préparation';
+      return c.statut === 'accepté' || c.statut === 'en préparation';
     }).length;
   document.getElementById('stat-livree').textContent =
     commandes.filter(function(c) {
-      return c.statut === 'Livrée' || c.statut === 'Terminée';
+      return c.statut === 'livré' || c.statut === 'terminée';
     }).length;
 }
 
@@ -562,7 +557,7 @@ async function chargerAvis() {
   var table = document.getElementById('table-avis');
 
   try {
-    var data = await fetchAPI('/avis?tous=true');
+    var data = await fetchAPI('/employe/avis');
     tousLesAvis = data.avis || data || [];
     if (chargement) chargement.classList.add('d-none');
 
@@ -602,11 +597,11 @@ function afficherAvis(avis) {
 
     // badge statut
     var statutBadge = '';
-    if (avisItem.statut === 'en_attente' || avisItem.statut === 'pending') {
+    if (avisItem.statut === 'en_attente' || avisItem.statut === 'en attente' || avisItem.statut === 'pending') {
       statutBadge = '<span class="badge bg-warning text-dark">En attente</span>';
-    } else if (avisItem.statut === 'valide' || avisItem.statut === 'approved') {
+    } else if (avisItem.statut === 'validé' || avisItem.statut === 'valide' || avisItem.statut === 'approved') {
       statutBadge = '<span class="badge bg-success">Validé</span>';
-    } else if (avisItem.statut === 'refuse' || avisItem.statut === 'rejected') {
+    } else if (avisItem.statut === 'refusé' || avisItem.statut === 'refuse' || avisItem.statut === 'rejected') {
       statutBadge = '<span class="badge bg-danger">Refusé</span>';
     } else {
       statutBadge = '<span class="badge bg-secondary">' + echapper(avisItem.statut || '—') + '</span>';
@@ -619,7 +614,7 @@ function afficherAvis(avis) {
 
     // boutons d'action (seulement si en attente)
     var actions = '';
-    if (avisItem.statut === 'en_attente' || avisItem.statut === 'pending') {
+    if (avisItem.statut === 'en_attente' || avisItem.statut === 'en attente' || avisItem.statut === 'pending') {
       actions =
         '<button class="btn btn-sm btn-success me-1" onclick="validerAvis(\'' + avisItem.id + '\')" ' +
           'aria-label="Valider l\'avis">' +
@@ -640,8 +635,8 @@ function afficherAvis(avis) {
       : commentaire;
 
     tr.innerHTML =
-      '<td>' + echapper(avisItem.auteur || avisItem.prenom || '—') + '</td>' +
-      '<td class="small">' + echapper(avisItem.menuNom || '—') + '</td>' +
+      '<td>' + echapper(avisItem.client || avisItem.auteur || avisItem.prenom || '—') + '</td>' +
+      '<td class="small">' + echapper(avisItem.menu_titre || avisItem.menuNom || '—') + '</td>' +
       '<td style="color:#b8860b;">' + etoiles + '</td>' +
       '<td class="small">' + echapper(commentaireCourt) + '</td>' +
       '<td class="small">' + dateAvis + '</td>' +
@@ -656,15 +651,15 @@ async function validerAvis(avisId) {
   if (!confirm('Valider cet avis ? Il sera visible sur la page d\'accueil.')) return;
 
   try {
-    await fetchAPI('/avis/' + avisId + '/statut', {
+    await fetchAPI('/employe/avis/' + avisId + '/statut', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ statut: 'valide' })
+      body: JSON.stringify({ statut: 'validé' })
     });
 
     // mettre à jour localement
     var avis = tousLesAvis.find(function(a) { return a.id == avisId; });
-    if (avis) avis.statut = 'valide';
+    if (avis) avis.statut = 'validé';
 
     afficherAvis(tousLesAvis);
 
@@ -681,15 +676,15 @@ async function refuserAvis(avisId) {
   if (!confirm('Refuser cet avis ? Il ne sera pas affiché.')) return;
 
   try {
-    await fetchAPI('/avis/' + avisId + '/statut', {
+    await fetchAPI('/employe/avis/' + avisId + '/statut', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ statut: 'refuse' })
+      body: JSON.stringify({ statut: 'refusé' })
     });
 
     // mettre à jour localement
     var avis = tousLesAvis.find(function(a) { return a.id == avisId; });
-    if (avis) avis.statut = 'refuse';
+    if (avis) avis.statut = 'refusé';
 
     afficherAvis(tousLesAvis);
 
