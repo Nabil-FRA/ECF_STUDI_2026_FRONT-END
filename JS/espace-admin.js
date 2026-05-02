@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', function() {
     token = localStorage.getItem('token');
   }
 
-  if (!user || !token || user.role !== 'admin') {
+  // L'API retourne role = 'administrateur'
+  if (!user || !token || (user.role !== 'administrateur' && user.role !== 'admin')) {
     alert('Accès réservé aux administrateurs.');
     window.location.href = 'connexion.html';
     return;

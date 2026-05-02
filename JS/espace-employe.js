@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
-  if (user.role !== 'employe' && user.role !== 'admin') {
+  // L'API retourne role = 'employe' ou 'administrateur'
+  if (user.role !== 'employe' && user.role !== 'administrateur' && user.role !== 'admin') {
     alert('Accès non autorisé.');
     window.location.href = '../index.html';
     return;

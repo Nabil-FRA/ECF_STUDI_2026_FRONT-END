@@ -41,7 +41,8 @@ async function chargerMenus() {
 
   try {
     var data = await fetchAPI('/menus');
-    tousLesMenus = data.menus || [];
+    // L'API retourne un tableau directement (pas { menus: [] })
+    tousLesMenus = Array.isArray(data) ? data : (data.menus || data || []);
 
     console.log('menus chargés:', tousLesMenus.length);
 
@@ -99,23 +100,27 @@ function appliquerFiltres() {
       }
     }
 
-    // filtre fourchette de prix
-    if (menu.prix_base < prixMin || menu.prix_base > prixMax) {
+    // filtre fourchette de prix (API : prix_par_personne)
+    var prixMenu = menu.prix_par_personne || menu.prix_base || 0;
+    if (prixMenu < prixMin || prixMenu > prixMax) {
       return false;
     }
 
-    // filtre thème
-    if (themeChoisi && menu.theme !== themeChoisi) {
+    // filtre thème (API : theme.libelle)
+    var themeLibelle = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
+    if (themeChoisi && themeLibelle !== themeChoisi) {
       return false;
     }
 
-    // filtre régime
-    if (regimeChoisi && menu.regime !== regimeChoisi) {
+    // filtre régime (API : regime.libelle)
+    var regimeLibelle = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || '');
+    if (regimeChoisi && regimeLibelle !== regimeChoisi) {
       return false;
     }
 
-    // filtre nb personnes (le menu doit accepter ce nombre)
-    if (nbPersonnes && menu.nb_personnes_min > parseInt(nbPersonnes)) {
+    // filtre nb personnes (API : nombre_personne_minimum)
+    var nbMin = menu.nombre_personne_minimum || menu.nb_personnes_min || 0;
+    if (nbPersonnes && nbMin > parseInt(nbPersonnes)) {
       return false;
     }
 
@@ -170,25 +175,34 @@ function afficherMenus() {
 
 // ---- générer une card menu ----
 function genererCardMenu(menu) {
+  // Normalisation des champs API (prix_par_personne, nombre_personne_minimum, quantite_restante)
+  var prixBase      = menu.prix_par_personne || menu.prix_base || 0;
+  var nbMin         = menu.nombre_personne_minimum || menu.nb_personnes_min || 0;
+  var stock         = (menu.quantite_restante !== undefined) ? menu.quantite_restante : menu.stock;
+  var themeLibelle  = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
+  var regimeLibelle = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || '');
+  var description   = menu.description || menu.description_courte || '';
+
   // badge régime
   var badgeRegime = '';
-  if (menu.regime === 'vegetarien') {
+  var regimeLower = regimeLibelle.toLowerCase();
+  if (regimeLower.includes('v') && regimeLower.includes('tarien')) {
     badgeRegime = '<span class="badge bg-success">Végétarien</span>';
-  } else if (menu.regime === 'vegan') {
+  } else if (regimeLower.includes('gan')) {
     badgeRegime = '<span class="badge bg-success">Végan</span>';
-  } else if (menu.regime === 'sans-gluten') {
+  } else if (regimeLower.includes('gluten')) {
     badgeRegime = '<span class="badge bg-info">Sans gluten</span>';
   }
 
-  // badge stock
+  // badge stock (API : quantite_restante)
   var badgeStock = '';
-  if (menu.stock !== undefined && menu.stock <= 0) {
+  if (stock !== undefined && stock !== null && stock <= 0) {
     badgeStock = '<span class="badge bg-danger position-absolute top-0 end-0 m-2">Épuisé</span>';
-  } else if (menu.stock !== undefined && menu.stock <= 3) {
+  } else if (stock !== undefined && stock !== null && stock <= 3) {
     badgeStock = '<span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Stock limité</span>';
   }
 
-  var image = menu.image || '../images/placeholder-menu.jpg';
+  var image = menu.image || (menu.images && menu.images[0] && menu.images[0].url) || '../images/placeholder-menu.jpg';
 
   return '<article class="col-md-6 col-lg-4">' +
     '<div class="card menu-card h-100">' +
@@ -198,17 +212,17 @@ function genererCardMenu(menu) {
       '</div>' +
       '<div class="card-body d-flex flex-column">' +
         '<div class="menu-card-badges mb-2">' +
-          '<span class="badge bg-secondary">' + echapper(menu.theme) + '</span> ' +
+          '<span class="badge bg-secondary">' + echapper(themeLibelle) + '</span> ' +
           badgeRegime +
         '</div>' +
         '<h3 class="card-title h5">' + echapper(menu.titre) + '</h3>' +
-        '<p class="card-text text-muted small flex-grow-1">' + echapper(menu.description_courte || '') + '</p>' +
+        '<p class="card-text text-muted small flex-grow-1">' + echapper(description) + '</p>' +
         '<div class="menu-card-meta">' +
           '<span class="menu-card-personnes">' +
             '<i class="bi bi-people" aria-hidden="true"></i> ' +
-            menu.nb_personnes_min + ' pers. min' +
+            nbMin + ' pers. min' +
           '</span>' +
-          '<span class="menu-card-prix">' + formatPrix(menu.prix_base) + '</span>' +
+          '<span class="menu-card-prix">' + formatPrix(prixBase) + '</span>' +
         '</div>' +
       '</div>' +
       '<div class="card-footer bg-transparent border-0 pt-0">' +

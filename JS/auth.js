@@ -103,7 +103,8 @@
       var espaceUrl = prefix;
 
       // rediriger vers le bon espace selon le rôle
-      if (user.role === 'admin') {
+      // L'API retourne : 'administrateur', 'employe', 'utilisateur'
+      if (user.role === 'administrateur' || user.role === 'admin') {
         espaceUrl += 'espace-admin.html';
       } else if (user.role === 'employe') {
         espaceUrl += 'espace-employe.html';

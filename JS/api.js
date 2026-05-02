@@ -12,8 +12,8 @@
 
   // URL de base de l'API — à modifier selon l'environnement
   // En production : 'https://api.viteetgourmand.fr'
-  // En dev local  : 'http://localhost:3000/api' ou '/api'
-  var API_BASE_URL = '/api';
+  // En dev local  : le back-end Symfony tourne sur le port 8080 via Docker
+  var API_BASE_URL = 'https://vite-et-gourmand-ecf-nar-7b5ab7722b1a.herokuapp.com/api';
 
   // Timeout par défaut (en ms)
   var TIMEOUT_MS = 15000;
