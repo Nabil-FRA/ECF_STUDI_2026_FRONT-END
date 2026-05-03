@@ -370,17 +370,20 @@ async function chargerMenusEmploye() {
 
     tousLesMenusEmp.forEach(function(menu) {
       var tr = document.createElement('tr');
-      var prix = menu.prix_base || menu.prix || 0;
+      var prix = menu.prix_par_personne || menu.prix_base || menu.prix || 0;
+      var themeLib = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '—');
+      var minP = menu.nombre_personne_minimum || menu.nb_personnes_min || '—';
+      var stock = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '—');
       var statutBadge = menu.actif !== false
         ? '<span class="badge bg-success">Actif</span>'
         : '<span class="badge bg-secondary">Inactif</span>';
 
       tr.innerHTML =
         '<td><strong>' + echapper(menu.titre || menu.nom) + '</strong></td>' +
-        '<td>' + echapper(menu.theme || '—') + '</td>' +
-        '<td>' + prix.toFixed(2) + ' €</td>' +
-        '<td>' + (menu.nb_personnes_min || '—') + ' — ' + (menu.nb_personnes_max || '—') + '</td>' +
-        '<td>' + (menu.stock !== undefined ? menu.stock : '—') + '</td>' +
+        '<td>' + echapper(themeLib) + '</td>' +
+        '<td>' + Number(prix).toFixed(2) + ' €</td>' +
+        '<td>' + minP + '</td>' +
+        '<td>' + stock + '</td>' +
         '<td>' + statutBadge + '</td>' +
         '<td>' +
           '<button class="btn btn-sm btn-outline-primary me-1" ' +
@@ -411,12 +414,12 @@ function ouvrirModifierMenuEmp(menuId) {
   document.getElementById('modal-menu-emp-titre').textContent = 'Modifier le menu';
   document.getElementById('emp-menu-id').value = menu.id;
   document.getElementById('emp-menu-nom').value = menu.titre || menu.nom || '';
-  document.getElementById('emp-menu-prix').value = menu.prix_base || menu.prix || '';
-  document.getElementById('emp-menu-theme').value = menu.theme || '';
-  document.getElementById('emp-menu-regime').value = menu.regime || 'classique';
-  document.getElementById('emp-menu-convives-min').value = menu.nb_personnes_min || '';
-  document.getElementById('emp-menu-convives-max').value = menu.nb_personnes_max || '';
-  document.getElementById('emp-menu-stock').value = menu.stock !== undefined ? menu.stock : '';
+  document.getElementById('emp-menu-prix').value = menu.prix_par_personne || menu.prix_base || menu.prix || '';
+  document.getElementById('emp-menu-theme').value = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
+  document.getElementById('emp-menu-regime').value = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || 'classique');
+  document.getElementById('emp-menu-convives-min').value = menu.nombre_personne_minimum || menu.nb_personnes_min || '';
+  document.getElementById('emp-menu-convives-max').value = menu.nombre_personne_maximum || menu.nb_personnes_max || '';
+  document.getElementById('emp-menu-stock').value = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '');
   document.getElementById('emp-menu-description').value = menu.description || '';
 
   var modal = new bootstrap.Modal(document.getElementById('modal-menu-emp'));
