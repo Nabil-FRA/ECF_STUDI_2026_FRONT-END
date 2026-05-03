@@ -491,50 +491,80 @@ async function supprimerMenuEmp(menuId) {
 // L'énoncé dit : "Il peut modifier / supprimer [...] les horaires"
 // ══════════════════════════════════════════════════════════════
 
+var JOURS_HORAIRES = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+// ── gérer la case "Fermé" pour chaque jour ────────────────────
+function initCasesFerme() {
+  JOURS_HORAIRES.forEach(function(jour) {
+    var caseCheck = document.getElementById('h-' + jour + '-ferme');
+    var inputOuv  = document.getElementById('h-' + jour + '-ouverture');
+    var inputFerm = document.getElementById('h-' + jour + '-fermeture');
+    if (!caseCheck || !inputOuv || !inputFerm) return;
+
+    caseCheck.addEventListener('change', function() {
+      inputOuv.disabled  = caseCheck.checked;
+      inputFerm.disabled = caseCheck.checked;
+    });
+    // appliquer l'état initial
+    inputOuv.disabled  = caseCheck.checked;
+    inputFerm.disabled = caseCheck.checked;
+  });
+}
+
 async function chargerHoraires() {
+  initCasesFerme();
+
   try {
     var data = await fetchAPI('/horaires');
-    var horaires = data.horaires || data || {};
+    var liste = Array.isArray(data) ? data : (data.horaires || []);
 
-    var jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-    jours.forEach(function(jour) {
-      var input = document.getElementById('h-' + jour);
-      if (input && horaires[jour]) {
-        input.value = horaires[jour];
+    liste.forEach(function(h) {
+      var jour = (h.jour || '').toLowerCase();
+      var inputOuv  = document.getElementById('h-' + jour + '-ouverture');
+      var inputFerm = document.getElementById('h-' + jour + '-fermeture');
+      var caseCheck = document.getElementById('h-' + jour + '-ferme');
+
+      if (!inputOuv) return;
+
+      if (!h.heure_ouverture && !h.heure_fermeture) {
+        // Fermé
+        if (caseCheck) { caseCheck.checked = true; inputOuv.disabled = true; inputFerm.disabled = true; }
+      } else {
+        if (caseCheck) { caseCheck.checked = false; inputOuv.disabled = false; inputFerm.disabled = false; }
+        if (h.heure_ouverture) inputOuv.value  = h.heure_ouverture.substring(0, 5);
+        if (h.heure_fermeture) inputFerm.value = h.heure_fermeture.substring(0, 5);
       }
     });
 
   } catch (err) {
-    console.log('Horaires : utilisation des valeurs par défaut (API indisponible)');
-    // les valeurs par défaut sont déjà dans les inputs HTML
+    console.log('Horaires : valeurs par défaut (API indisponible)');
   }
 }
 
 async function sauvegarderHoraires(e) {
   e.preventDefault();
 
-  var jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-  var horaires = {};
-
-  jours.forEach(function(jour) {
-    var input = document.getElementById('h-' + jour);
-    horaires[jour] = input ? input.value.trim() : '';
-  });
-
   var succes = document.getElementById('horaires-succes');
   var erreur = document.getElementById('horaires-erreur');
   succes.classList.add('d-none');
   erreur.classList.add('d-none');
 
+  var horaires = JOURS_HORAIRES.map(function(jour) {
+    var caseCheck = document.getElementById('h-' + jour + '-ferme');
+    var ferme = caseCheck && caseCheck.checked;
+    var ouverture = ferme ? null : (document.getElementById('h-' + jour + '-ouverture') || {}).value || null;
+    var fermeture = ferme ? null : (document.getElementById('h-' + jour + '-fermeture') || {}).value || null;
+    return { jour: jour, heure_ouverture: ouverture, heure_fermeture: fermeture };
+  });
+
   try {
-    await fetchAPI('/horaires', {
+    await fetchAPI('/employe/horaires', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(horaires)
     });
 
     succes.classList.remove('d-none');
-
     if (typeof afficherToast === 'function') {
       afficherToast('Horaires mis à jour.', 'success');
     }

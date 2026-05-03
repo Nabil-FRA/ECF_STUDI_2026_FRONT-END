@@ -126,16 +126,93 @@
       <!-- ══════ ONGLET HORAIRES ══════ -->
       <div class="tab-pane fade" id="panel-horaires" role="tabpanel" aria-labelledby="tab-horaires">
         <h2 class="h5 mb-3">Gestion des horaires</h2>
-        <p class="text-muted small">Modifiez les horaires d'ouverture affichés sur le site.</p>
+        <p class="text-muted small">Sélectionnez les heures d'ouverture et de fermeture pour chaque jour. Laissez vide pour indiquer "Fermé".</p>
         <form id="form-horaires" novalidate aria-label="Formulaire de modification des horaires">
           <div class="row g-3">
-            <div class="col-md-6"><label for="h-lundi" class="form-label fw-bold">Lundi</label><input type="text" id="h-lundi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
-            <div class="col-md-6"><label for="h-mardi" class="form-label fw-bold">Mardi</label><input type="text" id="h-mardi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
-            <div class="col-md-6"><label for="h-mercredi" class="form-label fw-bold">Mercredi</label><input type="text" id="h-mercredi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
-            <div class="col-md-6"><label for="h-jeudi" class="form-label fw-bold">Jeudi</label><input type="text" id="h-jeudi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
-            <div class="col-md-6"><label for="h-vendredi" class="form-label fw-bold">Vendredi</label><input type="text" id="h-vendredi" class="form-control" value="8h00 - 19h00" maxlength="50"></div>
-            <div class="col-md-6"><label for="h-samedi" class="form-label fw-bold">Samedi</label><input type="text" id="h-samedi" class="form-control" value="9h00 - 17h00" maxlength="50"></div>
-            <div class="col-md-6"><label for="h-dimanche" class="form-label fw-bold">Dimanche</label><input type="text" id="h-dimanche" class="form-control" value="Fermé" maxlength="50"></div>
+            <!-- Lundi -->
+            <div class="col-md-6">
+              <fieldset>
+                <legend class="form-label fw-bold mb-1">Lundi</legend>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="time" id="h-lundi-ouverture" class="form-control" aria-label="Heure ouverture lundi" value="08:00">
+                  <span class="text-muted">→</span>
+                  <input type="time" id="h-lundi-fermeture" class="form-control" aria-label="Heure fermeture lundi" value="19:00">
+                  <div class="form-check ms-2 text-nowrap"><input class="form-check-input" type="checkbox" id="h-lundi-ferme" aria-label="Fermé lundi"><label class="form-check-label small" for="h-lundi-ferme">Fermé</label></div>
+                </div>
+              </fieldset>
+            </div>
+            <!-- Mardi -->
+            <div class="col-md-6">
+              <fieldset>
+                <legend class="form-label fw-bold mb-1">Mardi</legend>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="time" id="h-mardi-ouverture" class="form-control" aria-label="Heure ouverture mardi" value="08:00">
+                  <span class="text-muted">→</span>
+                  <input type="time" id="h-mardi-fermeture" class="form-control" aria-label="Heure fermeture mardi" value="19:00">
+                  <div class="form-check ms-2 text-nowrap"><input class="form-check-input" type="checkbox" id="h-mardi-ferme" aria-label="Fermé mardi"><label class="form-check-label small" for="h-mardi-ferme">Fermé</label></div>
+                </div>
+              </fieldset>
+            </div>
+            <!-- Mercredi -->
+            <div class="col-md-6">
+              <fieldset>
+                <legend class="form-label fw-bold mb-1">Mercredi</legend>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="time" id="h-mercredi-ouverture" class="form-control" aria-label="Heure ouverture mercredi" value="08:00">
+                  <span class="text-muted">→</span>
+                  <input type="time" id="h-mercredi-fermeture" class="form-control" aria-label="Heure fermeture mercredi" value="19:00">
+                  <div class="form-check ms-2 text-nowrap"><input class="form-check-input" type="checkbox" id="h-mercredi-ferme" aria-label="Fermé mercredi"><label class="form-check-label small" for="h-mercredi-ferme">Fermé</label></div>
+                </div>
+              </fieldset>
+            </div>
+            <!-- Jeudi -->
+            <div class="col-md-6">
+              <fieldset>
+                <legend class="form-label fw-bold mb-1">Jeudi</legend>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="time" id="h-jeudi-ouverture" class="form-control" aria-label="Heure ouverture jeudi" value="08:00">
+                  <span class="text-muted">→</span>
+                  <input type="time" id="h-jeudi-fermeture" class="form-control" aria-label="Heure fermeture jeudi" value="19:00">
+                  <div class="form-check ms-2 text-nowrap"><input class="form-check-input" type="checkbox" id="h-jeudi-ferme" aria-label="Fermé jeudi"><label class="form-check-label small" for="h-jeudi-ferme">Fermé</label></div>
+                </div>
+              </fieldset>
+            </div>
+            <!-- Vendredi -->
+            <div class="col-md-6">
+              <fieldset>
+                <legend class="form-label fw-bold mb-1">Vendredi</legend>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="time" id="h-vendredi-ouverture" class="form-control" aria-label="Heure ouverture vendredi" value="08:00">
+                  <span class="text-muted">→</span>
+                  <input type="time" id="h-vendredi-fermeture" class="form-control" aria-label="Heure fermeture vendredi" value="19:00">
+                  <div class="form-check ms-2 text-nowrap"><input class="form-check-input" type="checkbox" id="h-vendredi-ferme" aria-label="Fermé vendredi"><label class="form-check-label small" for="h-vendredi-ferme">Fermé</label></div>
+                </div>
+              </fieldset>
+            </div>
+            <!-- Samedi -->
+            <div class="col-md-6">
+              <fieldset>
+                <legend class="form-label fw-bold mb-1">Samedi</legend>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="time" id="h-samedi-ouverture" class="form-control" aria-label="Heure ouverture samedi" value="09:00">
+                  <span class="text-muted">→</span>
+                  <input type="time" id="h-samedi-fermeture" class="form-control" aria-label="Heure fermeture samedi" value="17:00">
+                  <div class="form-check ms-2 text-nowrap"><input class="form-check-input" type="checkbox" id="h-samedi-ferme" aria-label="Fermé samedi"><label class="form-check-label small" for="h-samedi-ferme">Fermé</label></div>
+                </div>
+              </fieldset>
+            </div>
+            <!-- Dimanche -->
+            <div class="col-md-6">
+              <fieldset>
+                <legend class="form-label fw-bold mb-1">Dimanche</legend>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="time" id="h-dimanche-ouverture" class="form-control" aria-label="Heure ouverture dimanche" value="08:00" disabled>
+                  <span class="text-muted">→</span>
+                  <input type="time" id="h-dimanche-fermeture" class="form-control" aria-label="Heure fermeture dimanche" value="19:00" disabled>
+                  <div class="form-check ms-2 text-nowrap"><input class="form-check-input" type="checkbox" id="h-dimanche-ferme" aria-label="Fermé dimanche" checked><label class="form-check-label small" for="h-dimanche-ferme">Fermé</label></div>
+                </div>
+              </fieldset>
+            </div>
           </div>
           <div id="horaires-succes" class="alert alert-success d-none mt-3" role="status">Horaires mis à jour avec succès.</div>
           <div id="horaires-erreur" class="alert alert-danger d-none mt-3" role="alert"></div>
