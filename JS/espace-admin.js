@@ -93,14 +93,24 @@ document.addEventListener('DOMContentLoaded', function() {
 async function chargerStats() {
   try {
     var data = await fetchAPI('/admin/stats');
-    // Le backend retourne : chiffre_affaires, commandes_par_menu, menus_list
+    // Le backend retourne : utilisateurs, nb_menus, chiffre_affaires, commandes_par_menu, menus_list
     var ca    = data.chiffre_affaires || {};
     var total = ca.chiffre_affaires || ca.total || 0;
     var nbCmd = ca.nombre_commandes || ca.nb_commandes || 0;
-    document.getElementById('stat-utilisateurs').textContent = data.utilisateurs || '—';
-    document.getElementById('stat-menus').textContent = (data.menus_list || []).length || '—';
-    document.getElementById('stat-commandes-mois').textContent = nbCmd;
-    document.getElementById('stat-ca-mois').textContent = Number(total).toFixed(2) + ' €';
+
+    // Compteurs MySQL (fiables)
+    var nbUtil  = data.utilisateurs !== undefined ? data.utilisateurs : '—';
+    var nbMenus = data.nb_menus !== undefined ? data.nb_menus : ((data.menus_list || []).length || '—');
+
+    var elUtil = document.getElementById('stat-utilisateurs');
+    var elMenus = document.getElementById('stat-menus');
+    var elCmd = document.getElementById('stat-commandes-mois');
+    var elCA = document.getElementById('stat-ca-mois');
+
+    if (elUtil) elUtil.textContent = nbUtil;
+    if (elMenus) elMenus.textContent = nbMenus;
+    if (elCmd) elCmd.textContent = nbCmd;
+    if (elCA) elCA.textContent = Number(total).toFixed(2) + ' €';
 
     // Stocker les données MongoDB pour le graphique
     if (data.commandes_par_menu && data.commandes_par_menu.length > 0) {
@@ -199,7 +209,7 @@ async function sauvegarderMenu() {
     description:              document.getElementById('menu-description').value.trim()
   };
 
-  if (!donnees.titre || !donnees.prix_base || !donnees.theme) {
+  if (!donnees.titre || !donnees.prix_par_personne || !donnees.theme) {
     alert('Veuillez remplir les champs obligatoires.');
     return;
   }
