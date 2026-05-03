@@ -366,6 +366,7 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
 .site-footer {
   background: var(--vg-bg-dark);
   color: #d4cfc9;
+  padding: 2.5rem 0 0;
 }
 
 /* Footer custom avec grid (index, menus…) */
@@ -374,7 +375,12 @@ h3, .h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
-  padding-top: 2rem;
+}
+
+/* Garantit le centrage horizontal sur tous les écrans */
+.site-footer > .container {
+  padding-left: max(1.5rem, var(--bs-gutter-x, 0.75rem));
+  padding-right: max(1.5rem, var(--bs-gutter-x, 0.75rem));
 }
 
 .footer-title {
