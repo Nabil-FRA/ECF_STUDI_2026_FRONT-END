@@ -34,20 +34,63 @@ async function chargerMenu(id) {
 
 // ── normaliser les champs de l'API ──────────────────────────
 function normaliserMenu(menu) {
+  // Photo principale : menu.image (legacy) ou images[0].url (API actuelle)
+  var imagesPrincipale = menu.image || null;
+  if (!imagesPrincipale && menu.images && menu.images.length > 0) {
+    imagesPrincipale = menu.images[0].url || null;
+  }
+
+  // Miniatures : menu.photos (legacy) ou images[].url (API actuelle)
+  var photosList = [];
+  if (menu.photos && menu.photos.length > 0) {
+    photosList = menu.photos;
+  } else if (menu.images && menu.images.length > 0) {
+    photosList = menu.images.map(function(img) { return img.url; });
+  }
+
+  // Composition : menu.composition (legacy) ou plats[] groupés (API actuelle)
+  var compositionData = menu.composition || null;
+  if (!compositionData && menu.plats && menu.plats.length > 0) {
+    // Regrouper tous les plats sous une seule catégorie "Plats du menu"
+    compositionData = {
+      'Plats du menu': menu.plats.map(function(p) {
+        return { nom: p.titre || p.titre_plat || '', description: '' };
+      })
+    };
+  }
+
+  // Allergènes : depuis menu.allergenes (legacy) ou extraits de chaque plat
+  var allergenesList = [];
+  if (menu.allergenes && menu.allergenes.length > 0) {
+    allergenesList = menu.allergenes;
+  } else if (menu.plats && menu.plats.length > 0) {
+    var vus = {};
+    menu.plats.forEach(function(plat) {
+      (plat.allergenes || []).forEach(function(a) {
+        var lib = a.libelle || a;
+        if (lib && !vus[lib]) {
+          vus[lib] = true;
+          allergenesList.push(lib);
+        }
+      });
+    });
+  }
+
   return {
-    id:               menu.id,
-    titre:            menu.titre || menu.nom || '',
-    description:      menu.description || menu.description_courte || '',
-    prix:             menu.prix_par_personne || menu.prix || 0,
-    nbConvivesMin:    menu.nombre_personne_minimum || menu.nbConvivesMin || 0,
-    stock:            (menu.quantite_restante !== undefined) ? menu.quantite_restante : menu.stock,
-    theme:            (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || ''),
-    regime:           (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || ''),
-    image:            menu.image || null,
-    photos:           menu.photos || [],
-    allergenes:       menu.allergenes || [],
-    composition:      menu.composition || null,
-    duree:            menu.duree || null
+    id:            menu.id,
+    titre:         menu.titre || menu.nom || '',
+    description:   menu.description || menu.description_courte || '',
+    prix:          menu.prix_par_personne || menu.prix || 0,
+    nbConvivesMin: menu.nombre_personne_minimum || menu.nbConvivesMin || 0,
+    stock:         (menu.quantite_restante !== undefined) ? menu.quantite_restante : menu.stock,
+    theme:         (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || ''),
+    regime:        (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || ''),
+    image:         imagesPrincipale,
+    photos:        photosList,
+    allergenes:    allergenesList,
+    composition:   compositionData,
+    conditions:    menu.conditions || null,
+    duree:         menu.duree || null
   };
 }
 
