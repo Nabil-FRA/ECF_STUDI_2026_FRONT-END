@@ -521,7 +521,9 @@ async function chargerGraphiqueEtCA() {
         '<div class="card">' +
           '<div class="card-body">' +
             '<h3 class="h6 mb-3"><i class="bi bi-bar-chart" aria-hidden="true"></i> Commandes par menu</h3>' +
-            '<canvas id="chart-commandes-menu" height="300" aria-label="Graphique comparaison des commandes par menu" role="img"></canvas>' +
+            '<div style="position:relative;height:280px;width:100%;">' +
+              '<canvas id="chart-commandes-menu" aria-label="Graphique comparaison des commandes par menu" role="img"></canvas>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -637,52 +639,59 @@ function creerChart(canvas, labels, values, couleurs) {
 
   var ctx = canvas.getContext('2d');
 
+  // Tronquer les labels longs pour éviter le débordement
+  var labelsAffichage = labels.map(function(l) {
+    return l.length > 20 ? l.substring(0, 18) + '…' : l;
+  });
+
   graphiqueInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: labelsAffichage,
       datasets: [{
         label: 'Nombre de commandes',
         data: values,
         backgroundColor: couleurs.slice(0, labels.length),
-        borderColor: couleurs.slice(0, labels.length).map(function(c) {
-          return c;
-        }),
+        borderColor: couleurs.slice(0, labels.length),
         borderWidth: 1,
-        borderRadius: 6
+        borderRadius: 4
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: { duration: 400 },
       plugins: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: 'Comparaison des commandes par menu',
-          font: { size: 14, family: "'Source Sans 3', sans-serif" },
-          color: '#2c2c2c'
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: function(items) {
+              // Afficher le nom complet dans le tooltip
+              return labels[items[0].dataIndex] || labelsAffichage[items[0].dataIndex];
+            }
+          }
         }
       },
       scales: {
         y: {
           beginAtZero: true,
+          suggestedMax: Math.max.apply(null, values) + 1,
           ticks: {
             stepSize: 1,
-            font: { size: 12 }
+            precision: 0,
+            font: { size: 11 }
           },
           title: {
             display: true,
             text: 'Commandes',
-            font: { size: 12 }
+            font: { size: 11 }
           }
         },
         x: {
           ticks: {
-            font: { size: 11 },
-            maxRotation: 45
+            font: { size: 10 },
+            maxRotation: 40,
+            minRotation: 0
           }
         }
       }
