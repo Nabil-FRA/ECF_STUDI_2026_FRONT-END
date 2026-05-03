@@ -93,15 +93,65 @@
   // ══════════════════════════════════════════════════════════
 
   function chargerHorairesFooter() {
-    // Les horaires sont en dur dans le HTML pour l'instant
-    // En production, on pourrait les charger depuis l'API
-    // pour que les employés puissent les modifier
     var horairesDiv = document.getElementById('horaires-footer');
     if (!horairesDiv) return;
 
-    // On vérifie si le contenu est déjà présent (ce qui est le cas dans le HTML)
-    // Si un jour on veut charger depuis l'API :
-    // fetchAPI('/horaires').then(function(data) { ... });
+    // Charger les horaires depuis l'API (GET /api/horaires — public)
+    fetchAPI('/horaires').then(function(data) {
+      var liste = Array.isArray(data) ? data : (data.horaires || []);
+      if (!liste || liste.length === 0) return; // garder le contenu HTML par défaut
+
+      var ORDRE = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+      // Indexer par jour
+      var map = {};
+      liste.forEach(function(h) { map[(h.jour || '').toLowerCase()] = h; });
+
+      // Regrouper les jours consécutifs ayant les mêmes horaires
+      var lignes = [];
+      var groupe = [];
+      var horaireCourant = null;
+
+      ORDRE.forEach(function(jour, i) {
+        var h = map[jour];
+        var ouv  = h ? (h.heure_ouverture || null) : null;
+        var ferm = h ? (h.heure_fermeture || null) : null;
+        var cle  = ouv ? (ouv + '-' + ferm) : 'ferme';
+
+        if (cle === horaireCourant) {
+          groupe.push(jour);
+        } else {
+          if (groupe.length > 0) lignes.push({ jours: groupe, ouv: horaireCourant });
+          groupe = [jour];
+          horaireCourant = cle;
+        }
+      });
+      if (groupe.length > 0) lignes.push({ jours: groupe, ouv: horaireCourant });
+
+      // Noms courts des jours
+      var NOMS = { lundi:'Lun', mardi:'Mar', mercredi:'Mer', jeudi:'Jeu', vendredi:'Ven', samedi:'Sam', dimanche:'Dim' };
+
+      var html = '';
+      lignes.forEach(function(l) {
+        var jours = l.jours;
+        var label = jours.length === 1
+          ? NOMS[jours[0]]
+          : NOMS[jours[0]] + ' – ' + NOMS[jours[jours.length - 1]];
+
+        if (l.ouv === 'ferme') {
+          html += '<p>' + label + ' : Fermé</p>';
+        } else {
+          var parts = l.ouv.split('-');
+          var heureOuv  = parts[0] ? parts[0].substring(0, 5) : '';
+          var heureFerm = parts[1] ? parts[1].substring(0, 5) : '';
+          html += '<p>' + label + ' : ' + heureOuv + ' – ' + heureFerm + '</p>';
+        }
+      });
+
+      if (html) horairesDiv.innerHTML = html;
+
+    }).catch(function() {
+      // En cas d'erreur API, on garde le contenu HTML par défaut
+    });
   }
 
   // ══════════════════════════════════════════════════════════
