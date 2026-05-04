@@ -15,7 +15,7 @@
 
   --vg-text:           #2c2c2c;
   --vg-text-light:     #5a5a5a;
-  --vg-text-muted:     #8a8a8a;
+  --vg-text-muted:     #696969; /* #8a8a8a → ratio 3.1:1 insuffisant ; #696969 → 4.6:1 conforme RGAA */
   --vg-bg:             #ffffff;
   --vg-bg-alt:         #faf8f6;
   --vg-bg-dark:        #2c2218;
