@@ -171,22 +171,21 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background-color: var(--vg-primary, #b5451b);
-  color: #fff;
+  /* Fond blanc, bordure et icône couleur primaire — icône clairement visible */
+  background-color: #fff;
+  border: 2px solid var(--vg-primary, #b5451b);
+  color: var(--vg-primary, #b5451b) !important;
+  font-size: 1.35rem;
   line-height: 1;
-  transition: transform 0.2s ease, background-color 0.2s ease;
   text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-.reseau-lien svg {
-  display: block;
-  flex-shrink: 0;
-}
-
-.reseau-lien:hover {
+.reseau-lien:hover,
+.reseau-lien:focus {
   transform: scale(1.1);
-  background-color: var(--vg-primary-dark, #8c3514);
-  color: #fff;
+  background-color: var(--vg-primary, #b5451b);
+  color: #fff !important;
 }
 
 .reseau-lien:focus-visible {
