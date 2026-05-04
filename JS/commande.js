@@ -7,7 +7,7 @@ const cpBordeaux = ['33000', '33100', '33200', '33300', '33800'];
 
 // prix livraison hors bordeaux
 const FRAIS_LIVRAISON = 5.00;
-const FRAIS_KM = 0.59;
+const FRAIS_KM = 1.50; // €/km — tarif traiteur (vrai taux, pas le taux fiscal)
 
 // pour la remise
 const REMISE_PERSONNES = 5; // faut 5 personnes de plus que le min
@@ -215,28 +215,30 @@ function calculerPrix() {
   const min = menuCourant._minPersonnes;
   const prixBase = menuCourant._prix;
 
-  // prix proportionnel
-  // TODO : vérifier avec le client si c'est bien comme ça qu'on calcule
-  const prixMenu = (prixBase / min) * nbP;
+  // Prix = prix par personne × nombre de personnes
+  const prixMenu = prixBase * nbP;
 
-  // remise si 5 personnes de plus que le min
+  // Remise de 10% si nombre de personnes >= minimum + 5
   let remise = 0;
   let aRemise = false;
   if (nbP >= min + REMISE_PERSONNES) {
     remise = prixMenu * REMISE;
     aRemise = true;
-    console.log('remise appliquée car', nbP, '>=', min + REMISE_PERSONNES);
   }
 
-  // frais de livraison
+  // Frais de livraison : forfait 5€ + 1,50€/km estimé hors Bordeaux
   const cp = document.getElementById('code-postal').value.trim();
-  const horsBoirdeaux = !cpBordeaux.includes(cp); // j'ai fait une typo mais ça marche
-  // NOTE : le calcul des km c'est côté serveur, ici je mets juste le forfait de base
-  const fraisLiv = horsBoirdeaux ? FRAIS_LIVRAISON : 0;
+  const horsBoirdeaux = !cpBordeaux.includes(cp);
+
+  // Estimation distance : ~20km pour hors Bordeaux (ajustable selon adresse réelle)
+  let fraisLiv = 0;
+  let distanceEstimee = 0;
+  if (horsBoirdeaux) {
+    distanceEstimee = 20; // estimation par défaut — sera recalculée côté serveur
+    fraisLiv = FRAIS_LIVRAISON + (FRAIS_KM * distanceEstimee);
+  }
 
   const total = prixMenu - remise + fraisLiv;
-
-  console.log('calcul prix ->', prixMenu, 'remise ->', remise, 'livraison ->', fraisLiv, 'total ->', total);
 
   return {
     prixMenu: prixMenu,
@@ -244,6 +246,7 @@ function calculerPrix() {
     remise: remise,
     horsBoirdeaux: horsBoirdeaux,
     fraisLiv: fraisLiv,
+    distanceEstimee: distanceEstimee,
     total: total
   };
 }
@@ -299,8 +302,8 @@ function afficherRecap() {
 
     lignes += `
       <tr>
-        <td>Livraison ${prix.horsBoirdeaux ? '(hors Bordeaux)' : '(Bordeaux)'}</td>
-        <td class="text-end">${prix.horsBoirdeaux ? formatPrix(prix.fraisLiv) + ' + 0,59€/km*' : 'Incluse'}</td>
+        <td>Livraison ${prix.horsBoirdeaux ? '(hors Bordeaux, ~' + prix.distanceEstimee + ' km)' : '(Bordeaux)'}</td>
+        <td class="text-end">${prix.horsBoirdeaux ? formatPrix(prix.fraisLiv) + '*' : 'Incluse'}</td>
       </tr>
     `;
 
