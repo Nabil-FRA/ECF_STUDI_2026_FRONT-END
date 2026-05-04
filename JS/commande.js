@@ -7,7 +7,10 @@ const cpBordeaux = ['33000', '33100', '33200', '33300', '33800'];
 
 // prix livraison hors bordeaux
 const FRAIS_LIVRAISON = 5.00;
-const FRAIS_KM = 1.50; // €/km — tarif traiteur (vrai taux, pas le taux fiscal)
+const FRAIS_KM = 1.50; // €/km — tarif traiteur affiché (estimation côté client)
+
+// distance estimée par défaut pour livraison hors Bordeaux (km)
+const DISTANCE_ESTIMEE_KM = 20;
 
 // pour la remise
 const REMISE_PERSONNES = 5; // faut 5 personnes de plus que le min
@@ -230,11 +233,11 @@ function calculerPrix() {
   const cp = document.getElementById('code-postal').value.trim();
   const horsBoirdeaux = !cpBordeaux.includes(cp);
 
-  // Estimation distance : ~20km pour hors Bordeaux (ajustable selon adresse réelle)
+  // Estimation distance : DISTANCE_ESTIMEE_KM pour hors Bordeaux (sera recalculée côté serveur)
   let fraisLiv = 0;
   let distanceEstimee = 0;
   if (horsBoirdeaux) {
-    distanceEstimee = 20; // estimation par défaut — sera recalculée côté serveur
+    distanceEstimee = DISTANCE_ESTIMEE_KM;
     fraisLiv = FRAIS_LIVRAISON + (FRAIS_KM * distanceEstimee);
   }
 
@@ -438,6 +441,9 @@ function revenirEtape(num) {
 async function envoyerCommande(e) {
   e.preventDefault();
 
+  // sécurité : n'accepter la soumission que depuis l'étape 3
+  if (etapeActuelle !== 3) return;
+
   // je valide l'étape 3 avant d'envoyer
   if (!validerEtape(3)) {
     return;
@@ -466,24 +472,42 @@ async function envoyerCommande(e) {
     heure_livraison: document.getElementById('heure-livraison').value,
     lieu_prestation: lieuPrestation,
     pret_materiel:   false,
-    distance_km:     cp && !['33000','33100','33200','33300','33800'].includes(cp) ? 10 : 0
+    distance_km:     cp && !cpBordeaux.includes(cp) ? DISTANCE_ESTIMEE_KM : 0
   };
 
-  // je récupère le token csrf dans la meta
-  const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
   try {
-    await fetchAPI('/user/commandes', {
+    // je capture la réponse de l'API (elle contient le numéro de commande et les prix réels)
+    const reponse = await fetchAPI('/user/commandes', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrf
-      },
       body: JSON.stringify(data)
     });
 
+    // je récupère les données de la commande créée
+    const commandeData = (reponse && reponse.commande) ? reponse.commande : {};
+
+    // je construis l'objet à stocker pour la page de confirmation
+    // - sousTotal et reduction : valeurs frontend (avant envoi), lisibles par l'utilisateur
+    // - fraisLivraison et total : valeurs réelles renvoyées par le serveur
+    const derniereCommande = {
+      numero:         commandeData.numero_commande || commandeData.id || '',
+      menuNom:        menuCourant ? menuCourant.titre : (commandeData.menu ? commandeData.menu.titre : ''),
+      date:           data.date_prestation,
+      heure:          data.heure_livraison,
+      nbPersonnes:    data.nombre_personne,
+      adresse:        adresse,
+      codePostal:     cp,
+      ville:          ville,
+      sousTotal:      prix ? prix.prixMenu : (commandeData.prix_menu || 0),
+      reduction:      prix && prix.aRemise ? prix.remise : 0,
+      fraisLivraison: commandeData.prix_livraison !== undefined ? commandeData.prix_livraison : (prix ? prix.fraisLiv : 0),
+      total:          commandeData.prix_total     !== undefined ? commandeData.prix_total     : (prix ? prix.total   : 0),
+    };
+
+    // je sauvegarde pour la page de confirmation (lue par confirmation.js via sessionStorage)
+    sessionStorage.setItem('derniere_commande', JSON.stringify(derniereCommande));
+
     // ça a marché, je redirige vers la page de confirmation
-    console.log('commande envoyée avec succès !');
+    console.log('commande envoyée avec succès !', derniereCommande.numero);
     window.location.href = 'confirmation-commande.html';
 
   } catch(err) {

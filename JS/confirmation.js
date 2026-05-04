@@ -11,45 +11,54 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
-  // récupérer l'id de la commande depuis l'URL
+  // priorité 1 : données de la dernière commande passée (sessionStorage)
+  const donneesCommande = JSON.parse(sessionStorage.getItem('derniere_commande') || 'null');
+  if (donneesCommande) {
+    afficherRecap(donneesCommande);
+    // nettoyer après affichage
+    sessionStorage.removeItem('derniere_commande');
+    return;
+  }
+
+  // priorité 2 : id de commande passé en paramètre URL (?id=...)
   const params = new URLSearchParams(window.location.search);
   const commandeId = params.get('id');
-
   if (commandeId) {
-    // charger depuis l'API
     chargerCommande(commandeId);
-  } else {
-    // essayer de récupérer depuis sessionStorage (si on vient de valider)
-    const donneesCommande = JSON.parse(sessionStorage.getItem('derniere_commande') || 'null');
-    if (donneesCommande) {
-      afficherRecap(donneesCommande);
-      // nettoyer après affichage
-      sessionStorage.removeItem('derniere_commande');
-    } else {
-      // pas de données, rediriger vers l'accueil
-      window.location.href = '../index.html';
-    }
+    return;
   }
+
+  // aucune donnée disponible → page d'accueil
+  window.location.href = '../index.html';
 });
 
 // ── charger la commande depuis l'API ────────────────────────
 async function chargerCommande(id) {
   try {
-    const token = localStorage.getItem('token');
-    // TODO: remplacer par la vraie URL de l'API
-    const response = await fetch('/api/commandes/' + id, {
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    });
+    // fetchAPI est fourni par api.js (gère le token Bearer automatiquement)
+    const reponse = await fetchAPI('/user/commandes/' + id);
+    const commandeData = reponse.commande || reponse;
 
-    if (!response.ok) throw new Error('Commande non trouvée');
+    // normaliser les champs API → format attendu par afficherRecap
+    const donnees = {
+      numero:         commandeData.numero_commande || commandeData.id || id,
+      menuNom:        commandeData.menu ? commandeData.menu.titre : '',
+      date:           commandeData.date_prestation || '',
+      heure:          commandeData.heure_livraison || '',
+      nbPersonnes:    commandeData.nombre_personne || 0,
+      adresse:        commandeData.lieu_prestation || '',
+      codePostal:     '',
+      ville:          '',
+      sousTotal:      commandeData.prix_menu || 0,
+      reduction:      0,
+      fraisLivraison: commandeData.prix_livraison || 0,
+      total:          commandeData.prix_total || 0,
+    };
 
-    const commande = await response.json();
-    afficherRecap(commande);
+    afficherRecap(donnees);
 
   } catch (erreur) {
-    console.error('Erreur :', erreur);
+    console.error('Erreur chargement commande :', erreur);
     window.location.href = '../index.html';
   }
 }
