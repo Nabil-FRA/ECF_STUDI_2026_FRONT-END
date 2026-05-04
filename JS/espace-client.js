@@ -261,7 +261,22 @@ async function ouvrirSuivi(commandeId) {
   try {
     var data = await fetchAPI('/user/commandes/' + commandeId);
     var cmdDetail = data.commande || data;
-    var historique = (cmdDetail.suivi && cmdDetail.suivi.historique) ? cmdDetail.suivi.historique : [];
+
+    // getSuivi() retourne un tableau plat [{ statut, date }, ...]
+    // — pas { historique: [...] } — on normalise ici.
+    var rawSuivi = cmdDetail.suivi || [];
+    var historique;
+    if (Array.isArray(rawSuivi) && rawSuivi.length > 0) {
+      // Données réelles MongoDB : ajouter actif:true pour colorier en orange
+      historique = rawSuivi.map(function(e) {
+        return { statut: e.statut, date: e.date, actif: true };
+      });
+    } else if (rawSuivi.historique && Array.isArray(rawSuivi.historique)) {
+      // Format alternatif au cas où
+      historique = rawSuivi.historique;
+    } else {
+      historique = [];
+    }
 
     afficherTimeline(historique, cmd, contenu);
 
