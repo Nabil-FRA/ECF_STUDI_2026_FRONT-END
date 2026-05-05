@@ -508,9 +508,9 @@ function afficherUtilisateurs(utilisateurs) {
         '<select class="form-select form-select-sm d-inline-block" style="width:auto;" ' +
           'onchange="changerRole(\'' + u.id + '\', this.value)" ' +
           'aria-label="Changer le rôle de ' + echapper(u.prenom || u.email) + '">' +
-          '<option value="client"' + (u.role === 'client' ? ' selected' : '') + '>Client</option>' +
+          '<option value="utilisateur"' + (u.role === 'utilisateur' ? ' selected' : '') + '>Client</option>' +
           '<option value="employe"' + (u.role === 'employe' ? ' selected' : '') + '>Employé</option>' +
-          '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>Admin</option>' +
+          '<option value="administrateur"' + (u.role === 'administrateur' ? ' selected' : '') + '>Admin</option>' +
         '</select>' +
         btnDesactiver +
       '</td>';
