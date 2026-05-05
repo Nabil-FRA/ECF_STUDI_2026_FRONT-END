@@ -61,6 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // ── sauvegarder un menu (créer ou modifier) ───────────────
   document.getElementById('btn-sauvegarder-menu').addEventListener('click', sauvegarderMenu);
 
+  // ── ajouter une image au menu ─────────────────────────────
+  document.getElementById('btn-ajouter-image').addEventListener('click', ajouterImageMenu);
+
   // ── créer un employé ──────────────────────────────────────
   var btnCreerEmploye = document.getElementById('btn-creer-employe');
   if (btnCreerEmploye) {
@@ -184,14 +187,81 @@ function ouvrirModifierMenu(menuId) {
   document.getElementById('menu-nom').value = menu.titre || menu.nom || '';
   document.getElementById('menu-prix').value = menu.prix_par_personne || menu.prix_base || menu.prix || '';
   document.getElementById('menu-theme').value = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
-  document.getElementById('menu-regime').value = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || 'classique');
+  document.getElementById('menu-regime').value = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || 'Classique');
   document.getElementById('menu-convives-min').value = menu.nombre_personne_minimum || menu.nb_personnes_min || '';
   document.getElementById('menu-convives-max').value = menu.nombre_personne_maximum || menu.nb_personnes_max || '';
   document.getElementById('menu-stock').value = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '');
   document.getElementById('menu-description').value = menu.description || '';
 
+  // Afficher la galerie et charger les images existantes
+  document.getElementById('section-galerie').style.display = '';
+  afficherGalerieImages(menu.images || menu.menuImages || []);
+
   var modal = new bootstrap.Modal(document.getElementById('modal-menu'));
   modal.show();
+}
+
+function afficherGalerieImages(images) {
+  var liste = document.getElementById('galerie-liste');
+  liste.innerHTML = '';
+  if (!images || images.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-0">Aucune image.</p>';
+    return;
+  }
+  images.forEach(function(img) {
+    var url = img.url_image || img.urlImage || img;
+    var id  = img.id || null;
+    var div = document.createElement('div');
+    div.className = 'position-relative';
+    div.style.cssText = 'width:80px;height:60px;';
+    div.innerHTML =
+      '<img src="' + echapper(url) + '" alt="Image menu" ' +
+        'style="width:100%;height:100%;object-fit:cover;border-radius:4px;" ' +
+        'onerror="this.src=\'../img/placeholder.jpg\'">' +
+      (id ? '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" ' +
+        'style="width:18px;height:18px;font-size:10px;line-height:1;" ' +
+        'onclick="supprimerImageMenu(' + id + ')" aria-label="Supprimer image">&times;</button>' : '');
+    liste.appendChild(div);
+  });
+}
+
+async function ajouterImageMenu() {
+  var menuId = document.getElementById('menu-id').value;
+  var url = document.getElementById('menu-image-url').value.trim();
+  if (!menuId || !url) return;
+
+  try {
+    var data = await fetchAPI('/admin/menus/' + menuId + '/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url_image: url })
+    });
+    document.getElementById('menu-image-url').value = '';
+    var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
+    if (menu) {
+      if (!menu.images) menu.images = [];
+      menu.images.push(data.image || { id: data.id, url_image: url });
+      afficherGalerieImages(menu.images);
+    }
+  } catch (err) {
+    alert('Erreur lors de l\'ajout de l\'image.');
+  }
+}
+
+async function supprimerImageMenu(imageId) {
+  var menuId = document.getElementById('menu-id').value;
+  if (!menuId) return;
+
+  try {
+    await fetchAPI('/admin/menus/' + menuId + '/images/' + imageId, { method: 'DELETE' });
+    var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
+    if (menu && menu.images) {
+      menu.images = menu.images.filter(function(img) { return img.id != imageId; });
+      afficherGalerieImages(menu.images);
+    }
+  } catch (err) {
+    alert('Erreur lors de la suppression de l\'image.');
+  }
 }
 
 async function sauvegarderMenu() {
@@ -255,6 +325,7 @@ if (modalMenu) {
       document.getElementById('modal-menu-titre').textContent = 'Nouveau menu';
       document.getElementById('form-menu').reset();
       document.getElementById('menu-id').value = '';
+      document.getElementById('section-galerie').style.display = 'none';
     }
   });
 }

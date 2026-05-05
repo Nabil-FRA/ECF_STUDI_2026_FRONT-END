@@ -204,19 +204,19 @@
               <label for="menu-theme" class="form-label">Thème *</label>
               <select id="menu-theme" class="form-select" required>
                 <option value="">— Choisir —</option>
-                <option value="noel">Noël</option>
-                <option value="paques">Pâques</option>
-                <option value="classique">Classique</option>
-                <option value="evenement">Événement</option>
+                <option value="Noël">Noël</option>
+                <option value="Pâques">Pâques</option>
+                <option value="Classique">Classique</option>
+                <option value="Évènement">Évènement</option>
               </select>
             </div>
             <div class="col-md-6">
               <label for="menu-regime" class="form-label">Régime</label>
               <select id="menu-regime" class="form-select">
-                <option value="classique">Classique</option>
-                <option value="vegetarien">Végétarien</option>
-                <option value="vegan">Végan</option>
-                <option value="sans-gluten">Sans gluten</option>
+                <option value="Classique">Classique</option>
+                <option value="Végétarien">Végétarien</option>
+                <option value="Végan">Végan</option>
+                <option value="Sans Gluten">Sans Gluten</option>
               </select>
             </div>
             <div class="col-md-4">
@@ -234,6 +234,17 @@
             <div class="col-12">
               <label for="menu-description" class="form-label">Description</label>
               <textarea id="menu-description" class="form-control" rows="3" maxlength="500"></textarea>
+            </div>
+            <div class="col-12" id="section-galerie" style="display:none;">
+              <hr>
+              <label class="form-label fw-bold">Galerie d'images</label>
+              <div id="galerie-liste" class="d-flex flex-wrap gap-2 mb-2"></div>
+              <div class="input-group input-group-sm">
+                <input type="url" id="menu-image-url" class="form-control" placeholder="https://exemple.com/image.jpg">
+                <button type="button" class="btn btn-outline-primary" id="btn-ajouter-image">
+                  <i class="bi bi-plus-lg" aria-hidden="true"></i> Ajouter
+                </button>
+              </div>
             </div>
           </div>
         </form>
