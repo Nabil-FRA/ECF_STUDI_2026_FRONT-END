@@ -209,7 +209,7 @@ function afficherGalerieImages(images) {
     return;
   }
   images.forEach(function(img) {
-    var url = img.url_image || img.urlImage || img;
+    var url = img.url_image || img.urlImage || img.url || img;
     var id  = img.id || null;
     var div = document.createElement('div');
     div.className = 'position-relative';
