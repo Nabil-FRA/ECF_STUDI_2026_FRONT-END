@@ -235,6 +235,26 @@
               <label for="menu-description" class="form-label">Description</label>
               <textarea id="menu-description" class="form-control" rows="3" maxlength="500"></textarea>
             </div>
+            <div class="col-12" id="section-plats" style="display:none;">
+              <hr>
+              <label class="form-label fw-bold">Composition du menu (plats)</label>
+              <div id="plats-liste" class="mb-2"></div>
+              <div class="row g-2 align-items-end">
+                <div class="col-md-5">
+                  <label for="plat-titre" class="form-label small">Nom du plat</label>
+                  <input type="text" id="plat-titre" class="form-control form-control-sm" placeholder="ex: Magret de canard">
+                </div>
+                <div class="col-md-5">
+                  <label for="plat-allergenes" class="form-label small">Allergènes</label>
+                  <select id="plat-allergenes" class="form-select form-select-sm" multiple style="height:70px;"></select>
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-outline-primary btn-sm w-100" id="btn-ajouter-plat">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Ajouter
+                  </button>
+                </div>
+              </div>
+            </div>
             <div class="col-12" id="section-galerie" style="display:none;">
               <hr>
               <label class="form-label fw-bold">Galerie d'images</label>

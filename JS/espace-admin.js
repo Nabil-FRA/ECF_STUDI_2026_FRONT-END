@@ -64,6 +64,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // ── ajouter une image au menu ─────────────────────────────
   document.getElementById('btn-ajouter-image').addEventListener('click', ajouterImageMenu);
 
+  // ── ajouter un plat au menu ───────────────────────────────
+  document.getElementById('btn-ajouter-plat').addEventListener('click', ajouterPlatMenu);
+
+  // charger les allergènes disponibles
+  chargerAllergenes();
+
   // ── créer un employé ──────────────────────────────────────
   var btnCreerEmploye = document.getElementById('btn-creer-employe');
   if (btnCreerEmploye) {
@@ -193,8 +199,10 @@ function ouvrirModifierMenu(menuId) {
   document.getElementById('menu-stock').value = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '');
   document.getElementById('menu-description').value = menu.description || '';
 
-  // Afficher la galerie et charger les images existantes
+  // Afficher la section plats et galerie
+  document.getElementById('section-plats').style.display = '';
   document.getElementById('section-galerie').style.display = '';
+  afficherPlats(menu.plats || []);
   afficherGalerieImages(menu.images || menu.menuImages || []);
 
   var modal = new bootstrap.Modal(document.getElementById('modal-menu'));
@@ -326,8 +334,95 @@ if (modalMenu) {
       document.getElementById('form-menu').reset();
       document.getElementById('menu-id').value = '';
       document.getElementById('section-galerie').style.display = 'none';
+      document.getElementById('section-plats').style.display = 'none';
     }
   });
+}
+
+// ── allergènes ───────────────────────────────────────────────
+var tousLesAllergenes = [];
+
+async function chargerAllergenes() {
+  try {
+    var data = await fetchAPI('/allergenes');
+    tousLesAllergenes = data.allergenes || data || [];
+    var select = document.getElementById('plat-allergenes');
+    if (!select) return;
+    select.innerHTML = '';
+    tousLesAllergenes.forEach(function(a) {
+      var opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = a.libelle;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error('Erreur allergènes :', err);
+  }
+}
+
+function afficherPlats(plats) {
+  var liste = document.getElementById('plats-liste');
+  liste.innerHTML = '';
+  if (!plats || plats.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-2">Aucun plat.</p>';
+    return;
+  }
+  plats.forEach(function(plat) {
+    var allergenes = (plat.allergenes || []).map(function(a) { return echapper(a.libelle); }).join(', ');
+    var div = document.createElement('div');
+    div.className = 'd-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1';
+    div.innerHTML =
+      '<span><strong>' + echapper(plat.titre_plat || plat.titrePlat) + '</strong>' +
+        (allergenes ? ' <small class="text-muted">— ' + allergenes + '</small>' : '') +
+      '</span>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger ms-2 py-0" ' +
+        'onclick="supprimerPlatMenu(' + plat.id + ')" aria-label="Supprimer le plat">&times;</button>';
+    liste.appendChild(div);
+  });
+}
+
+async function ajouterPlatMenu() {
+  var menuId = document.getElementById('menu-id').value;
+  var titre = document.getElementById('plat-titre').value.trim();
+  if (!menuId || !titre) return;
+
+  var selectAllergenes = document.getElementById('plat-allergenes');
+  var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+
+  try {
+    var data = await fetchAPI('/admin/menus/' + menuId + '/plats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
+    });
+    document.getElementById('plat-titre').value = '';
+    Array.from(selectAllergenes.options).forEach(function(o) { o.selected = false; });
+
+    var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
+    if (menu) {
+      if (!menu.plats) menu.plats = [];
+      menu.plats.push(data.plat);
+      afficherPlats(menu.plats);
+    }
+  } catch (err) {
+    alert('Erreur lors de l\'ajout du plat.');
+  }
+}
+
+async function supprimerPlatMenu(platId) {
+  var menuId = document.getElementById('menu-id').value;
+  if (!menuId) return;
+
+  try {
+    await fetchAPI('/admin/menus/' + menuId + '/plats/' + platId, { method: 'DELETE' });
+    var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
+    if (menu && menu.plats) {
+      menu.plats = menu.plats.filter(function(p) { return p.id != platId; });
+      afficherPlats(menu.plats);
+    }
+  } catch (err) {
+    alert('Erreur lors de la suppression du plat.');
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
