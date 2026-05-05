@@ -385,11 +385,11 @@ function afficherPlats(plats) {
     var div = document.createElement('div');
     div.className = 'd-flex align-items-start justify-content-between border rounded px-3 py-2 mb-2';
     div.innerHTML =
-      '<div>' +
-        '<div class="fw-bold">' + echapper(plat.titre_plat || plat.titre || plat.titrePlat) + '</div>' +
-        (allergenesBadges
-          ? '<div class="mt-1">' + allergenesBadges + '</div>'
-          : '<small class="text-muted">Aucun allergène</small>') +
+      '<div class="w-100">' +
+        '<div class="fw-bold mb-1">' + echapper(plat.titre_plat || plat.titre || plat.titrePlat) + '</div>' +
+        '<hr class="my-1">' +
+        '<small class="text-muted me-1">Allergènes :</small>' +
+        (allergenesBadges ? allergenesBadges : '<small class="text-muted fst-italic">aucun</small>') +
       '</div>' +
       '<button type="button" class="btn btn-sm btn-outline-danger ms-3 flex-shrink-0" ' +
         'onclick="supprimerPlatMenu(' + plat.id + ')" aria-label="Supprimer le plat">' +
