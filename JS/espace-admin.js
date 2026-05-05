@@ -379,15 +379,22 @@ function afficherPlats(plats) {
     return;
   }
   plats.forEach(function(plat) {
-    var allergenes = (plat.allergenes || []).map(function(a) { return echapper(a.libelle); }).join(', ');
+    var allergenesBadges = (plat.allergenes || []).map(function(a) {
+      return '<span class="badge bg-warning text-dark me-1">' + echapper(a.libelle) + '</span>';
+    }).join('');
     var div = document.createElement('div');
-    div.className = 'd-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1';
+    div.className = 'd-flex align-items-start justify-content-between border rounded px-3 py-2 mb-2';
     div.innerHTML =
-      '<span><strong>' + echapper(plat.titre_plat || plat.titre || plat.titrePlat) + '</strong>' +
-        (allergenes ? ' <small class="text-muted">— ' + allergenes + '</small>' : '') +
-      '</span>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger ms-2 py-0" ' +
-        'onclick="supprimerPlatMenu(' + plat.id + ')" aria-label="Supprimer le plat">&times;</button>';
+      '<div>' +
+        '<div class="fw-bold">' + echapper(plat.titre_plat || plat.titre || plat.titrePlat) + '</div>' +
+        (allergenesBadges
+          ? '<div class="mt-1">' + allergenesBadges + '</div>'
+          : '<small class="text-muted">Aucun allergène</small>') +
+      '</div>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger ms-3 flex-shrink-0" ' +
+        'onclick="supprimerPlatMenu(' + plat.id + ')" aria-label="Supprimer le plat">' +
+        '<i class="bi bi-trash" aria-hidden="true"></i>' +
+      '</button>';
     liste.appendChild(div);
   });
 }
