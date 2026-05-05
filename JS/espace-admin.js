@@ -184,29 +184,40 @@ async function chargerMenus() {
   }
 }
 
-function ouvrirModifierMenu(menuId) {
-  var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
-  if (!menu) return;
+async function ouvrirModifierMenu(menuId) {
+  var menuBase = tousLesMenus.find(function(m) { return m.id == menuId; });
+  if (!menuBase) return;
 
+  // Pré-remplir avec les données de base pendant le chargement
   document.getElementById('modal-menu-titre').textContent = 'Modifier le menu';
-  document.getElementById('menu-id').value = menu.id;
-  document.getElementById('menu-nom').value = menu.titre || menu.nom || '';
-  document.getElementById('menu-prix').value = menu.prix_par_personne || menu.prix_base || menu.prix || '';
-  document.getElementById('menu-theme').value = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
-  document.getElementById('menu-regime').value = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || 'Classique');
-  document.getElementById('menu-convives-min').value = menu.nombre_personne_minimum || menu.nb_personnes_min || '';
-  document.getElementById('menu-convives-max').value = menu.nombre_personne_maximum || menu.nb_personnes_max || '';
-  document.getElementById('menu-stock').value = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '');
-  document.getElementById('menu-description').value = menu.description || '';
+  document.getElementById('menu-id').value = menuBase.id;
+  document.getElementById('menu-nom').value = menuBase.titre || menuBase.nom || '';
+  document.getElementById('menu-prix').value = menuBase.prix_par_personne || menuBase.prix_base || menuBase.prix || '';
+  document.getElementById('menu-theme').value = (menuBase.theme && menuBase.theme.libelle) ? menuBase.theme.libelle : (menuBase.theme || '');
+  document.getElementById('menu-regime').value = (menuBase.regime && menuBase.regime.libelle) ? menuBase.regime.libelle : (menuBase.regime || 'Classique');
+  document.getElementById('menu-convives-min').value = menuBase.nombre_personne_minimum || menuBase.nb_personnes_min || '';
+  document.getElementById('menu-convives-max').value = menuBase.nombre_personne_maximum || menuBase.nb_personnes_max || '';
+  document.getElementById('menu-stock').value = (menuBase.quantite_restante !== undefined) ? menuBase.quantite_restante : (menuBase.stock !== undefined ? menuBase.stock : '');
+  document.getElementById('menu-description').value = menuBase.description || '';
 
-  // Afficher la section plats et galerie
   document.getElementById('section-plats').style.display = '';
   document.getElementById('section-galerie').style.display = '';
-  afficherPlats(menu.plats || []);
-  afficherGalerieImages(menu.images || menu.menuImages || []);
 
   var modal = new bootstrap.Modal(document.getElementById('modal-menu'));
   modal.show();
+
+  // Charger le détail complet (plats + images avec IDs)
+  try {
+    var detail = await fetchAPI('/menus/' + menuId);
+    // Mettre à jour le cache local
+    menuBase.plats = detail.plats || [];
+    menuBase.images = detail.images || [];
+    afficherPlats(menuBase.plats);
+    afficherGalerieImages(menuBase.images);
+  } catch (err) {
+    afficherPlats([]);
+    afficherGalerieImages([]);
+  }
 }
 
 function afficherGalerieImages(images) {
@@ -372,7 +383,7 @@ function afficherPlats(plats) {
     var div = document.createElement('div');
     div.className = 'd-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1';
     div.innerHTML =
-      '<span><strong>' + echapper(plat.titre_plat || plat.titrePlat) + '</strong>' +
+      '<span><strong>' + echapper(plat.titre_plat || plat.titre || plat.titrePlat) + '</strong>' +
         (allergenes ? ' <small class="text-muted">— ' + allergenes + '</small>' : '') +
       '</span>' +
       '<button type="button" class="btn btn-sm btn-outline-danger ms-2 py-0" ' +
