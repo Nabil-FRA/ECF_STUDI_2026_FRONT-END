@@ -295,10 +295,6 @@ function afficherUtilisateurs(utilisateurs) {
       ? '<span class="badge bg-success">Actif</span>'
       : '<span class="badge bg-secondary">Désactivé</span>';
 
-    var dateInscription = u.createdAt
-      ? new Date(u.createdAt).toLocaleDateString('fr-FR')
-      : '—';
-
     // bouton désactiver/activer (seulement pour les employés)
     var btnDesactiver = '';
     if (u.role === 'employe') {
@@ -324,7 +320,6 @@ function afficherUtilisateurs(utilisateurs) {
       '<td>' + echapper(u.email || '—') + '</td>' +
       '<td>' + roleBadge + '</td>' +
       '<td>' + statutBadge + '</td>' +
-      '<td class="small">' + dateInscription + '</td>' +
       '<td>' +
         '<select class="form-select form-select-sm d-inline-block" style="width:auto;" ' +
           'onchange="changerRole(\'' + u.id + '\', this.value)" ' +
