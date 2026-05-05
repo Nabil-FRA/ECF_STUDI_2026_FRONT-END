@@ -478,14 +478,16 @@ async function chargerToutesCommandes() {
     toutesLesCommandes.forEach(function(cmd) {
       var tr = document.createElement('tr');
 
+      var statutLower = (cmd.statut || '').toLowerCase();
       var badgeClass = 'bg-secondary';
-      if (cmd.statut === 'accepté') badgeClass = 'bg-success';
-      else if (cmd.statut === 'en cours') badgeClass = 'bg-warning text-dark';
-      else if (cmd.statut === 'livré') badgeClass = 'bg-info';
-      else if (cmd.statut === 'terminée') badgeClass = 'bg-primary';
-      else if (cmd.statut === 'annulée') badgeClass = 'bg-danger';
-      else if (cmd.statut === 'en préparation') badgeClass = 'bg-info text-dark';
-      else if (cmd.statut === 'en cours de livraison') badgeClass = 'bg-primary';
+      if (statutLower === 'en cours') badgeClass = 'bg-warning text-dark';
+      else if (statutLower === 'accepté') badgeClass = 'bg-success';
+      else if (statutLower === 'en préparation') badgeClass = 'bg-info text-dark';
+      else if (statutLower === 'en cours de livraison') badgeClass = 'bg-primary';
+      else if (statutLower === 'livré') badgeClass = 'bg-info';
+      else if (statutLower === 'en attente du retour de matériel') badgeClass = 'bg-warning';
+      else if (statutLower === 'terminée') badgeClass = 'bg-primary';
+      else if (statutLower === 'annulée') badgeClass = 'bg-danger';
 
       tr.innerHTML =
         '<td>' + echapper(cmd.numero_commande || cmd.id) + '</td>' +
