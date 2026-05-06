@@ -251,12 +251,16 @@ function genererBoutonsAction(cmd) {
         '<i class="bi bi-check-circle" aria-hidden="true"></i></button>';
 
     case 'livré':
-      return '<button class="btn btn-sm btn-secondary me-1" onclick="changerStatut(\'' + id + '\', \'terminée\')" ' +
-        'aria-label="Terminer (sans matériel)">' +
-        '<i class="bi bi-check-all" aria-hidden="true"></i></button>' +
-        '<button class="btn btn-sm btn-warning" onclick="changerStatut(\'' + id + '\', \'en attente du retour de matériel\')" ' +
-        'aria-label="En attente retour matériel">' +
-        '<i class="bi bi-box-seam" aria-hidden="true"></i></button>';
+      // Si matériel prêté → passer en attente retour ; sinon → terminer directement
+      if (cmd.pret_materiel) {
+        return '<button class="btn btn-sm btn-warning" onclick="changerStatut(\'' + id + '\', \'en attente du retour de matériel\')" ' +
+          'aria-label="En attente retour matériel">' +
+          '<i class="bi bi-box-seam" aria-hidden="true"></i></button>';
+      } else {
+        return '<button class="btn btn-sm btn-secondary" onclick="changerStatut(\'' + id + '\', \'terminée\')" ' +
+          'aria-label="Terminer la commande">' +
+          '<i class="bi bi-check-all" aria-hidden="true"></i></button>';
+      }
 
     case 'en attente du retour de matériel':
       return '<button class="btn btn-sm btn-success" onclick="changerStatut(\'' + id + '\', \'terminée\')" ' +
