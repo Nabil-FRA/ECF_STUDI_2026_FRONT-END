@@ -546,7 +546,7 @@ async function soumettreAvis() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         note: note,
-        commentaire: commentaire
+        description: commentaire
       })
     });
 
