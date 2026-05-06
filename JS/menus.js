@@ -10,6 +10,21 @@ var menusFiltres = [];
 var pageCourante = 1;
 var MENUS_PAR_PAGE = 9; // 3x3 sur desktop
 
+/**
+ * Normalise une chaîne pour la comparaison de filtres :
+ * minuscules, accents supprimés, espaces → tirets.
+ * "Végétarien" → "vegetarien", "Sans Gluten" → "sans-gluten", "Noël" → "noel"
+ */
+function normaliser(str) {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // supprime les diacritiques (accents)
+    .replace(/\s+/g, '-')            // espaces → tirets
+    .replace(/[^a-z0-9-]/g, '');     // retire tout sauf lettres, chiffres, tirets
+}
+
 // ---- fonctions utilitaires ----
 
 function echapper(str) {
@@ -45,6 +60,25 @@ async function chargerMenus() {
     tousLesMenus = Array.isArray(data) ? data : (data.menus || data || []);
 
     console.log('menus chargés:', tousLesMenus.length);
+
+    // initialiser le slider max en fonction du prix le plus élevé
+    if (tousLesMenus.length > 0) {
+      var prixMax = Math.ceil(Math.max.apply(null, tousLesMenus.map(function(m) {
+        return m.prix_par_personne || m.prix_base || 0;
+      })));
+      // arrondir au multiple de 10 supérieur pour un curseur propre
+      prixMax = Math.ceil(prixMax / 10) * 10;
+      var prixMaxEl = document.getElementById('filtre-prix-max');
+      var prixMinEl = document.getElementById('filtre-prix-min');
+      if (prixMaxEl) {
+        prixMaxEl.max = prixMax;
+        prixMaxEl.value = prixMax;
+      }
+      if (prixMinEl) {
+        prixMinEl.max = prixMax;
+      }
+      mettreAJourAffichagePrix();
+    }
 
     // on applique les filtres (au début aucun filtre = tous les menus)
     appliquerFiltres();
@@ -106,15 +140,15 @@ function appliquerFiltres() {
       return false;
     }
 
-    // filtre thème (API : theme.libelle)
+    // filtre thème (API : theme.libelle) — normalisation pour correspondre aux valeurs du select HTML
     var themeLibelle = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
-    if (themeChoisi && themeLibelle !== themeChoisi) {
+    if (themeChoisi && normaliser(themeLibelle) !== themeChoisi) {
       return false;
     }
 
-    // filtre régime (API : regime.libelle)
+    // filtre régime (API : regime.libelle) — normalisation pour correspondre aux valeurs du select HTML
     var regimeLibelle = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || '');
-    if (regimeChoisi && regimeLibelle !== regimeChoisi) {
+    if (regimeChoisi && normaliser(regimeLibelle) !== regimeChoisi) {
       return false;
     }
 
@@ -243,7 +277,7 @@ function reinitialiserFiltres() {
 
   if (rechercheEl) rechercheEl.value = '';
   if (prixMinEl) { prixMinEl.value = 0; }
-  if (prixMaxEl) { prixMaxEl.value = 100; }
+  if (prixMaxEl) { prixMaxEl.value = prixMaxEl.max || 100; }
   if (themeEl) themeEl.value = '';
   if (regimeEl) regimeEl.value = '';
   if (personnesEl) personnesEl.value = '';
