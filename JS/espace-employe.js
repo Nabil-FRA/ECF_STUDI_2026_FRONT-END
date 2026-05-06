@@ -686,17 +686,19 @@ function afficherAvis(avis) {
     }
 
     // commentaire tronqué à 100 chars pour le tableau
-    var commentaire = avisItem.commentaire || avisItem.text || '';
+    var commentaire = avisItem.description || avisItem.commentaire || avisItem.text || '';
     var commentaireCourt = commentaire.length > 100
       ? commentaire.substring(0, 100) + '…'
       : commentaire;
 
+    var menuTitre = avisItem.menu_titre || avisItem.menuNom || avisItem.commande || '—';
+
     tr.innerHTML =
       '<td>' + echapper(avisItem.client || avisItem.auteur || avisItem.prenom || '—') + '</td>' +
-      '<td class="small">' + echapper(avisItem.menu_titre || avisItem.menuNom || '—') + '</td>' +
+      '<td class="small">' + echapper(menuTitre) + '</td>' +
       '<td style="color:#b8860b;">' + etoiles + '</td>' +
-      '<td class="small">' + echapper(commentaireCourt) + '</td>' +
-      '<td class="small">' + dateAvis + '</td>' +
+      '<td class="small">' + echapper(commentaireCourt || '—') + '</td>' +
+      '<td class="small">' + echapper(avisItem.commande || '—') + '</td>' +
       '<td>' + statutBadge + '</td>' +
       '<td>' + actions + '</td>';
 
