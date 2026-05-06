@@ -94,7 +94,7 @@
       var prefix = estDansPages() ? '' : 'pages/';
 
       authArea.innerHTML =
-        '<a href="' + prefix + 'connexion.html" class="btn btn-secondary btn-sm">Connexion</a> ' +
+        '<a href="' + prefix + 'connexion.html" class="btn btn-outline-secondary btn-sm">Connexion</a> ' +
         '<a href="' + prefix + 'inscription.html" class="btn btn-primary btn-sm">Inscription</a>';
 
     } else {
