@@ -469,34 +469,35 @@ function afficherUtilisateurs(utilisateurs) {
   utilisateurs.forEach(function(u) {
     var tr = document.createElement('tr');
 
-    var roleBadge = '<span class="badge bg-secondary">' + echapper(u.role) + '</span>';
-    if (u.role === 'admin') roleBadge = '<span class="badge bg-danger">admin</span>';
-    else if (u.role === 'employe') roleBadge = '<span class="badge bg-warning text-dark">employé</span>';
+    // Le backend renvoie role='desactive' pour les comptes désactivés
+    var actif = u.role !== 'desactive';
 
-    // statut actif/désactivé
-    var actif = u.actif !== false;
+    var roleBadge = '<span class="badge bg-secondary">' + echapper(u.role) + '</span>';
+    if (u.role === 'admin' || u.role === 'administrateur') roleBadge = '<span class="badge bg-danger">admin</span>';
+    else if (u.role === 'employe') roleBadge = '<span class="badge bg-warning text-dark">employé</span>';
+    else if (u.role === 'desactive') roleBadge = '<span class="badge bg-secondary">désactivé</span>';
+    else if (u.role === 'utilisateur') roleBadge = '<span class="badge bg-info text-dark">client</span>';
+
     var statutBadge = actif
       ? '<span class="badge bg-success">Actif</span>'
       : '<span class="badge bg-secondary">Désactivé</span>';
 
-    // bouton désactiver/activer (seulement pour les employés)
+    // bouton désactiver (employés actifs) / réactiver (comptes désactivés)
     var btnDesactiver = '';
     if (u.role === 'employe') {
-      if (actif) {
-        btnDesactiver =
-          '<button class="btn btn-sm btn-outline-warning ms-1" ' +
-            'onclick="toggleActivation(\'' + u.id + '\', false)" ' +
-            'aria-label="Désactiver ' + echapper(u.prenom) + '">' +
-            '<i class="bi bi-person-slash" aria-hidden="true"></i>' +
-          '</button>';
-      } else {
-        btnDesactiver =
-          '<button class="btn btn-sm btn-outline-success ms-1" ' +
-            'onclick="toggleActivation(\'' + u.id + '\', true)" ' +
-            'aria-label="Réactiver ' + echapper(u.prenom) + '">' +
-            '<i class="bi bi-person-check" aria-hidden="true"></i>' +
-          '</button>';
-      }
+      btnDesactiver =
+        '<button class="btn btn-sm btn-outline-warning ms-1" ' +
+          'onclick="toggleActivation(\'' + u.id + '\', false)" ' +
+          'aria-label="Désactiver ' + echapper(u.prenom) + '">' +
+          '<i class="bi bi-person-slash" aria-hidden="true"></i>' +
+        '</button>';
+    } else if (u.role === 'desactive') {
+      btnDesactiver =
+        '<button class="btn btn-sm btn-outline-success ms-1" ' +
+          'onclick="toggleActivation(\'' + u.id + '\', true)" ' +
+          'aria-label="Réactiver ' + echapper(u.prenom) + '">' +
+          '<i class="bi bi-person-check" aria-hidden="true"></i>' +
+        '</button>';
     }
 
     tr.innerHTML =
@@ -523,6 +524,11 @@ function filtrerUtilisateurs() {
   var role = document.getElementById('filtre-role').value;
   if (role === 'tous') {
     afficherUtilisateurs(tousLesUtilisateurs);
+  } else if (role === 'employe') {
+    // Inclure les comptes désactivés (anciens employés) dans le filtre employés
+    afficherUtilisateurs(
+      tousLesUtilisateurs.filter(function(u) { return u.role === 'employe' || u.role === 'desactive'; })
+    );
   } else {
     afficherUtilisateurs(
       tousLesUtilisateurs.filter(function(u) { return u.role === role; })
@@ -566,7 +572,7 @@ async function toggleActivation(userId, activer) {
     });
 
     var user = tousLesUtilisateurs.find(function(u) { return u.id == userId; });
-    if (user) user.actif = activer;
+    if (user) user.role = activer ? 'employe' : 'desactive';
 
     afficherUtilisateurs(tousLesUtilisateurs);
 
