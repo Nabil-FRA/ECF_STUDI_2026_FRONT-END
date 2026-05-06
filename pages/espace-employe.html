@@ -279,6 +279,75 @@
     </div>
   </div>
 
+  <!-- ══════ MODAL MODIFICATION COMMANDE ══════ -->
+  <div class="modal fade" id="modal-modif-commande" tabindex="-1" aria-labelledby="modal-modif-cmd-titre" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modal-modif-cmd-titre">Modifier la commande</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="modif-cmd-id">
+          <p class="text-muted small mb-3">Vous devez avoir contacté le client avant toute modification.</p>
+          <div class="mb-3">
+            <label for="modif-nb-personnes" class="form-label">Nombre de personnes</label>
+            <input type="number" id="modif-nb-personnes" class="form-control" min="1" step="1">
+          </div>
+          <div class="mb-3">
+            <label for="modif-date-prestation" class="form-label">Date de prestation</label>
+            <input type="date" id="modif-date-prestation" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="modif-heure-livraison" class="form-label">Heure de livraison</label>
+            <input type="time" id="modif-heure-livraison" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="modif-lieu-prestation" class="form-label">Lieu de prestation</label>
+            <input type="text" id="modif-lieu-prestation" class="form-control" maxlength="255">
+          </div>
+          <div id="modif-cmd-erreur" class="alert alert-danger d-none" role="alert"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="btn-sauvegarder-modif-cmd">
+            <i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer les modifications
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ MODAL MODIFICATION PLAT ══════ -->
+  <div class="modal fade" id="modal-edit-plat" tabindex="-1" aria-labelledby="modal-edit-plat-titre" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modal-edit-plat-titre">Modifier le plat</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-plat-id">
+          <input type="hidden" id="edit-plat-menu-id">
+          <div class="mb-3">
+            <label for="edit-plat-titre" class="form-label">Nom du plat <span class="text-danger">*</span></label>
+            <input type="text" id="edit-plat-titre" class="form-control" maxlength="150" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit-plat-allergenes" class="form-label">Allergènes <span class="text-muted small">(Ctrl+clic pour plusieurs)</span></label>
+            <select id="edit-plat-allergenes" class="form-select" multiple style="height:110px;"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="btn-sauvegarder-edit-plat">
+            <i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ══════ MODAL MENU (créer / modifier) ══════ -->
   <div class="modal fade" id="modal-menu-emp" tabindex="-1" aria-labelledby="modal-menu-emp-titre" aria-hidden="true">
     <div class="modal-dialog modal-lg"><div class="modal-content">

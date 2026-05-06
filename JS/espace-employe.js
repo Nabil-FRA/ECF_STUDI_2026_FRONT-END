@@ -108,6 +108,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // ── confirmer annulation ──────────────────────────────────
   document.getElementById('btn-confirmer-annulation').addEventListener('click', confirmerAnnulation);
 
+  // ── sauvegarder modification commande ────────────────────
+  document.getElementById('btn-sauvegarder-modif-cmd').addEventListener('click', sauvegarderModifCommande);
+
+  // ── sauvegarder modification plat ────────────────────────
+  document.getElementById('btn-sauvegarder-edit-plat').addEventListener('click', sauvegarderEditPlat);
+
   // ── formulaire horaires ───────────────────────────────────
   document.getElementById('form-horaires').addEventListener('submit', sauvegarderHoraires);
 
@@ -245,19 +251,28 @@ function genererBoutonsAction(cmd) {
       return '<button class="btn btn-sm btn-success me-1" onclick="changerStatut(\'' + id + '\', \'accepté\')" ' +
         'aria-label="Accepter la commande ' + num + '">' +
         '<i class="bi bi-check-lg" aria-hidden="true"></i></button>' +
+        '<button class="btn btn-sm btn-outline-secondary me-1" onclick="ouvrirModalModifCommande(\'' + id + '\')" ' +
+        'aria-label="Modifier la commande ' + num + '">' +
+        '<i class="bi bi-pencil" aria-hidden="true"></i></button>' +
         '<button class="btn btn-sm btn-danger" onclick="ouvrirModalAnnulation(\'' + id + '\')" ' +
         'aria-label="Annuler la commande ' + num + '">' +
         '<i class="bi bi-x-lg" aria-hidden="true"></i></button>';
 
     case 'accepté':
-      return '<button class="btn btn-sm btn-info" onclick="changerStatut(\'' + id + '\', \'en préparation\')" ' +
+      return '<button class="btn btn-sm btn-info me-1" onclick="changerStatut(\'' + id + '\', \'en préparation\')" ' +
         'aria-label="Mettre en préparation">' +
-        '<i class="bi bi-gear" aria-hidden="true"></i></button>';
+        '<i class="bi bi-gear" aria-hidden="true"></i></button>' +
+        '<button class="btn btn-sm btn-outline-secondary me-1" onclick="ouvrirModalModifCommande(\'' + id + '\')" ' +
+        'aria-label="Modifier la commande ' + num + '">' +
+        '<i class="bi bi-pencil" aria-hidden="true"></i></button>';
 
     case 'en préparation':
-      return '<button class="btn btn-sm btn-primary" onclick="changerStatut(\'' + id + '\', \'en cours de livraison\')" ' +
+      return '<button class="btn btn-sm btn-primary me-1" onclick="changerStatut(\'' + id + '\', \'en cours de livraison\')" ' +
         'aria-label="Passer en livraison">' +
-        '<i class="bi bi-truck" aria-hidden="true"></i></button>';
+        '<i class="bi bi-truck" aria-hidden="true"></i></button>' +
+        '<button class="btn btn-sm btn-outline-secondary me-1" onclick="ouvrirModalModifCommande(\'' + id + '\')" ' +
+        'aria-label="Modifier la commande ' + num + '">' +
+        '<i class="bi bi-pencil" aria-hidden="true"></i></button>';
 
     case 'en cours de livraison':
       return '<button class="btn btn-sm btn-success me-1" onclick="changerStatut(\'' + id + '\', \'livré\')" ' +
@@ -875,10 +890,17 @@ function afficherPlatsEmp(plats) {
         '<small class="text-muted me-1">Allergènes :</small>' +
         (allergenesBadges ? allergenesBadges : '<small class="text-muted fst-italic">aucun</small>') +
       '</div>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger ms-3 flex-shrink-0" ' +
-        'onclick="supprimerPlatMenuEmp(' + plat.id + ')" aria-label="Supprimer le plat">' +
-        '<i class="bi bi-trash" aria-hidden="true"></i>' +
-      '</button>';
+      '<div class="d-flex gap-1 ms-3 flex-shrink-0">' +
+        '<button type="button" class="btn btn-sm btn-outline-primary" ' +
+          'onclick="ouvrirModalEditPlat(' + plat.id + ', \'' + (plat.titre_plat || plat.titre || plat.titrePlat || '').replace(/'/g, "\\'") + '\', ' + JSON.stringify((plat.allergenes || []).map(function(a){return a.id;})) + ')" ' +
+          'aria-label="Modifier le plat">' +
+          '<i class="bi bi-pencil" aria-hidden="true"></i>' +
+        '</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-danger" ' +
+          'onclick="supprimerPlatMenuEmp(' + plat.id + ')" aria-label="Supprimer le plat">' +
+          '<i class="bi bi-trash" aria-hidden="true"></i>' +
+        '</button>' +
+      '</div>';
     liste.appendChild(div);
   });
 }
@@ -947,5 +969,141 @@ async function refuserAvis(avisId) {
 
   } catch (err) {
     alert('Erreur lors du refus de l\'avis.');
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// MODIFICATION COMMANDE
+// ══════════════════════════════════════════════════════════════
+
+function ouvrirModalModifCommande(commandeId) {
+  var commande = toutesLesCommandes.find(function(c) { return c.id == commandeId; });
+  if (!commande) return;
+
+  document.getElementById('modif-cmd-id').value = commandeId;
+  document.getElementById('modif-nb-personnes').value = commande.nombre_personne || '';
+  document.getElementById('modif-date-prestation').value = commande.date_prestation
+    ? commande.date_prestation.substring(0, 10)
+    : '';
+  document.getElementById('modif-heure-livraison').value = commande.heure_livraison || '';
+  document.getElementById('modif-lieu-prestation').value = commande.lieu_prestation || '';
+  document.getElementById('modif-cmd-erreur').classList.add('d-none');
+
+  var modal = new bootstrap.Modal(document.getElementById('modal-modif-commande'));
+  modal.show();
+}
+
+async function sauvegarderModifCommande() {
+  var commandeId = document.getElementById('modif-cmd-id').value;
+  var erreurEl   = document.getElementById('modif-cmd-erreur');
+  erreurEl.classList.add('d-none');
+
+  var donnees = {
+    nombre_personne:  parseInt(document.getElementById('modif-nb-personnes').value) || undefined,
+    date_prestation:  document.getElementById('modif-date-prestation').value || undefined,
+    heure_livraison:  document.getElementById('modif-heure-livraison').value || undefined,
+    lieu_prestation:  document.getElementById('modif-lieu-prestation').value.trim() || undefined
+  };
+
+  // Supprimer les clés undefined
+  Object.keys(donnees).forEach(function(k) { if (donnees[k] === undefined) delete donnees[k]; });
+
+  try {
+    var result = await fetchAPI('/employe/commandes/' + commandeId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(donnees)
+    });
+
+    // Mettre à jour localement
+    var commande = toutesLesCommandes.find(function(c) { return c.id == commandeId; });
+    if (commande) {
+      if (result.nombre_personne !== undefined) commande.nombre_personne  = result.nombre_personne;
+      if (result.date_prestation !== undefined) commande.date_prestation  = result.date_prestation;
+      if (result.lieu_prestation !== undefined) commande.lieu_prestation  = result.lieu_prestation;
+      if (result.heure_livraison !== undefined) commande.heure_livraison  = result.heure_livraison;
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('modal-modif-commande')).hide();
+    filtrerCommandes();
+
+    if (typeof afficherToast === 'function') {
+      afficherToast('Commande mise à jour.', 'success');
+    }
+
+  } catch (err) {
+    erreurEl.textContent = err.message || 'Erreur lors de la modification.';
+    erreurEl.classList.remove('d-none');
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// MODIFICATION PLAT
+// ══════════════════════════════════════════════════════════════
+
+function ouvrirModalEditPlat(platId, titrePlat, allergenesActifs) {
+  var menuId = document.getElementById('emp-menu-id').value;
+
+  document.getElementById('edit-plat-id').value    = platId;
+  document.getElementById('edit-plat-menu-id').value = menuId;
+  document.getElementById('edit-plat-titre').value = titrePlat;
+
+  // Peupler le select allergènes depuis la liste déjà chargée
+  var select = document.getElementById('edit-plat-allergenes');
+  select.innerHTML = '';
+  tousLesAllergenesEmp.forEach(function(a) {
+    var opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = a.libelle;
+    opt.selected = allergenesActifs.indexOf(a.id) !== -1;
+    select.appendChild(opt);
+  });
+
+  var modal = new bootstrap.Modal(document.getElementById('modal-edit-plat'));
+  modal.show();
+}
+
+async function sauvegarderEditPlat() {
+  var platId  = document.getElementById('edit-plat-id').value;
+  var menuId  = document.getElementById('edit-plat-menu-id').value;
+  var titre   = document.getElementById('edit-plat-titre').value.trim();
+
+  if (!titre) {
+    alert('Le nom du plat est obligatoire.');
+    document.getElementById('edit-plat-titre').focus();
+    return;
+  }
+
+  var selectAllergenes = document.getElementById('edit-plat-allergenes');
+  var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+
+  try {
+    var result = await fetchAPI('/admin/menus/' + menuId + '/plats/' + platId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
+    });
+
+    // Mettre à jour localement dans tousLesMenusEmp
+    var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
+    if (menu && menu.plats) {
+      var plat = menu.plats.find(function(p) { return p.id == platId; });
+      if (plat && result.plat) {
+        plat.titre_plat  = result.plat.titre_plat;
+        plat.allergenes  = result.plat.allergenes;
+      }
+      afficherPlatsEmp(menu.plats);
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('modal-edit-plat')).hide();
+
+    if (typeof afficherToast === 'function') {
+      afficherToast('Plat mis à jour.', 'success');
+    }
+
+  } catch (err) {
+    alert(err.message || 'Erreur lors de la modification du plat.');
   }
 }
