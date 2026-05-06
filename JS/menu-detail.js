@@ -229,90 +229,113 @@ function afficherStock(stock) {
   }
 }
 
-// ── afficher la composition en onglets ──────────────────────
-function afficherComposition(composition) {
-  const tabsContainer = document.getElementById('composition-tabs');
-  const panelsContainer = document.getElementById('composition-panels');
-  if (!tabsContainer || !panelsContainer) return;
+// ── détecter la catégorie d'un plat à partir de son nom ────
+function detecterCategoriePlat(nom) {
+  var n = (nom || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, ''); // sans accents pour matcher
 
-  tabsContainer.innerHTML = '';
+  var desserts = /tarte|mousse|creme brulee|sorbet|glace|fondant|clafoutis|paris.brest|mignardise|gateau|macaron|financier|eclair|souffle|profiterole|panna cotta|tiramisu|brownie|pain perdu|ile flottante|baba|mille.feuille|charlotte|buche|religieuse|saint.honore|compote|meringue|chou|savarin/;
+  var fromages = /fromage|plateau de|coulommiers|camembert|comté|comte|roquefort/;
+  var plats    = /gigot|filet|poulet|magret|canard|b[oe]uf|veau|agneau|porc|roti|grille|braise|cabillaud|lieu noir|sole|thon|daurade|bar |crevette|homard|langoustine|risotto|lasagne|tajine|couscous|paella|blanquette|cassoulet|pot.au.feu|bourguignon|navarin|curry|saumon (entier|roti|grille|braise|poche)|choucroute|andouillette|tripes|jarret|osso/;
+
+  if (desserts.test(n)) return 'Desserts';
+  if (fromages.test(n)) return 'Fromages';
+  if (plats.test(n))    return 'Plats principaux';
+  return 'Entrées';
+}
+
+// ── afficher la composition — carte restaurant ──────────────
+function afficherComposition(composition) {
+  const panelsContainer = document.getElementById('composition-panels');
+  if (!panelsContainer) return;
+
   panelsContainer.innerHTML = '';
 
-  const categories = Object.keys(composition);
+  // Regrouper les plats par catégorie auto-détectée
+  // (si l'API envoie déjà des catégories, on les respecte)
+  var categoriesSource = Object.keys(composition);
+  var estFlatList = categoriesSource.length === 1 && categoriesSource[0] === 'Plats du menu';
 
-  categories.forEach(function(categorie, index) {
-    const tabId    = 'tab-' + index;
-    const panelId  = 'panel-' + index;
-    const isFirst  = index === 0;
+  var groupes = {}; // { 'Entrées': [...], 'Plats principaux': [...], 'Desserts': [...] }
+  var ORDRE_CATEGORIES = ['Entrées', 'Plats principaux', 'Fromages', 'Desserts'];
 
-    // ── bouton onglet ──
-    const tabBtn = document.createElement('button');
-    tabBtn.className = 'btn composition-tab-btn ' + (isFirst ? 'active' : '') + ' me-2 mb-2';
-    tabBtn.id = tabId;
-    tabBtn.setAttribute('role', 'tab');
-    tabBtn.setAttribute('aria-controls', panelId);
-    tabBtn.setAttribute('aria-selected', isFirst ? 'true' : 'false');
-    tabBtn.textContent = categorie;
-
-    tabBtn.addEventListener('click', function() {
-      tabsContainer.querySelectorAll('[role="tab"]').forEach(function(t) {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-      });
-      panelsContainer.querySelectorAll('[role="tabpanel"]').forEach(function(p) {
-        p.classList.add('d-none');
-      });
-      tabBtn.classList.add('active');
-      tabBtn.setAttribute('aria-selected', 'true');
-      document.getElementById(panelId).classList.remove('d-none');
+  if (estFlatList) {
+    // Auto-catégorisation à partir des noms de plats
+    composition['Plats du menu'].forEach(function(plat) {
+      var nom = typeof plat === 'object' ? (plat.nom || '') : String(plat);
+      var cat = detecterCategoriePlat(nom);
+      if (!groupes[cat]) groupes[cat] = [];
+      groupes[cat].push(plat);
     });
+  } else {
+    // Catégories déjà fournies par l'API
+    categoriesSource.forEach(function(cat) {
+      groupes[cat] = composition[cat];
+    });
+  }
 
-    tabsContainer.appendChild(tabBtn);
+  // Construire la carte
+  var carte = document.createElement('div');
+  carte.className = 'menu-carte';
 
-    // ── panneau ──
-    const panel = document.createElement('div');
-    panel.id = panelId;
-    panel.setAttribute('role', 'tabpanel');
-    panel.setAttribute('aria-labelledby', tabId);
-    panel.className = 'composition-panel' + (isFirst ? '' : ' d-none');
+  // Déterminer l'ordre d'affichage
+  var catsPresentes = ORDRE_CATEGORIES.filter(function(c) { return groupes[c] && groupes[c].length > 0; });
+  // Ajouter les catégories non prévues à la fin
+  Object.keys(groupes).forEach(function(c) {
+    if (catsPresentes.indexOf(c) === -1 && groupes[c].length > 0) catsPresentes.push(c);
+  });
 
-    const grid = document.createElement('div');
-    grid.className = 'plats-grid';
+  // Si une seule catégorie détectée (tous "Entrées" ex.), afficher sans header
+  var afficherHeaders = catsPresentes.length > 1;
 
-    composition[categorie].forEach(function(plat, i) {
-      const nomPlat = typeof plat === 'object' ? (plat.nom || '') : String(plat);
-      const desc    = typeof plat === 'object' ? (plat.description || '') : '';
-      const allergenes = (typeof plat === 'object' && plat.allergenes) ? plat.allergenes : [];
+  catsPresentes.forEach(function(categorie, catIndex) {
+    if (afficherHeaders) {
+      if (catIndex > 0) {
+        var sep = document.createElement('hr');
+        sep.className = 'categorie-separateur';
+        carte.appendChild(sep);
+      }
+      var header = document.createElement('div');
+      header.className = 'categorie-header';
+      var label = document.createElement('span');
+      label.className = 'categorie-label';
+      label.textContent = categorie;
+      header.appendChild(label);
+      carte.appendChild(header);
+    }
 
-      const card = document.createElement('div');
-      card.className = 'plat-card';
+    groupes[categorie].forEach(function(plat) {
+      var nomPlat  = typeof plat === 'object' ? (plat.nom || '') : String(plat);
+      var desc     = typeof plat === 'object' ? (plat.description || '') : '';
+      var allergenes = (typeof plat === 'object' && plat.allergenes) ? plat.allergenes : [];
 
-      // Numéro
-      const num = document.createElement('span');
-      num.className = 'plat-numero';
-      num.textContent = String(i + 1).padStart(2, '0');
+      var ligne = document.createElement('div');
+      ligne.className = 'plat-ligne';
 
-      // Contenu
-      const content = document.createElement('div');
-      content.className = 'plat-content';
+      var puce = document.createElement('span');
+      puce.className = 'plat-puce';
+      puce.setAttribute('aria-hidden', 'true');
 
-      const titre = document.createElement('span');
-      titre.className = 'plat-nom';
-      titre.textContent = nomPlat;
-      content.appendChild(titre);
+      var content = document.createElement('div');
+      content.className = 'plat-ligne-content';
+
+      var nomEl = document.createElement('span');
+      nomEl.className = 'plat-nom-text';
+      nomEl.textContent = nomPlat;
+      content.appendChild(nomEl);
 
       if (desc) {
-        const description = document.createElement('span');
-        description.className = 'plat-desc';
-        description.textContent = desc;
-        content.appendChild(description);
+        var descEl = document.createElement('span');
+        descEl.className = 'plat-desc-text';
+        descEl.textContent = desc;
+        content.appendChild(descEl);
       }
 
       if (allergenes.length > 0) {
-        const badgesDiv = document.createElement('div');
+        var badgesDiv = document.createElement('div');
         badgesDiv.className = 'plat-allergenes';
         allergenes.forEach(function(a) {
-          const badge = document.createElement('span');
+          var badge = document.createElement('span');
           badge.className = 'plat-allergene-badge';
           badge.textContent = a.libelle || a;
           badgesDiv.appendChild(badge);
@@ -320,20 +343,13 @@ function afficherComposition(composition) {
         content.appendChild(badgesDiv);
       }
 
-      // Icône décorative
-      const icon = document.createElement('i');
-      icon.className = 'bi bi-cup-hot plat-icon';
-      icon.setAttribute('aria-hidden', 'true');
-
-      card.appendChild(num);
-      card.appendChild(content);
-      card.appendChild(icon);
-      grid.appendChild(card);
+      ligne.appendChild(puce);
+      ligne.appendChild(content);
+      carte.appendChild(ligne);
     });
-
-    panel.appendChild(grid);
-    panelsContainer.appendChild(panel);
   });
+
+  panelsContainer.appendChild(carte);
 }
 
 // ── charger les menus similaires ────────────────────────────
