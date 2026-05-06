@@ -244,23 +244,28 @@ function detecterCategoriePlat(nom) {
   return 'Entrées';
 }
 
+// ── icônes par catégorie ────────────────────────────────────
+var ICONES_CATEGORIES = {
+  'Entrées':          'bi-egg-fried',
+  'Plats principaux': 'bi-fire',
+  'Fromages':         'bi-slash-circle',
+  'Desserts':         'bi-cake2'
+};
+
 // ── afficher la composition — carte restaurant ──────────────
 function afficherComposition(composition) {
-  const panelsContainer = document.getElementById('composition-panels');
+  var panelsContainer = document.getElementById('composition-panels');
   if (!panelsContainer) return;
 
   panelsContainer.innerHTML = '';
 
-  // Regrouper les plats par catégorie auto-détectée
-  // (si l'API envoie déjà des catégories, on les respecte)
   var categoriesSource = Object.keys(composition);
   var estFlatList = categoriesSource.length === 1 && categoriesSource[0] === 'Plats du menu';
 
-  var groupes = {}; // { 'Entrées': [...], 'Plats principaux': [...], 'Desserts': [...] }
   var ORDRE_CATEGORIES = ['Entrées', 'Plats principaux', 'Fromages', 'Desserts'];
+  var groupes = {};
 
   if (estFlatList) {
-    // Auto-catégorisation à partir des noms de plats
     composition['Plats du menu'].forEach(function(plat) {
       var nom = typeof plat === 'object' ? (plat.nom || '') : String(plat);
       var cat = detecterCategoriePlat(nom);
@@ -268,83 +273,92 @@ function afficherComposition(composition) {
       groupes[cat].push(plat);
     });
   } else {
-    // Catégories déjà fournies par l'API
-    categoriesSource.forEach(function(cat) {
-      groupes[cat] = composition[cat];
-    });
+    categoriesSource.forEach(function(cat) { groupes[cat] = composition[cat]; });
   }
 
-  // Construire la carte
-  var carte = document.createElement('div');
-  carte.className = 'menu-carte';
-
-  // Déterminer l'ordre d'affichage
   var catsPresentes = ORDRE_CATEGORIES.filter(function(c) { return groupes[c] && groupes[c].length > 0; });
-  // Ajouter les catégories non prévues à la fin
   Object.keys(groupes).forEach(function(c) {
     if (catsPresentes.indexOf(c) === -1 && groupes[c].length > 0) catsPresentes.push(c);
   });
 
-  // Si une seule catégorie détectée (tous "Entrées" ex.), afficher sans header
   var afficherHeaders = catsPresentes.length > 1;
 
-  catsPresentes.forEach(function(categorie, catIndex) {
+  // ── carte principale ──
+  var carte = document.createElement('div');
+  carte.className = 'mc-carte';
+
+  catsPresentes.forEach(function(categorie) {
+    // En-tête de catégorie
     if (afficherHeaders) {
-      if (catIndex > 0) {
-        var sep = document.createElement('hr');
-        sep.className = 'categorie-separateur';
-        carte.appendChild(sep);
-      }
       var header = document.createElement('div');
-      header.className = 'categorie-header';
+      header.className = 'mc-cat-header';
+
+      var ligneG = document.createElement('span');
+      ligneG.className = 'mc-cat-ligne';
+
+      var iconeClass = ICONES_CATEGORIES[categorie] || 'bi-dot';
+      var icone = document.createElement('i');
+      icone.className = 'bi ' + iconeClass + ' mc-cat-icone';
+      icone.setAttribute('aria-hidden', 'true');
+
       var label = document.createElement('span');
-      label.className = 'categorie-label';
+      label.className = 'mc-cat-label';
       label.textContent = categorie;
+
+      var ligneD = document.createElement('span');
+      ligneD.className = 'mc-cat-ligne';
+
+      header.appendChild(ligneG);
+      header.appendChild(icone);
       header.appendChild(label);
+      header.appendChild(ligneD);
       carte.appendChild(header);
     }
 
+    // Lignes de plats
     groupes[categorie].forEach(function(plat) {
-      var nomPlat  = typeof plat === 'object' ? (plat.nom || '') : String(plat);
-      var desc     = typeof plat === 'object' ? (plat.description || '') : '';
+      var nomPlat   = typeof plat === 'object' ? (plat.nom || '') : String(plat);
+      var desc      = typeof plat === 'object' ? (plat.description || '') : '';
       var allergenes = (typeof plat === 'object' && plat.allergenes) ? plat.allergenes : [];
 
       var ligne = document.createElement('div');
-      ligne.className = 'plat-ligne';
+      ligne.className = 'mc-plat';
 
+      // puce
       var puce = document.createElement('span');
-      puce.className = 'plat-puce';
+      puce.className = 'mc-plat-puce';
       puce.setAttribute('aria-hidden', 'true');
+      ligne.appendChild(puce);
 
-      var content = document.createElement('div');
-      content.className = 'plat-ligne-content';
+      // corps
+      var corps = document.createElement('div');
+      corps.className = 'mc-plat-corps';
 
       var nomEl = document.createElement('span');
-      nomEl.className = 'plat-nom-text';
+      nomEl.className = 'mc-plat-nom';
       nomEl.textContent = nomPlat;
-      content.appendChild(nomEl);
+      corps.appendChild(nomEl);
 
       if (desc) {
         var descEl = document.createElement('span');
-        descEl.className = 'plat-desc-text';
+        descEl.className = 'mc-plat-desc';
         descEl.textContent = desc;
-        content.appendChild(descEl);
+        corps.appendChild(descEl);
       }
 
       if (allergenes.length > 0) {
-        var badgesDiv = document.createElement('div');
-        badgesDiv.className = 'plat-allergenes';
+        var badgesWrap = document.createElement('div');
+        badgesWrap.className = 'mc-plat-allergenes';
         allergenes.forEach(function(a) {
           var badge = document.createElement('span');
-          badge.className = 'plat-allergene-badge';
-          badge.textContent = a.libelle || a;
-          badgesDiv.appendChild(badge);
+          badge.className = 'mc-allergen';
+          badge.textContent = typeof a === 'object' ? (a.libelle || '') : String(a);
+          badgesWrap.appendChild(badge);
         });
-        content.appendChild(badgesDiv);
+        corps.appendChild(badgesWrap);
       }
 
-      ligne.appendChild(puce);
-      ligne.appendChild(content);
+      ligne.appendChild(corps);
       carte.appendChild(ligne);
     });
   });
