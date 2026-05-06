@@ -92,6 +92,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // ── sauvegarder un menu ───────────────────────────────────
   document.getElementById('btn-sauvegarder-menu-emp').addEventListener('click', sauvegarderMenuEmploye);
 
+  // ── ajouter une image / un plat ───────────────────────────
+  document.getElementById('emp-btn-ajouter-image').addEventListener('click', ajouterImageMenuEmp);
+  document.getElementById('emp-btn-ajouter-plat').addEventListener('click', ajouterPlatMenuEmp);
+
+  // charger les allergènes
+  chargerAllergenesEmp();
+
   // ── confirmer annulation ──────────────────────────────────
   document.getElementById('btn-confirmer-annulation').addEventListener('click', confirmerAnnulation);
 
@@ -106,6 +113,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modal-menu-emp-titre').textContent = 'Nouveau menu';
         document.getElementById('form-menu-emp').reset();
         document.getElementById('emp-menu-id').value = '';
+        document.getElementById('emp-section-plats').style.display = 'none';
+        document.getElementById('emp-section-galerie').style.display = 'none';
       }
     });
   }
@@ -407,23 +416,38 @@ async function chargerMenusEmploye() {
   }
 }
 
-function ouvrirModifierMenuEmp(menuId) {
-  var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
-  if (!menu) return;
+async function ouvrirModifierMenuEmp(menuId) {
+  var menuBase = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
+  if (!menuBase) return;
 
   document.getElementById('modal-menu-emp-titre').textContent = 'Modifier le menu';
-  document.getElementById('emp-menu-id').value = menu.id;
-  document.getElementById('emp-menu-nom').value = menu.titre || menu.nom || '';
-  document.getElementById('emp-menu-prix').value = menu.prix_par_personne || menu.prix_base || menu.prix || '';
-  document.getElementById('emp-menu-theme').value = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '');
-  document.getElementById('emp-menu-regime').value = (menu.regime && menu.regime.libelle) ? menu.regime.libelle : (menu.regime || 'classique');
-  document.getElementById('emp-menu-convives-min').value = menu.nombre_personne_minimum || menu.nb_personnes_min || '';
-  document.getElementById('emp-menu-convives-max').value = menu.nombre_personne_maximum || menu.nb_personnes_max || '';
-  document.getElementById('emp-menu-stock').value = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '');
-  document.getElementById('emp-menu-description').value = menu.description || '';
+  document.getElementById('emp-menu-id').value = menuBase.id;
+  document.getElementById('emp-menu-nom').value = menuBase.titre || menuBase.nom || '';
+  document.getElementById('emp-menu-prix').value = menuBase.prix_par_personne || menuBase.prix_base || menuBase.prix || '';
+  document.getElementById('emp-menu-theme').value = (menuBase.theme && menuBase.theme.libelle) ? menuBase.theme.libelle : (menuBase.theme || '');
+  document.getElementById('emp-menu-regime').value = (menuBase.regime && menuBase.regime.libelle) ? menuBase.regime.libelle : (menuBase.regime || 'Classique');
+  document.getElementById('emp-menu-convives-min').value = menuBase.nombre_personne_minimum || menuBase.nb_personnes_min || '';
+  document.getElementById('emp-menu-convives-max').value = menuBase.nombre_personne_maximum || menuBase.nb_personnes_max || '';
+  document.getElementById('emp-menu-stock').value = (menuBase.quantite_restante !== undefined) ? menuBase.quantite_restante : (menuBase.stock !== undefined ? menuBase.stock : '');
+  document.getElementById('emp-menu-description').value = menuBase.description || '';
+
+  document.getElementById('emp-section-plats').style.display = '';
+  document.getElementById('emp-section-galerie').style.display = '';
 
   var modal = new bootstrap.Modal(document.getElementById('modal-menu-emp'));
   modal.show();
+
+  // Charger le détail complet (plats + images avec IDs)
+  try {
+    var detail = await fetchAPI('/menus/' + menuId);
+    menuBase.plats = detail.plats || [];
+    menuBase.images = detail.images || [];
+    afficherPlatsEmp(menuBase.plats);
+    afficherGalerieEmp(menuBase.images);
+  } catch (err) {
+    afficherPlatsEmp([]);
+    afficherGalerieEmp([]);
+  }
 }
 
 async function sauvegarderMenuEmploye() {
@@ -431,23 +455,23 @@ async function sauvegarderMenuEmploye() {
   var isModif = !!menuId;
 
   var donnees = {
-    titre: document.getElementById('emp-menu-nom').value.trim(),
-    prix_base: parseFloat(document.getElementById('emp-menu-prix').value),
-    theme: document.getElementById('emp-menu-theme').value,
-    regime: document.getElementById('emp-menu-regime').value,
-    nb_personnes_min: parseInt(document.getElementById('emp-menu-convives-min').value),
-    nb_personnes_max: parseInt(document.getElementById('emp-menu-convives-max').value),
-    stock: parseInt(document.getElementById('emp-menu-stock').value) || 0,
-    description: document.getElementById('emp-menu-description').value.trim()
+    titre:                   document.getElementById('emp-menu-nom').value.trim(),
+    prix_par_personne:       parseFloat(document.getElementById('emp-menu-prix').value),
+    theme:                   document.getElementById('emp-menu-theme').value,
+    regime:                  document.getElementById('emp-menu-regime').value,
+    nombre_personne_minimum: parseInt(document.getElementById('emp-menu-convives-min').value),
+    nombre_personne_maximum: parseInt(document.getElementById('emp-menu-convives-max').value),
+    quantite_restante:       parseInt(document.getElementById('emp-menu-stock').value) || 0,
+    description:             document.getElementById('emp-menu-description').value.trim()
   };
 
-  if (!donnees.titre || !donnees.prix_base || !donnees.theme) {
+  if (!donnees.titre || !donnees.prix_par_personne || !donnees.theme) {
     alert('Veuillez remplir les champs obligatoires (nom, prix, thème).');
     return;
   }
 
   try {
-    var url = isModif ? '/menus/' + menuId : '/menus';
+    var url = isModif ? '/admin/menus/' + menuId : '/admin/menus';
     var method = isModif ? 'PUT' : 'POST';
 
     await fetchAPI(url, {
@@ -474,7 +498,7 @@ async function supprimerMenuEmp(menuId) {
   if (!confirm('Supprimer ce menu ? Cette action est irréversible.')) return;
 
   try {
-    await fetchAPI('/menus/' + menuId, { method: 'DELETE' });
+    await fetchAPI('/admin/menus/' + menuId, { method: 'DELETE' });
     chargerMenusEmploye();
 
     if (typeof afficherToast === 'function') {
@@ -702,6 +726,162 @@ async function validerAvis(avisId) {
 
   } catch (err) {
     alert('Erreur lors de la validation de l\'avis.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// GALERIE + PLATS (employé — mêmes endpoints que admin)
+// ══════════════════════════════════════════════════════════════
+
+var tousLesAllergenesEmp = [];
+
+async function chargerAllergenesEmp() {
+  try {
+    var data = await fetchAPI('/allergenes');
+    tousLesAllergenesEmp = data.allergenes || data || [];
+    var select = document.getElementById('emp-plat-allergenes');
+    if (!select) return;
+    select.innerHTML = '';
+    tousLesAllergenesEmp.forEach(function(a) {
+      var opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = a.libelle;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error('Erreur allergènes :', err);
+  }
+}
+
+function afficherGalerieEmp(images) {
+  var liste = document.getElementById('emp-galerie-liste');
+  liste.innerHTML = '';
+  if (!images || images.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-0">Aucune image.</p>';
+    return;
+  }
+  images.forEach(function(img) {
+    var url = img.url_image || img.url || img;
+    var id  = img.id || null;
+    var div = document.createElement('div');
+    div.className = 'position-relative';
+    div.style.cssText = 'width:80px;height:60px;';
+    div.innerHTML =
+      '<img src="' + echapper(url) + '" alt="Image menu" ' +
+        'style="width:100%;height:100%;object-fit:cover;border-radius:4px;" ' +
+        'onerror="this.src=\'../img/placeholder.jpg\'">' +
+      (id ? '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" ' +
+        'style="width:18px;height:18px;font-size:10px;line-height:1;" ' +
+        'onclick="supprimerImageMenuEmp(' + id + ')" aria-label="Supprimer image">&times;</button>' : '');
+    liste.appendChild(div);
+  });
+}
+
+async function ajouterImageMenuEmp() {
+  var menuId = document.getElementById('emp-menu-id').value;
+  var url = document.getElementById('emp-menu-image-url').value.trim();
+  if (!menuId || !url) return;
+
+  try {
+    var data = await fetchAPI('/admin/menus/' + menuId + '/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url_image: url })
+    });
+    document.getElementById('emp-menu-image-url').value = '';
+    var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
+    if (menu) {
+      if (!menu.images) menu.images = [];
+      menu.images.push(data.image || { id: data.id, url_image: url });
+      afficherGalerieEmp(menu.images);
+    }
+  } catch (err) {
+    alert('Erreur lors de l\'ajout de l\'image.');
+  }
+}
+
+async function supprimerImageMenuEmp(imageId) {
+  var menuId = document.getElementById('emp-menu-id').value;
+  if (!menuId) return;
+  try {
+    await fetchAPI('/admin/menus/' + menuId + '/images/' + imageId, { method: 'DELETE' });
+    var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
+    if (menu && menu.images) {
+      menu.images = menu.images.filter(function(img) { return img.id != imageId; });
+      afficherGalerieEmp(menu.images);
+    }
+  } catch (err) {
+    alert('Erreur lors de la suppression de l\'image.');
+  }
+}
+
+function afficherPlatsEmp(plats) {
+  var liste = document.getElementById('emp-plats-liste');
+  liste.innerHTML = '';
+  if (!plats || plats.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-2">Aucun plat.</p>';
+    return;
+  }
+  plats.forEach(function(plat) {
+    var allergenesBadges = (plat.allergenes || []).map(function(a) {
+      return '<span class="badge bg-warning text-dark me-1">' + echapper(a.libelle) + '</span>';
+    }).join('');
+    var div = document.createElement('div');
+    div.className = 'd-flex align-items-start justify-content-between border rounded px-3 py-2 mb-2';
+    div.innerHTML =
+      '<div class="w-100">' +
+        '<div class="fw-bold mb-1">' + echapper(plat.titre_plat || plat.titre || plat.titrePlat) + '</div>' +
+        '<hr class="my-1">' +
+        '<small class="text-muted me-1">Allergènes :</small>' +
+        (allergenesBadges ? allergenesBadges : '<small class="text-muted fst-italic">aucun</small>') +
+      '</div>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger ms-3 flex-shrink-0" ' +
+        'onclick="supprimerPlatMenuEmp(' + plat.id + ')" aria-label="Supprimer le plat">' +
+        '<i class="bi bi-trash" aria-hidden="true"></i>' +
+      '</button>';
+    liste.appendChild(div);
+  });
+}
+
+async function ajouterPlatMenuEmp() {
+  var menuId = document.getElementById('emp-menu-id').value;
+  var titre = document.getElementById('emp-plat-titre').value.trim();
+  if (!menuId || !titre) return;
+
+  var selectAllergenes = document.getElementById('emp-plat-allergenes');
+  var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+
+  try {
+    var data = await fetchAPI('/admin/menus/' + menuId + '/plats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
+    });
+    document.getElementById('emp-plat-titre').value = '';
+    Array.from(selectAllergenes.options).forEach(function(o) { o.selected = false; });
+    var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
+    if (menu) {
+      if (!menu.plats) menu.plats = [];
+      menu.plats.push(data.plat);
+      afficherPlatsEmp(menu.plats);
+    }
+  } catch (err) {
+    alert('Erreur lors de l\'ajout du plat.');
+  }
+}
+
+async function supprimerPlatMenuEmp(platId) {
+  var menuId = document.getElementById('emp-menu-id').value;
+  if (!menuId) return;
+  try {
+    await fetchAPI('/admin/menus/' + menuId + '/plats/' + platId, { method: 'DELETE' });
+    var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
+    if (menu && menu.plats) {
+      menu.plats = menu.plats.filter(function(p) { return p.id != platId; });
+      afficherPlatsEmp(menu.plats);
+    }
+  } catch (err) {
+    alert('Erreur lors de la suppression du plat.');
   }
 }
 

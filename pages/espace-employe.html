@@ -73,14 +73,14 @@
           <label for="filtre-statut" class="form-label mb-0 fw-bold">Statut :</label>
           <select id="filtre-statut" class="form-select form-select-sm" style="width:auto;" aria-label="Filtrer par statut">
             <option value="tous">Tous</option>
-            <option value="En attente">En attente</option>
-            <option value="Confirmée">Confirmée</option>
-            <option value="En préparation">En préparation</option>
-            <option value="En cours de livraison">En cours de livraison</option>
-            <option value="Livrée">Livrée</option>
-            <option value="En attente du retour de matériel">Retour matériel</option>
-            <option value="Terminée">Terminée</option>
-            <option value="Annulée">Annulée</option>
+            <option value="en cours">En cours</option>
+            <option value="accepté">Accepté</option>
+            <option value="en préparation">En préparation</option>
+            <option value="en cours de livraison">En cours de livraison</option>
+            <option value="livré">Livré</option>
+            <option value="en attente du retour de matériel">Retour matériel</option>
+            <option value="terminée">Terminée</option>
+            <option value="annulée">Annulée</option>
           </select>
 
           <label for="filtre-client" class="form-label mb-0 ms-3 fw-bold">Client :</label>
@@ -290,19 +290,19 @@
               <label for="emp-menu-theme" class="form-label">Thème <span class="text-danger">*</span></label>
               <select id="emp-menu-theme" class="form-select" required>
                 <option value="">— Choisir —</option>
-                <option value="noel">Noël</option>
-                <option value="paques">Pâques</option>
-                <option value="classique">Classique</option>
-                <option value="evenement">Événement</option>
+                <option value="Noël">Noël</option>
+                <option value="Pâques">Pâques</option>
+                <option value="Classique">Classique</option>
+                <option value="Évènement">Évènement</option>
               </select>
             </div>
             <div class="col-md-6">
               <label for="emp-menu-regime" class="form-label">Régime</label>
               <select id="emp-menu-regime" class="form-select">
-                <option value="classique">Classique</option>
-                <option value="vegetarien">Végétarien</option>
-                <option value="vegan">Végan</option>
-                <option value="sans-gluten">Sans gluten</option>
+                <option value="Classique">Classique</option>
+                <option value="Végétarien">Végétarien</option>
+                <option value="Végan">Végan</option>
+                <option value="Sans Gluten">Sans Gluten</option>
               </select>
             </div>
             <div class="col-md-4">
@@ -320,6 +320,36 @@
             <div class="col-12">
               <label for="emp-menu-description" class="form-label">Description</label>
               <textarea id="emp-menu-description" class="form-control" rows="3" maxlength="500"></textarea>
+            </div>
+            <div class="col-12" id="emp-section-plats" style="display:none;">
+              <hr>
+              <label class="form-label fw-bold">Composition du menu (plats)</label>
+              <div id="emp-plats-liste" class="mb-3"></div>
+              <div class="border rounded p-3 bg-light">
+                <p class="small fw-bold text-muted mb-2">Ajouter un plat</p>
+                <div class="mb-2">
+                  <label for="emp-plat-titre" class="form-label small">Nom du plat</label>
+                  <input type="text" id="emp-plat-titre" class="form-control form-control-sm" placeholder="ex: Magret de canard">
+                </div>
+                <div class="mb-2">
+                  <label for="emp-plat-allergenes" class="form-label small">Allergènes <span class="text-muted">(Ctrl+clic pour plusieurs)</span></label>
+                  <select id="emp-plat-allergenes" class="form-select form-select-sm" multiple style="height:90px;"></select>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="emp-btn-ajouter-plat">
+                  <i class="bi bi-plus-lg" aria-hidden="true"></i> Ajouter ce plat
+                </button>
+              </div>
+            </div>
+            <div class="col-12" id="emp-section-galerie" style="display:none;">
+              <hr>
+              <label class="form-label fw-bold">Galerie d'images</label>
+              <div id="emp-galerie-liste" class="d-flex flex-wrap gap-2 mb-2"></div>
+              <div class="input-group input-group-sm">
+                <input type="url" id="emp-menu-image-url" class="form-control" placeholder="https://exemple.com/image.jpg">
+                <button type="button" class="btn btn-outline-primary" id="emp-btn-ajouter-image">
+                  <i class="bi bi-plus-lg" aria-hidden="true"></i> Ajouter
+                </button>
+              </div>
             </div>
           </div>
         </form>
