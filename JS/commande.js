@@ -282,6 +282,11 @@ function afficherRecap() {
       <dd class="col-sm-8">${menuCourant ? echapper(menuCourant.titre) : '-'}</dd>
       <dt class="col-sm-4">Nombre de personnes</dt>
       <dd class="col-sm-8">${nbP}</dd>
+      <dt class="col-sm-4">Prêt de matériel</dt>
+      <dd class="col-sm-8">${document.getElementById('pret-materiel') && document.getElementById('pret-materiel').checked
+        ? '<span class="badge bg-warning text-dark"><i class="bi bi-check-lg"></i> Demandé</span>'
+        : '<span class="text-muted">Non</span>'
+      }</dd>
     </dl>
   `;
 
@@ -471,7 +476,7 @@ async function envoyerCommande(e) {
     date_prestation: document.getElementById('date-prestation').value,
     heure_livraison: document.getElementById('heure-livraison').value,
     lieu_prestation: lieuPrestation,
-    pret_materiel:   false,
+    pret_materiel:   document.getElementById('pret-materiel') ? document.getElementById('pret-materiel').checked : false,
     distance_km:     cp && !cpBordeaux.includes(cp) ? DISTANCE_ESTIMEE_KM : 0
   };
 
