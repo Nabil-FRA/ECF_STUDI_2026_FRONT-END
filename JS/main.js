@@ -93,8 +93,9 @@
   // ══════════════════════════════════════════════════════════
 
   function chargerHorairesFooter() {
-    var horairesDiv = document.getElementById('horaires-footer');
-    if (!horairesDiv) return;
+    var horairesFooter  = document.getElementById('horaires-footer');
+    var horairesContact = document.getElementById('horaires-contact');
+    if (!horairesFooter && !horairesContact) return;
 
     // Charger les horaires depuis l'API (GET /api/horaires — public)
     fetchAPI('/horaires').then(function(data) {
@@ -127,27 +128,35 @@
       });
       if (groupe.length > 0) lignes.push({ jours: groupe, ouv: horaireCourant });
 
-      // Noms courts des jours
-      var NOMS = { lundi:'Lun', mardi:'Mar', mercredi:'Mer', jeudi:'Jeu', vendredi:'Ven', samedi:'Sam', dimanche:'Dim' };
+      // Noms courts des jours (footer) et noms longs (page contact)
+      var NOMS_COURTS = { lundi:'Lun', mardi:'Mar', mercredi:'Mer', jeudi:'Jeu', vendredi:'Ven', samedi:'Sam', dimanche:'Dim' };
+      var NOMS_LONGS  = { lundi:'Lundi', mardi:'Mardi', mercredi:'Mercredi', jeudi:'Jeudi', vendredi:'Vendredi', samedi:'Samedi', dimanche:'Dimanche' };
 
-      var html = '';
-      lignes.forEach(function(l) {
-        var jours = l.jours;
-        var label = jours.length === 1
-          ? NOMS[jours[0]]
-          : NOMS[jours[0]] + ' – ' + NOMS[jours[jours.length - 1]];
+      function genererHtml(noms) {
+        var html = '';
+        lignes.forEach(function(l) {
+          var jours = l.jours;
+          var label = jours.length === 1
+            ? noms[jours[0]]
+            : noms[jours[0]] + ' – ' + noms[jours[jours.length - 1]];
 
-        if (l.ouv === 'ferme') {
-          html += '<p>' + label + ' : Fermé</p>';
-        } else {
-          var parts = l.ouv.split('-');
-          var heureOuv  = parts[0] ? parts[0].substring(0, 5) : '';
-          var heureFerm = parts[1] ? parts[1].substring(0, 5) : '';
-          html += '<p>' + label + ' : ' + heureOuv + ' – ' + heureFerm + '</p>';
-        }
-      });
+          if (l.ouv === 'ferme') {
+            html += '<p>' + label + ' : Fermé</p>';
+          } else {
+            var parts = l.ouv.split('-');
+            var heureOuv  = parts[0] ? parts[0].substring(0, 5) : '';
+            var heureFerm = parts[1] ? parts[1].substring(0, 5) : '';
+            html += '<p>' + label + ' : ' + heureOuv + ' – ' + heureFerm + '</p>';
+          }
+        });
+        return html;
+      }
 
-      if (html) horairesDiv.innerHTML = html;
+      var htmlFooter  = genererHtml(NOMS_COURTS);
+      var htmlContact = genererHtml(NOMS_LONGS);
+
+      if (horairesFooter  && htmlFooter)  horairesFooter.innerHTML  = htmlFooter;
+      if (horairesContact && htmlContact) horairesContact.innerHTML = htmlContact;
 
     }).catch(function() {
       // En cas d'erreur API, on garde le contenu HTML par défaut
