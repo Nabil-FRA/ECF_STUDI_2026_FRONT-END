@@ -50,8 +50,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ── filtres commandes ─────────────────────────────────────
   document.getElementById('filtre-statut').addEventListener('change', filtrerCommandes);
-  dateInput.addEventListener('change', function() {
-    chargerCommandes(dateInput.value);
+  dateInput.addEventListener('change', filtrerCommandes);
+  document.getElementById('btn-effacer-date').addEventListener('click', function() {
+    dateInput.value = '';
+    filtrerCommandes();
   });
 
   // filtre par nom/email client
@@ -88,6 +90,12 @@ document.addEventListener('DOMContentLoaded', function() {
       chargerAvis();
     }
   });
+
+  // ── filtre statut avis ─────────────────────────────────────
+  var filtreStatutAvis = document.getElementById('filtre-statut-avis');
+  if (filtreStatutAvis) {
+    filtreStatutAvis.addEventListener('change', filtrerAvis);
+  }
 
   // ── sauvegarder un menu ───────────────────────────────────
   document.getElementById('btn-sauvegarder-menu-emp').addEventListener('click', sauvegarderMenuEmploye);
@@ -153,6 +161,7 @@ async function chargerCommandes(date) {
 function filtrerCommandes() {
   var statutFiltre = document.getElementById('filtre-statut').value;
   var clientFiltre = document.getElementById('filtre-client').value.trim().toLowerCase();
+  var dateFiltre   = document.getElementById('filtre-date').value;
   var body = document.getElementById('commandes-body');
   var vide = document.getElementById('commandes-vide');
 
@@ -168,9 +177,16 @@ function filtrerCommandes() {
   // filtre par nom/email client
   if (clientFiltre) {
     commandesFiltrees = commandesFiltrees.filter(function(cmd) {
-      var nom = (cmd.clientNom || '').toLowerCase();
-      var email = (cmd.clientEmail || '').toLowerCase();
+      var nom   = (cmd.client_email || cmd.clientEmail || cmd.clientNom || '').toLowerCase();
+      var email = (cmd.client_email || '').toLowerCase();
       return nom.includes(clientFiltre) || email.includes(clientFiltre);
+    });
+  }
+
+  // filtre par date de prestation
+  if (dateFiltre) {
+    commandesFiltrees = commandesFiltrees.filter(function(cmd) {
+      return cmd.date_prestation && cmd.date_prestation.startsWith(dateFiltre);
     });
   }
 
@@ -622,12 +638,32 @@ async function chargerAvis() {
     tousLesAvis = data.avis || data || [];
     if (chargement) chargement.classList.add('d-none');
 
-    afficherAvis(tousLesAvis);
+    filtrerAvis();
 
   } catch (err) {
     console.error('Erreur avis :', err);
     if (chargement) chargement.innerHTML = '<p class="text-danger">Erreur de chargement.</p>';
   }
+}
+
+function filtrerAvis() {
+  var select = document.getElementById('filtre-statut-avis');
+  var statutFiltre = select ? select.value : 'tous';
+
+  var avisFiltres = tousLesAvis;
+
+  if (statutFiltre !== 'tous') {
+    avisFiltres = tousLesAvis.filter(function(a) {
+      var s = a.statut || '';
+      // normaliser : "en_attente" / "pending" → "en attente"
+      if (statutFiltre === 'en attente') return s === 'en attente' || s === 'en_attente' || s === 'pending';
+      if (statutFiltre === 'validé')     return s === 'validé' || s === 'valide' || s === 'approved';
+      if (statutFiltre === 'refusé')     return s === 'refusé' || s === 'refuse' || s === 'rejected';
+      return s === statutFiltre;
+    });
+  }
+
+  afficherAvis(avisFiltres);
 }
 
 function afficherAvis(avis) {

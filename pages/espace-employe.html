@@ -87,7 +87,8 @@
           <input type="search" id="filtre-client" class="form-control form-control-sm" style="width:180px;" placeholder="Nom ou email..." aria-label="Filtrer par client">
 
           <label for="filtre-date" class="form-label mb-0 ms-3 fw-bold">Date :</label>
-          <input type="date" id="filtre-date" class="form-control form-control-sm" style="width:auto;" aria-label="Filtrer par date">
+          <input type="date" id="filtre-date" class="form-control form-control-sm" style="width:auto;" aria-label="Filtrer par date de prestation">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-effacer-date" title="Voir toutes les dates"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
 
         <!-- Tableau commandes -->
@@ -222,7 +223,18 @@
 
       <!-- ══════ ONGLET AVIS ══════ -->
       <div class="tab-pane fade" id="panel-avis" role="tabpanel" aria-labelledby="tab-avis">
-        <h2 class="h5 mb-3">Validation des avis clients</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 mb-0">Validation des avis clients</h2>
+          <div class="d-flex align-items-center gap-2">
+            <label for="filtre-statut-avis" class="form-label mb-0 fw-bold">Statut :</label>
+            <select id="filtre-statut-avis" class="form-select form-select-sm" style="width:auto;" aria-label="Filtrer les avis par statut">
+              <option value="tous">Tous</option>
+              <option value="en attente">En attente</option>
+              <option value="validé">Validé</option>
+              <option value="refusé">Refusé</option>
+            </select>
+          </div>
+        </div>
         <div id="avis-vide" class="text-center py-4 d-none"><i class="bi bi-chat-square-text display-3 text-muted" aria-hidden="true"></i><p class="mt-2 text-muted">Aucun avis en attente de validation.</p></div>
         <div class="table-responsive">
           <table class="table table-hover align-middle" aria-label="Avis clients en attente" id="table-avis">
