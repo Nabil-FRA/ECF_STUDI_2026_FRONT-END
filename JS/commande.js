@@ -2,15 +2,27 @@
 // gestion du formulaire de commande multi-étapes
 // fait par moi le 12/04/2026
 
-// les codes postaux de bordeaux (j'en ai mis les principaux)
+// les codes postaux de bordeaux intra-muros
 const cpBordeaux = ['33000', '33100', '33200', '33300', '33800'];
 
-// prix livraison hors bordeaux
+// Zone de livraison : uniquement la Gironde (département 33)
+// L'énoncé : "notre équipe logistique livre dans toute la métropole bordelaise"
+const DEPT_LIVRAISON = '33';
+
+// prix livraison hors bordeaux (mais dans la Gironde)
 const FRAIS_LIVRAISON = 5.00;
 const FRAIS_KM = 1.50; // €/km — tarif traiteur affiché (estimation côté client)
 
-// distance estimée par défaut pour livraison hors Bordeaux (km)
+// distance estimée par défaut pour livraison hors Bordeaux intra-muros (km)
 const DISTANCE_ESTIMEE_KM = 20;
+
+/**
+ * Vérifie si un code postal est dans la zone de livraison (Gironde, 33xxx).
+ */
+function estDansZoneLivraison(cp) {
+  if (!cp || cp.length < 2) return false;
+  return cp.startsWith(DEPT_LIVRAISON);
+}
 
 // pour la remise
 const REMISE_PERSONNES = 5; // faut 5 personnes de plus que le min
@@ -371,6 +383,22 @@ function validerEtape(num) {
     }
   }
 
+  // vérification custom : code postal dans la zone de livraison (Gironde, 33xxx)
+  if (num === 2) {
+    const cpInput = document.getElementById('code-postal');
+    const cpVal = cpInput ? cpInput.value.trim() : '';
+    if (cpVal.length === 5 && !estDansZoneLivraison(cpVal)) {
+      cpInput.classList.add('is-invalid');
+      cpInput.classList.remove('is-valid');
+      const cpError = document.getElementById('code-postal-error');
+      if (cpError) {
+        cpError.textContent =
+          'Nous livrons uniquement en Gironde (département 33). Votre adresse est hors de notre zone de livraison.';
+      }
+      ok = false;
+    }
+  }
+
   // vérification étape 3 : checkbox CGV
   if (num === 3) {
     const checkbox = document.getElementById('accepte-cgv');
@@ -578,6 +606,30 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // quand on change de menu, on met à jour les infos
   document.getElementById('menu-choisi').addEventListener('change', mettreAJourInfosMenu);
+
+  // feedback temps réel sur le code postal : avertir dès que hors zone
+  var cpInput = document.getElementById('code-postal');
+  if (cpInput) {
+    cpInput.addEventListener('input', function() {
+      var cp = this.value.trim();
+      var cpError = document.getElementById('code-postal-error');
+      // on réinitialise d'abord
+      this.classList.remove('is-invalid', 'is-valid');
+      if (cpError) cpError.textContent = 'Veuillez saisir un code postal valide (5 chiffres).';
+
+      if (cp.length === 5) {
+        if (!estDansZoneLivraison(cp)) {
+          this.classList.add('is-invalid');
+          if (cpError) {
+            cpError.textContent =
+              'Nous livrons uniquement en Gironde (département 33). Votre adresse est hors de notre zone de livraison.';
+          }
+        } else {
+          this.classList.add('is-valid');
+        }
+      }
+    });
+  }
 
   // recalcul du prix si nb personnes change
   document.getElementById('nb-personnes').addEventListener('input', function() {
