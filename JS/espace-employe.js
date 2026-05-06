@@ -40,13 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
-  // ── date du jour par défaut ───────────────────────────────
+  // ── filtre date (vide par défaut = toutes les commandes) ──
   var dateInput = document.getElementById('filtre-date');
-  var aujourdhui = new Date().toISOString().split('T')[0];
-  dateInput.value = aujourdhui;
 
-  // charger les commandes du jour
-  chargerCommandes(aujourdhui);
+  // charger toutes les commandes
+  chargerCommandes();
 
   // ── filtres commandes ─────────────────────────────────────
   document.getElementById('filtre-statut').addEventListener('change', filtrerCommandes);
