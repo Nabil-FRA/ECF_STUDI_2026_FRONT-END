@@ -54,7 +54,11 @@ function normaliserMenu(menu) {
     // Regrouper tous les plats sous une seule catégorie "Plats du menu"
     compositionData = {
       'Plats du menu': menu.plats.map(function(p) {
-        return { nom: p.titre || p.titre_plat || '', description: '' };
+        return {
+          nom: p.titre || p.titre_plat || '',
+          description: p.description || '',
+          allergenes: p.allergenes || []
+        };
       })
     };
   }
@@ -237,12 +241,13 @@ function afficherComposition(composition) {
   const categories = Object.keys(composition);
 
   categories.forEach(function(categorie, index) {
-    const tabId = 'tab-' + index;
-    const panelId = 'panel-' + index;
-    const isFirst = index === 0;
+    const tabId    = 'tab-' + index;
+    const panelId  = 'panel-' + index;
+    const isFirst  = index === 0;
 
+    // ── bouton onglet ──
     const tabBtn = document.createElement('button');
-    tabBtn.className = 'btn ' + (isFirst ? 'btn-primary' : 'btn-outline-primary') + ' me-2 mb-2';
+    tabBtn.className = 'btn composition-tab-btn ' + (isFirst ? 'active' : '') + ' me-2 mb-2';
     tabBtn.id = tabId;
     tabBtn.setAttribute('role', 'tab');
     tabBtn.setAttribute('aria-controls', panelId);
@@ -251,45 +256,82 @@ function afficherComposition(composition) {
 
     tabBtn.addEventListener('click', function() {
       tabsContainer.querySelectorAll('[role="tab"]').forEach(function(t) {
-        t.classList.remove('btn-primary');
-        t.classList.add('btn-outline-primary');
+        t.classList.remove('active');
         t.setAttribute('aria-selected', 'false');
       });
       panelsContainer.querySelectorAll('[role="tabpanel"]').forEach(function(p) {
         p.classList.add('d-none');
       });
-      tabBtn.classList.remove('btn-outline-primary');
-      tabBtn.classList.add('btn-primary');
+      tabBtn.classList.add('active');
       tabBtn.setAttribute('aria-selected', 'true');
       document.getElementById(panelId).classList.remove('d-none');
     });
 
     tabsContainer.appendChild(tabBtn);
 
+    // ── panneau ──
     const panel = document.createElement('div');
     panel.id = panelId;
     panel.setAttribute('role', 'tabpanel');
     panel.setAttribute('aria-labelledby', tabId);
-    panel.className = isFirst ? '' : 'd-none';
+    panel.className = 'composition-panel' + (isFirst ? '' : ' d-none');
 
-    const liste = document.createElement('ul');
-    liste.className = 'list-group';
+    const grid = document.createElement('div');
+    grid.className = 'plats-grid';
 
-    composition[categorie].forEach(function(plat) {
-      const li = document.createElement('li');
-      li.className = 'list-group-item';
-      if (typeof plat === 'object') {
-        li.innerHTML = '<strong>' + plat.nom + '</strong>';
-        if (plat.description) {
-          li.innerHTML += '<br><small class="text-muted">' + plat.description + '</small>';
-        }
-      } else {
-        li.textContent = plat;
+    composition[categorie].forEach(function(plat, i) {
+      const nomPlat = typeof plat === 'object' ? (plat.nom || '') : String(plat);
+      const desc    = typeof plat === 'object' ? (plat.description || '') : '';
+      const allergenes = (typeof plat === 'object' && plat.allergenes) ? plat.allergenes : [];
+
+      const card = document.createElement('div');
+      card.className = 'plat-card';
+
+      // Numéro
+      const num = document.createElement('span');
+      num.className = 'plat-numero';
+      num.textContent = String(i + 1).padStart(2, '0');
+
+      // Contenu
+      const content = document.createElement('div');
+      content.className = 'plat-content';
+
+      const titre = document.createElement('span');
+      titre.className = 'plat-nom';
+      titre.textContent = nomPlat;
+      content.appendChild(titre);
+
+      if (desc) {
+        const description = document.createElement('span');
+        description.className = 'plat-desc';
+        description.textContent = desc;
+        content.appendChild(description);
       }
-      liste.appendChild(li);
+
+      if (allergenes.length > 0) {
+        const badgesDiv = document.createElement('div');
+        badgesDiv.className = 'plat-allergenes';
+        allergenes.forEach(function(a) {
+          const badge = document.createElement('span');
+          badge.className = 'plat-allergene-badge';
+          badge.textContent = a.libelle || a;
+          badgesDiv.appendChild(badge);
+        });
+        content.appendChild(badgesDiv);
+      }
+
+      // Icône décorative
+      const icon = document.createElement('i');
+      icon.className = 'bi bi-cup-hot plat-icon';
+      icon.setAttribute('aria-hidden', 'true');
+
+      card.appendChild(num);
+      card.appendChild(content);
+      card.appendChild(icon);
+      grid.appendChild(card);
     });
 
-    panel.appendChild(liste);
+    panel.appendChild(grid);
     panelsContainer.appendChild(panel);
   });
 }
