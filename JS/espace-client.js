@@ -743,6 +743,6 @@ async function supprimerCompte() {
     window.location.href = '../index.html';
 
   } catch (err) {
-    alert('Erreur lors de la suppression. Veuillez réessayer.');
+    alert(err.message || 'Erreur lors de la suppression. Veuillez réessayer.');
   }
 }
