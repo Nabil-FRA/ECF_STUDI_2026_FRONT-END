@@ -7,6 +7,7 @@
 var toutesLesCommandes = [];
 var tousLesMenusEmp = [];
 var tousLesAvis = [];
+var platsCourantsEmp = {}; // cache plats par ID pour l'édition
 
 // Stockage temporaire pendant la création d'un nouveau menu
 var platsTempCreation   = [];
@@ -990,6 +991,9 @@ function afficherPlatsEmp(plats) {
     return;
   }
   plats.forEach(function(plat) {
+    // Stocker le plat dans le cache pour l'édition (évite les problèmes d'échappement inline)
+    platsCourantsEmp[plat.id] = plat;
+
     var allergenesBadges = (plat.allergenes || []).map(function(a) {
       return '<span class="badge bg-warning text-dark me-1">' + echapper(a.libelle) + '</span>';
     }).join('');
@@ -1004,7 +1008,7 @@ function afficherPlatsEmp(plats) {
       '</div>' +
       '<div class="d-flex gap-1 ms-3 flex-shrink-0">' +
         '<button type="button" class="btn btn-sm btn-outline-primary" ' +
-          'onclick="ouvrirModalEditPlat(' + plat.id + ', \'' + (plat.titre_plat || plat.titre || plat.titrePlat || '').replace(/'/g, "\\'") + '\', ' + JSON.stringify((plat.allergenes || []).map(function(a){return a.id;})) + ')" ' +
+          'onclick="ouvrirModalEditPlat(' + plat.id + ')" ' +
           'aria-label="Modifier le plat">' +
           '<i class="bi bi-pencil" aria-hidden="true"></i>' +
         '</button>' +
@@ -1165,12 +1169,17 @@ async function sauvegarderModifCommande() {
 // MODIFICATION PLAT
 // ══════════════════════════════════════════════════════════════
 
-function ouvrirModalEditPlat(platId, titrePlat, allergenesActifs) {
+function ouvrirModalEditPlat(platId) {
   var menuId = document.getElementById('emp-menu-id').value;
+  var plat   = platsCourantsEmp[platId];
+  if (!plat) { alert('Plat introuvable.'); return; }
 
-  document.getElementById('edit-plat-id').value    = platId;
+  var titrePlat      = plat.titre_plat || plat.titre || plat.titrePlat || '';
+  var allergenesActifs = (plat.allergenes || []).map(function(a) { return a.id; });
+
+  document.getElementById('edit-plat-id').value      = platId;
   document.getElementById('edit-plat-menu-id').value = menuId;
-  document.getElementById('edit-plat-titre').value = titrePlat;
+  document.getElementById('edit-plat-titre').value   = titrePlat;
 
   // Peupler le select allergènes depuis la liste déjà chargée
   var select = document.getElementById('edit-plat-allergenes');
