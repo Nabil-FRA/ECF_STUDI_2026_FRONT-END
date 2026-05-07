@@ -870,7 +870,11 @@ function afficherPlatsTempCreation() {
         '<small class="text-muted me-1">Allergènes :</small>' +
         (badges || '<small class="text-muted fst-italic">aucun</small>') +
       '</div>' +
-      '<div class="ms-3">' +
+      '<div class="d-flex gap-1 ms-3 flex-shrink-0">' +
+        '<button type="button" class="btn btn-sm btn-outline-primary" ' +
+          'onclick="ouvrirEditPlatTemp(' + index + ')" aria-label="Modifier le plat">' +
+          '<i class="bi bi-pencil" aria-hidden="true"></i>' +
+        '</button>' +
         '<button type="button" class="btn btn-sm btn-outline-danger" ' +
           'onclick="supprimerPlatTemp(' + index + ')" aria-label="Retirer le plat">' +
           '<i class="bi bi-trash" aria-hidden="true"></i>' +
@@ -883,6 +887,32 @@ function afficherPlatsTempCreation() {
 function supprimerPlatTemp(index) {
   platsTempCreation.splice(index, 1);
   afficherPlatsTempCreation();
+}
+
+// Édition d'un plat temporaire (mode création, avant sauvegarde du menu)
+var _editPlatTempIndex = -1;
+
+function ouvrirEditPlatTemp(index) {
+  var plat = platsTempCreation[index];
+  if (!plat) return;
+  _editPlatTempIndex = index;
+
+  document.getElementById('edit-plat-id').value      = ''; // pas d'ID réel
+  document.getElementById('edit-plat-menu-id').value = '';
+  document.getElementById('edit-plat-titre').value   = plat.titre;
+
+  var select = document.getElementById('edit-plat-allergenes');
+  select.innerHTML = '';
+  tousLesAllergenesEmp.forEach(function(a) {
+    var opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = a.libelle;
+    opt.selected = plat.allergeneIds.indexOf(a.id) !== -1;
+    select.appendChild(opt);
+  });
+
+  var modal = new bootstrap.Modal(document.getElementById('modal-edit-plat'));
+  modal.show();
 }
 
 function afficherGalerieTempCreation() {
@@ -1208,8 +1238,24 @@ async function sauvegarderEditPlat() {
   }
 
   var selectAllergenes = document.getElementById('edit-plat-allergenes');
-  var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+  var allergeneIds     = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+  var allergeneLibelles = Array.from(selectAllergenes.selectedOptions).map(function(o) { return o.text; });
 
+  // ── Plat temporaire (mode création, pas encore en base) ──────
+  if (!platId && _editPlatTempIndex >= 0) {
+    platsTempCreation[_editPlatTempIndex] = {
+      titre: titre,
+      allergeneIds: allergeneIds,
+      allergeneLibelles: allergeneLibelles
+    };
+    _editPlatTempIndex = -1;
+    bootstrap.Modal.getInstance(document.getElementById('modal-edit-plat')).hide();
+    afficherPlatsTempCreation();
+    if (typeof afficherToast === 'function') afficherToast('Plat mis à jour.', 'success');
+    return;
+  }
+
+  // ── Plat existant en base → appel API ───────────────────────
   try {
     var result = await fetchAPI('/employe/menus/' + menuId + '/plats/' + platId, {
       method: 'PUT',
@@ -1222,8 +1268,10 @@ async function sauvegarderEditPlat() {
     if (menu && menu.plats) {
       var plat = menu.plats.find(function(p) { return p.id == platId; });
       if (plat && result.plat) {
-        plat.titre_plat  = result.plat.titre_plat;
-        plat.allergenes  = result.plat.allergenes;
+        plat.titre_plat = result.plat.titre_plat;
+        plat.titre      = result.plat.titre_plat;
+        plat.allergenes = result.plat.allergenes;
+        platsCourantsEmp[plat.id] = plat;
       }
       afficherPlatsEmp(menu.plats);
     }
