@@ -127,6 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('emp-menu-id').value = '';
         document.getElementById('emp-section-plats').style.display = 'none';
         document.getElementById('emp-section-galerie').style.display = 'none';
+        afficherPlatsEmp([]);
+        afficherGalerieEmp([]);
       }
     });
   }
@@ -507,19 +509,33 @@ async function sauvegarderMenuEmploye() {
     var url = isModif ? '/employe/menus/' + menuId : '/employe/menus';
     var method = isModif ? 'PUT' : 'POST';
 
-    await fetchAPI(url, {
+    var result = await fetchAPI(url, {
       method: method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(donnees)
     });
 
-    bootstrap.Modal.getInstance(document.getElementById('modal-menu-emp')).hide();
-    document.getElementById('form-menu-emp').reset();
-    document.getElementById('emp-menu-id').value = '';
     chargerMenusEmploye();
 
-    if (typeof afficherToast === 'function') {
-      afficherToast(isModif ? 'Menu modifié.' : 'Menu créé.', 'success');
+    if (!isModif && result && result.id) {
+      // ── Création : on reste dans le modal, on déverrouille plats & images ──
+      document.getElementById('emp-menu-id').value = result.id;
+      document.getElementById('modal-menu-emp-titre').textContent = 'Modifier le menu';
+      document.getElementById('emp-section-plats').style.display = '';
+      document.getElementById('emp-section-galerie').style.display = '';
+      afficherPlatsEmp([]);
+      afficherGalerieEmp([]);
+      if (typeof afficherToast === 'function') {
+        afficherToast('Menu créé ! Ajoutez maintenant les plats et les images.', 'success');
+      }
+    } else {
+      // ── Modification : fermer le modal ──
+      bootstrap.Modal.getInstance(document.getElementById('modal-menu-emp')).hide();
+      document.getElementById('form-menu-emp').reset();
+      document.getElementById('emp-menu-id').value = '';
+      if (typeof afficherToast === 'function') {
+        afficherToast('Menu modifié.', 'success');
+      }
     }
 
   } catch (err) {
