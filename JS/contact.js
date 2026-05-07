@@ -85,16 +85,15 @@ document.addEventListener('DOMContentLoaded', function() {
     btnEnvoyer.querySelector('.btn-spinner').classList.remove('d-none');
 
     try {
-      // on utilise fetchAPI si disponible (de api.js), sinon fetch natif
+      // Champs attendus par l'API : email, titre, description
       var donnees = {
-        nom: nom.value.trim(),
         email: email.value.trim(),
-        sujet: sujet.value.trim(),
-        message: messageInput.value.trim()
+        titre: sujet.value.trim(),
+        description: (nom.value.trim() ? 'De : ' + nom.value.trim() + '\n\n' : '') + messageInput.value.trim()
       };
 
       if (typeof fetchAPI === 'function') {
-        await fetchAPI('/contact', {
+        await fetchAPI('/api/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(donnees)
