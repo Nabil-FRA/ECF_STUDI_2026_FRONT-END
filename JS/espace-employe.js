@@ -8,6 +8,10 @@ var toutesLesCommandes = [];
 var tousLesMenusEmp = [];
 var tousLesAvis = [];
 
+// Stockage temporaire pendant la création d'un nouveau menu
+var platsTempCreation   = [];
+var imagesTempCreation  = [];
+
 // ── échapper le HTML ────────────────────────────────────────
 function echapper(str) {
   if (!str) return '';
@@ -125,10 +129,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modal-menu-emp-titre').textContent = 'Nouveau menu';
         document.getElementById('form-menu-emp').reset();
         document.getElementById('emp-menu-id').value = '';
-        document.getElementById('emp-section-plats').style.display = 'none';
-        document.getElementById('emp-section-galerie').style.display = 'none';
-        afficherPlatsEmp([]);
-        afficherGalerieEmp([]);
+        // Réinitialiser les tableaux temporaires
+        platsTempCreation  = [];
+        imagesTempCreation = [];
+        // Afficher les sections dès l'ouverture
+        document.getElementById('emp-section-plats').style.display = '';
+        document.getElementById('emp-section-galerie').style.display = '';
+        afficherPlatsTempCreation();
+        afficherGalerieTempCreation();
       }
     });
   }
@@ -515,27 +523,43 @@ async function sauvegarderMenuEmploye() {
       body: JSON.stringify(donnees)
     });
 
+    if (!isModif && result && result.id) {
+      var newId = result.id;
+
+      // Envoyer les plats stockés localement
+      for (var i = 0; i < platsTempCreation.length; i++) {
+        try {
+          await fetchAPI('/employe/menus/' + newId + '/plats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ titre_plat: platsTempCreation[i].titre, allergenes: platsTempCreation[i].allergeneIds })
+          });
+        } catch (e) { console.error('Erreur ajout plat temp :', e); }
+      }
+
+      // Envoyer les images stockées localement
+      for (var j = 0; j < imagesTempCreation.length; j++) {
+        try {
+          await fetchAPI('/employe/menus/' + newId + '/images', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url_image: imagesTempCreation[j] })
+          });
+        } catch (e) { console.error('Erreur ajout image temp :', e); }
+      }
+
+      platsTempCreation  = [];
+      imagesTempCreation = [];
+    }
+
+    // Fermer le modal dans tous les cas
+    bootstrap.Modal.getInstance(document.getElementById('modal-menu-emp')).hide();
+    document.getElementById('form-menu-emp').reset();
+    document.getElementById('emp-menu-id').value = '';
     chargerMenusEmploye();
 
-    if (!isModif && result && result.id) {
-      // ── Création : on reste dans le modal, on déverrouille plats & images ──
-      document.getElementById('emp-menu-id').value = result.id;
-      document.getElementById('modal-menu-emp-titre').textContent = 'Modifier le menu';
-      document.getElementById('emp-section-plats').style.display = '';
-      document.getElementById('emp-section-galerie').style.display = '';
-      afficherPlatsEmp([]);
-      afficherGalerieEmp([]);
-      if (typeof afficherToast === 'function') {
-        afficherToast('Menu créé ! Ajoutez maintenant les plats et les images.', 'success');
-      }
-    } else {
-      // ── Modification : fermer le modal ──
-      bootstrap.Modal.getInstance(document.getElementById('modal-menu-emp')).hide();
-      document.getElementById('form-menu-emp').reset();
-      document.getElementById('emp-menu-id').value = '';
-      if (typeof afficherToast === 'function') {
-        afficherToast('Menu modifié.', 'success');
-      }
+    if (typeof afficherToast === 'function') {
+      afficherToast(isModif ? 'Menu modifié.' : 'Menu créé.', 'success');
     }
 
   } catch (err) {
@@ -824,6 +848,69 @@ async function chargerAllergenesEmp() {
   }
 }
 
+// ── Rendu des plats/images temporaires (mode création) ─────
+function afficherPlatsTempCreation() {
+  var liste = document.getElementById('emp-plats-liste');
+  liste.innerHTML = '';
+  if (platsTempCreation.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-2">Aucun plat.</p>';
+    return;
+  }
+  platsTempCreation.forEach(function(plat, index) {
+    var badges = plat.allergeneLibelles.map(function(lib) {
+      return '<span class="badge bg-warning text-dark me-1">' + echapper(lib) + '</span>';
+    }).join('');
+    var div = document.createElement('div');
+    div.className = 'd-flex align-items-start justify-content-between border rounded px-3 py-2 mb-2';
+    div.innerHTML =
+      '<div class="w-100">' +
+        '<div class="fw-bold mb-1">' + echapper(plat.titre) + '</div>' +
+        '<hr class="my-1">' +
+        '<small class="text-muted me-1">Allergènes :</small>' +
+        (badges || '<small class="text-muted fst-italic">aucun</small>') +
+      '</div>' +
+      '<div class="ms-3">' +
+        '<button type="button" class="btn btn-sm btn-outline-danger" ' +
+          'onclick="supprimerPlatTemp(' + index + ')" aria-label="Retirer le plat">' +
+          '<i class="bi bi-trash" aria-hidden="true"></i>' +
+        '</button>' +
+      '</div>';
+    liste.appendChild(div);
+  });
+}
+
+function supprimerPlatTemp(index) {
+  platsTempCreation.splice(index, 1);
+  afficherPlatsTempCreation();
+}
+
+function afficherGalerieTempCreation() {
+  var liste = document.getElementById('emp-galerie-liste');
+  liste.innerHTML = '';
+  if (imagesTempCreation.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-0">Aucune image.</p>';
+    return;
+  }
+  imagesTempCreation.forEach(function(url, index) {
+    var div = document.createElement('div');
+    div.className = 'position-relative';
+    div.style.cssText = 'width:80px;height:60px;';
+    div.innerHTML =
+      '<img src="' + echapper(url) + '" alt="Image menu" ' +
+        'style="width:100%;height:100%;object-fit:cover;border-radius:4px;" ' +
+        'onerror="this.src=\'../img/placeholder.jpg\'">' +
+      '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" ' +
+        'style="width:18px;height:18px;font-size:10px;line-height:1;" ' +
+        'onclick="supprimerImageTemp(' + index + ')" aria-label="Retirer image">&times;</button>';
+    liste.appendChild(div);
+  });
+}
+
+function supprimerImageTemp(index) {
+  imagesTempCreation.splice(index, 1);
+  afficherGalerieTempCreation();
+}
+
 function afficherGalerieEmp(images) {
   var liste = document.getElementById('emp-galerie-liste');
   liste.innerHTML = '';
@@ -851,15 +938,24 @@ function afficherGalerieEmp(images) {
 async function ajouterImageMenuEmp() {
   var menuId = document.getElementById('emp-menu-id').value;
   var url = document.getElementById('emp-menu-image-url').value.trim();
-  if (!menuId || !url) return;
+  if (!url) return;
 
+  document.getElementById('emp-menu-image-url').value = '';
+
+  if (!menuId) {
+    // Mode création : stocker localement
+    imagesTempCreation.push(url);
+    afficherGalerieTempCreation();
+    return;
+  }
+
+  // Mode modification : appel API direct
   try {
     var data = await fetchAPI('/employe/menus/' + menuId + '/images', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url_image: url })
     });
-    document.getElementById('emp-menu-image-url').value = '';
     var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
     if (menu) {
       if (!menu.images) menu.images = [];
@@ -924,19 +1020,29 @@ function afficherPlatsEmp(plats) {
 async function ajouterPlatMenuEmp() {
   var menuId = document.getElementById('emp-menu-id').value;
   var titre = document.getElementById('emp-plat-titre').value.trim();
-  if (!menuId || !titre) return;
+  if (!titre) return;
 
   var selectAllergenes = document.getElementById('emp-plat-allergenes');
   var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+  var allergeneLibelles = Array.from(selectAllergenes.selectedOptions).map(function(o) { return o.text; });
 
+  document.getElementById('emp-plat-titre').value = '';
+  Array.from(selectAllergenes.options).forEach(function(o) { o.selected = false; });
+
+  if (!menuId) {
+    // Mode création : stocker localement
+    platsTempCreation.push({ titre: titre, allergeneIds: allergeneIds, allergeneLibelles: allergeneLibelles });
+    afficherPlatsTempCreation();
+    return;
+  }
+
+  // Mode modification : appel API direct
   try {
     var data = await fetchAPI('/employe/menus/' + menuId + '/plats', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
     });
-    document.getElementById('emp-plat-titre').value = '';
-    Array.from(selectAllergenes.options).forEach(function(o) { o.selected = false; });
     var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
     if (menu) {
       if (!menu.plats) menu.plats = [];
