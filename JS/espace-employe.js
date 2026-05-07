@@ -9,6 +9,25 @@ var tousLesMenusEmp = [];
 var tousLesAvis = [];
 var platsCourantsEmp = {}; // cache plats par ID pour l'édition
 
+/**
+ * Ouvre un modal secondaire (imbriqué) par-dessus un modal déjà ouvert.
+ * Gère automatiquement le z-index du backdrop Bootstrap 5.
+ */
+function ouvrirModalSecondaire(id) {
+  var el = document.getElementById(id);
+  var modal = new bootstrap.Modal(el, { backdrop: true });
+  modal.show();
+  el.addEventListener('shown.bs.modal', function handler() {
+    el.removeEventListener('shown.bs.modal', handler);
+    // Remonter le backdrop du modal secondaire au-dessus du premier
+    var backdrops = document.querySelectorAll('.modal-backdrop');
+    if (backdrops.length > 1) {
+      backdrops[backdrops.length - 1].style.zIndex = '1060';
+    }
+    el.style.zIndex = '1065';
+  });
+}
+
 // Stockage temporaire pendant la création d'un nouveau menu
 var platsTempCreation   = [];
 var imagesTempCreation  = [];
@@ -911,8 +930,7 @@ function ouvrirEditPlatTemp(index) {
     select.appendChild(opt);
   });
 
-  var modal = new bootstrap.Modal(document.getElementById('modal-edit-plat'));
-  modal.show();
+  ouvrirModalSecondaire('modal-edit-plat');
 }
 
 function afficherGalerieTempCreation() {
@@ -1222,8 +1240,7 @@ function ouvrirModalEditPlat(platId) {
     select.appendChild(opt);
   });
 
-  var modal = new bootstrap.Modal(document.getElementById('modal-edit-plat'));
-  modal.show();
+  ouvrirModalSecondaire('modal-edit-plat');
 }
 
 async function sauvegarderEditPlat() {

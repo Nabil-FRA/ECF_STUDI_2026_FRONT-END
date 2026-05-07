@@ -288,3 +288,8 @@
     font-size: 1rem;
   }
 }
+
+/* ── Modaux imbriqués — s'afficher au-dessus du modal parent ── */
+#modal-edit-plat {
+  z-index: 1065 !important;
+}
