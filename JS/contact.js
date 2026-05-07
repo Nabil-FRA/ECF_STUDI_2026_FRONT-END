@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
       };
 
       if (typeof fetchAPI === 'function') {
-        await fetchAPI('/api/contact', {
+        await fetchAPI('/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(donnees)
