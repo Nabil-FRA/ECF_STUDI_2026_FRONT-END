@@ -44,6 +44,39 @@ function formatPrix(montant) {
   }).format(montant);
 }
 
+// ---- chargement dynamique des options thème / régime ----
+async function chargerFiltres() {
+  try {
+    var [themes, regimes] = await Promise.all([
+      fetchAPI('/themes'),
+      fetchAPI('/regimes')
+    ]);
+
+    var themeEl = document.getElementById('filtre-theme');
+    var regimeEl = document.getElementById('filtre-regime');
+
+    if (themeEl && Array.isArray(themes)) {
+      themes.forEach(function(t) {
+        var opt = document.createElement('option');
+        opt.value = normaliser(t.libelle);
+        opt.textContent = t.libelle;
+        themeEl.appendChild(opt);
+      });
+    }
+
+    if (regimeEl && Array.isArray(regimes)) {
+      regimes.forEach(function(r) {
+        var opt = document.createElement('option');
+        opt.value = normaliser(r.libelle);
+        opt.textContent = r.libelle;
+        regimeEl.appendChild(opt);
+      });
+    }
+  } catch (e) {
+    console.error('erreur chargement filtres thème/régime', e);
+  }
+}
+
 // ---- chargement des menus ----
 async function chargerMenus() {
   var chargement = document.getElementById('menus-chargement');
@@ -336,8 +369,8 @@ function initToggleFiltres() {
 document.addEventListener('DOMContentLoaded', async function() {
   console.log('--- initialisation menus.js ---');
 
-  // 1. charger les menus
-  await chargerMenus();
+  // 1. charger les menus et les options de filtre en parallèle
+  await Promise.all([chargerMenus(), chargerFiltres()]);
 
   // 2. toggle filtres mobile
   initToggleFiltres();
