@@ -504,7 +504,7 @@ async function sauvegarderMenuEmploye() {
   }
 
   try {
-    var url = isModif ? '/admin/menus/' + menuId : '/admin/menus';
+    var url = isModif ? '/employe/menus/' + menuId : '/employe/menus';
     var method = isModif ? 'PUT' : 'POST';
 
     await fetchAPI(url, {
@@ -531,7 +531,7 @@ async function supprimerMenuEmp(menuId) {
   if (!confirm('Supprimer ce menu ? Cette action est irréversible.')) return;
 
   try {
-    await fetchAPI('/admin/menus/' + menuId, { method: 'DELETE' });
+    await fetchAPI('/employe/menus/' + menuId, { method: 'DELETE' });
     chargerMenusEmploye();
 
     if (typeof afficherToast === 'function') {
@@ -838,7 +838,7 @@ async function ajouterImageMenuEmp() {
   if (!menuId || !url) return;
 
   try {
-    var data = await fetchAPI('/admin/menus/' + menuId + '/images', {
+    var data = await fetchAPI('/employe/menus/' + menuId + '/images', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url_image: url })
@@ -859,7 +859,7 @@ async function supprimerImageMenuEmp(imageId) {
   var menuId = document.getElementById('emp-menu-id').value;
   if (!menuId) return;
   try {
-    await fetchAPI('/admin/menus/' + menuId + '/images/' + imageId, { method: 'DELETE' });
+    await fetchAPI('/employe/menus/' + menuId + '/images/' + imageId, { method: 'DELETE' });
     var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
     if (menu && menu.images) {
       menu.images = menu.images.filter(function(img) { return img.id != imageId; });
@@ -914,7 +914,7 @@ async function ajouterPlatMenuEmp() {
   var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
 
   try {
-    var data = await fetchAPI('/admin/menus/' + menuId + '/plats', {
+    var data = await fetchAPI('/employe/menus/' + menuId + '/plats', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
@@ -936,7 +936,7 @@ async function supprimerPlatMenuEmp(platId) {
   var menuId = document.getElementById('emp-menu-id').value;
   if (!menuId) return;
   try {
-    await fetchAPI('/admin/menus/' + menuId + '/plats/' + platId, { method: 'DELETE' });
+    await fetchAPI('/employe/menus/' + menuId + '/plats/' + platId, { method: 'DELETE' });
     var menu = tousLesMenusEmp.find(function(m) { return m.id == menuId; });
     if (menu && menu.plats) {
       menu.plats = menu.plats.filter(function(p) { return p.id != platId; });
@@ -1080,7 +1080,7 @@ async function sauvegarderEditPlat() {
   var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
 
   try {
-    var result = await fetchAPI('/admin/menus/' + menuId + '/plats/' + platId, {
+    var result = await fetchAPI('/employe/menus/' + menuId + '/plats/' + platId, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
