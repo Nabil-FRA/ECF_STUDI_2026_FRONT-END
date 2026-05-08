@@ -506,12 +506,6 @@ function afficherUtilisateurs(utilisateurs) {
       '<td>' + roleBadge + '</td>' +
       '<td>' + statutBadge + '</td>' +
       '<td>' +
-        '<select class="form-select form-select-sm d-inline-block" style="width:auto;" ' +
-          'onchange="changerRole(\'' + u.id + '\', this.value)" ' +
-          'aria-label="Changer le rôle de ' + echapper(u.prenom || u.email) + '">' +
-          '<option value="utilisateur"' + (u.role === 'utilisateur' ? ' selected' : '') + '>Client</option>' +
-          '<option value="employe"' + (u.role === 'employe' ? ' selected' : '') + '>Employé</option>' +
-        '</select>' +
         btnDesactiver +
       '</td>';
 
