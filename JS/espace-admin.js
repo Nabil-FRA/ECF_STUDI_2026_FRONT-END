@@ -1101,10 +1101,35 @@ function creerChart(canvas, labels, values, couleurs) {
     return 'rgba(' + r + ',' + g + ',' + b + ',0.9)';
   });
 
+  // Plugin inline : affiche la valeur à droite de chaque barre
+  var valeursBaPlugin = {
+    id: 'valeursBars',
+    afterDraw: function(chart) {
+      var ctx2 = chart.ctx;
+      ctx2.save();
+      chart.data.datasets.forEach(function(dataset, i) {
+        var meta = chart.getDatasetMeta(i);
+        meta.data.forEach(function(bar, index) {
+          var val = dataset.data[index];
+          var x = bar.x + 6;
+          var y = bar.y;
+          ctx2.fillStyle = '#555';
+          ctx2.font = 'bold 12px system-ui, sans-serif';
+          ctx2.textBaseline = 'middle';
+          ctx2.fillText(val, x, y);
+        });
+      });
+      ctx2.restore();
+    }
+  };
+
   graphiqueInstance = new Chart(ctx, {
     type: 'bar',
+    plugins: [valeursBaPlugin],
     data: {
-      labels: sortedLabels,
+      labels: sortedLabels.map(function(l) {
+        return l.length > 22 ? l.substring(0, 20) + '…' : l;
+      }),
       datasets: [{
         label: 'Commandes',
         data: sortedValues,
@@ -1113,7 +1138,7 @@ function creerChart(canvas, labels, values, couleurs) {
         borderWidth: { left: 3, top: 0, right: 0, bottom: 0 },
         borderRadius: { topRight: 8, bottomRight: 8, topLeft: 0, bottomLeft: 0 },
         borderSkipped: false,
-        barThickness: 26
+        barThickness: 28
       }]
     },
     options: {
@@ -1144,30 +1169,29 @@ function creerChart(canvas, labels, values, couleurs) {
       scales: {
         x: {
           beginAtZero: true,
-          suggestedMax: (Math.max.apply(null, sortedValues) || 1) + 1,
-          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          suggestedMax: (Math.max.apply(null, sortedValues) || 1) + 2,
+          grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
           border: { display: false },
           ticks: {
             stepSize: 1,
             precision: 0,
             font: { size: 11 },
-            color: '#9e9e9e'
+            color: '#bbb',
+            maxTicksLimit: 6
           }
         },
         y: {
           grid: { display: false },
           border: { display: false },
+          afterFit: function(axis) { axis.width = 170; },
           ticks: {
             font: { size: 12 },
-            color: '#444',
-            callback: function(value, index) {
-              var l = sortedLabels[index] || '';
-              return l.length > 28 ? l.substring(0, 26) + '…' : l;
-            }
+            color: '#333',
+            align: 'end'
           }
         }
       },
-      layout: { padding: { right: 8, top: 4, bottom: 4 } }
+      layout: { padding: { right: 32, top: 4, bottom: 4, left: 4 } }
     }
   });
 }
