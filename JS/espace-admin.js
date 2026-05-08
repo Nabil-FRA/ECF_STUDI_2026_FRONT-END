@@ -511,7 +511,6 @@ function afficherUtilisateurs(utilisateurs) {
           'aria-label="Changer le rôle de ' + echapper(u.prenom || u.email) + '">' +
           '<option value="utilisateur"' + (u.role === 'utilisateur' ? ' selected' : '') + '>Client</option>' +
           '<option value="employe"' + (u.role === 'employe' ? ' selected' : '') + '>Employé</option>' +
-          '<option value="administrateur"' + (u.role === 'administrateur' ? ' selected' : '') + '>Admin</option>' +
         '</select>' +
         btnDesactiver +
       '</td>';
