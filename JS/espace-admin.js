@@ -935,20 +935,34 @@ async function chargerGraphiqueEtCA() {
     '<div class="row g-4">' +
       // graphique comparaison commandes par menu
       '<div class="col-lg-7">' +
-        '<div class="card">' +
-          '<div class="card-body">' +
-            '<h3 class="h6 mb-3"><i class="bi bi-bar-chart" aria-hidden="true"></i> Commandes par menu</h3>' +
-            '<div style="position:relative;height:280px;width:100%;">' +
-              '<canvas id="chart-commandes-menu" aria-label="Graphique comparaison des commandes par menu" role="img"></canvas>' +
+        '<div class="card shadow-sm border-0">' +
+          '<div class="card-header bg-white border-0 pb-0 pt-3 px-4 d-flex justify-content-between align-items-start">' +
+            '<div>' +
+              '<h3 class="h6 mb-1 fw-bold" style="color:#b5451b;">' +
+                '<i class="bi bi-bar-chart-line me-2" aria-hidden="true"></i>Commandes par menu' +
+              '</h3>' +
+              '<p class="text-muted small mb-0">Classement par volume de commandes</p>' +
+            '</div>' +
+            '<span id="chart-total-badge" class="badge rounded-pill" ' +
+              'style="background:#b5451b;font-size:0.75rem;padding:6px 12px;">—</span>' +
+          '</div>' +
+          '<div class="card-body pt-3 pb-4 px-4">' +
+            '<div id="chart-wrapper" style="position:relative;width:100%;">' +
+              '<canvas id="chart-commandes-menu" aria-label="Graphique commandes par menu" role="img"></canvas>' +
             '</div>' +
           '</div>' +
         '</div>' +
       '</div>' +
       // calcul CA par menu
       '<div class="col-lg-5">' +
-        '<div class="card">' +
-          '<div class="card-body">' +
-            '<h3 class="h6 mb-3"><i class="bi bi-currency-euro" aria-hidden="true"></i> Chiffre d\'affaires par menu</h3>' +
+        '<div class="card shadow-sm border-0">' +
+          '<div class="card-header bg-white border-0 pb-0 pt-3 px-4">' +
+            '<h3 class="h6 mb-1 fw-bold" style="color:#b5451b;">' +
+              '<i class="bi bi-currency-euro me-2" aria-hidden="true"></i>Chiffre d\'affaires par menu' +
+            '</h3>' +
+            '<p class="text-muted small mb-0">Filtrer et calculer le CA</p>' +
+          '</div>' +
+          '<div class="card-body px-4 pb-4">' +
             '<div class="mb-3">' +
               '<label for="ca-menu-filtre" class="form-label small fw-bold">Menu</label>' +
               '<select id="ca-menu-filtre" class="form-select form-select-sm" aria-label="Filtrer par menu">' +
@@ -965,8 +979,8 @@ async function chargerGraphiqueEtCA() {
                 '<input type="date" id="ca-date-fin" class="form-control form-control-sm" aria-label="Date fin">' +
               '</div>' +
             '</div>' +
-            '<button class="btn btn-primary btn-sm w-100 mb-3" onclick="calculerCA()">' +
-              '<i class="bi bi-calculator" aria-hidden="true"></i> Calculer le CA' +
+            '<button class="btn w-100 mb-3 text-white fw-semibold" style="background:#b5451b;" onclick="calculerCA()">' +
+              '<i class="bi bi-calculator me-2" aria-hidden="true"></i>Calculer le CA' +
             '</button>' +
             '<div id="ca-resultat" class="text-center py-3">' +
               '<p class="text-muted small">Cliquez sur "Calculer" pour afficher le chiffre d\'affaires.</p>' +
@@ -1041,77 +1055,119 @@ function dessinerGraphique() {
 }
 
 function creerChart(canvas, labels, values, couleurs) {
-  // vérifier que Chart.js est chargé
   if (typeof Chart === 'undefined') {
-    console.error('Chart.js non chargé');
-    canvas.parentElement.innerHTML =
-      '<p class="text-danger">Erreur : la bibliothèque de graphiques n\'est pas chargée.</p>';
+    canvas.parentElement.innerHTML = '<p class="text-danger">Erreur : Chart.js non chargé.</p>';
     return;
   }
 
-  // détruire l'ancien graphique s'il existe
-  if (graphiqueInstance) {
-    graphiqueInstance.destroy();
-  }
+  // Trier par valeur décroissante
+  var combined = labels.map(function(l, i) { return { label: l, value: values[i] }; });
+  combined.sort(function(a, b) { return b.value - a.value; });
+  var sortedLabels = combined.map(function(c) { return c.label; });
+  var sortedValues = combined.map(function(c) { return c.value; });
+  var total = sortedValues.reduce(function(s, v) { return s + v; }, 0);
+
+  // Mettre à jour le badge total
+  var totalEl = document.getElementById('chart-total-badge');
+  if (totalEl) totalEl.textContent = total + ' commande' + (total > 1 ? 's' : '');
+
+  // Hauteur dynamique selon le nombre de barres
+  var wrapper = document.getElementById('chart-wrapper');
+  var barH = 40;
+  var hauteur = Math.max(200, sortedLabels.length * barH + 60);
+  if (wrapper) wrapper.style.height = hauteur + 'px';
+
+  if (graphiqueInstance) graphiqueInstance.destroy();
 
   var ctx = canvas.getContext('2d');
 
-  // Tronquer les labels longs pour éviter le débordement
-  var labelsAffichage = labels.map(function(l) {
-    return l.length > 20 ? l.substring(0, 18) + '…' : l;
+  // Dégradé horizontal par barre : plus intense pour les 1ers
+  var backgroundColors = sortedValues.map(function(_, i) {
+    var ratio = 1 - (i / Math.max(sortedValues.length - 1, 1)) * 0.55;
+    var r = Math.round(181 * ratio + 220 * (1 - ratio));
+    var g = Math.round(69  * ratio + 120 * (1 - ratio));
+    var b = Math.round(27  * ratio + 80  * (1 - ratio));
+    var grad = ctx.createLinearGradient(0, 0, (canvas.parentElement.offsetWidth || 500), 0);
+    grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',0.95)');
+    grad.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0.35)');
+    return grad;
+  });
+
+  var borderColors = sortedValues.map(function(_, i) {
+    var ratio = 1 - (i / Math.max(sortedValues.length - 1, 1)) * 0.55;
+    var r = Math.round(181 * ratio + 220 * (1 - ratio));
+    var g = Math.round(69  * ratio + 120 * (1 - ratio));
+    var b = Math.round(27  * ratio + 80  * (1 - ratio));
+    return 'rgba(' + r + ',' + g + ',' + b + ',0.9)';
   });
 
   graphiqueInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labelsAffichage,
+      labels: sortedLabels,
       datasets: [{
-        label: 'Nombre de commandes',
-        data: values,
-        backgroundColor: couleurs.slice(0, labels.length),
-        borderColor: couleurs.slice(0, labels.length),
-        borderWidth: 1,
-        borderRadius: 4
+        label: 'Commandes',
+        data: sortedValues,
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: { left: 3, top: 0, right: 0, bottom: 0 },
+        borderRadius: { topRight: 8, bottomRight: 8, topLeft: 0, bottomLeft: 0 },
+        borderSkipped: false,
+        barThickness: 26
       }]
     },
     options: {
+      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 400 },
+      animation: { duration: 800, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
         tooltip: {
+          backgroundColor: 'rgba(20,20,20,0.9)',
+          titleColor: '#fff',
+          bodyColor: '#e0e0e0',
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: { size: 13, weight: 'bold' },
+          bodyFont: { size: 12 },
           callbacks: {
-            title: function(items) {
-              // Afficher le nom complet dans le tooltip
-              return labels[items[0].dataIndex] || labelsAffichage[items[0].dataIndex];
+            title: function(items) { return sortedLabels[items[0].dataIndex]; },
+            label: function(item) {
+              var v = item.raw;
+              var pct = total > 0 ? Math.round(v / total * 100) : 0;
+              return '  ' + v + ' commande' + (v > 1 ? 's' : '') + '  (' + pct + '%)';
             }
           }
         }
       },
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
-          suggestedMax: Math.max.apply(null, values) + 1,
+          suggestedMax: (Math.max.apply(null, sortedValues) || 1) + 1,
+          grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+          border: { display: false },
           ticks: {
             stepSize: 1,
             precision: 0,
-            font: { size: 11 }
-          },
-          title: {
-            display: true,
-            text: 'Commandes',
-            font: { size: 11 }
+            font: { size: 11 },
+            color: '#9e9e9e'
           }
         },
-        x: {
+        y: {
+          grid: { display: false },
+          border: { display: false },
           ticks: {
-            font: { size: 10 },
-            maxRotation: 40,
-            minRotation: 0
+            font: { size: 12 },
+            color: '#444',
+            callback: function(value, index) {
+              var l = sortedLabels[index] || '';
+              return l.length > 28 ? l.substring(0, 26) + '…' : l;
+            }
           }
         }
-      }
+      },
+      layout: { padding: { right: 8, top: 4, bottom: 4 } }
     }
   });
 }
