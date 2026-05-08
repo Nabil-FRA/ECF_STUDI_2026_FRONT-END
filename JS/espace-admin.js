@@ -172,10 +172,6 @@ async function chargerMenus() {
     tousLesMenus.forEach(function(menu) {
       var tr = document.createElement('tr');
 
-      var statutBadge = menu.actif !== false
-        ? '<span class="badge bg-success">Actif</span>'
-        : '<span class="badge bg-secondary">Inactif</span>';
-
       var prix    = menu.prix_par_personne || menu.prix_base || menu.prix || 0;
       var themeLib = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '—');
       var stock    = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '—');
@@ -187,7 +183,6 @@ async function chargerMenus() {
         '<td>' + Number(prix).toFixed(2) + ' €</td>' +
         '<td>' + minP + '</td>' +
         '<td>' + stock + '</td>' +
-        '<td>' + statutBadge + '</td>' +
         '<td>' +
           '<button class="btn btn-sm btn-outline-primary me-1" ' +
             'onclick="ouvrirModifierMenu(\'' + menu.id + '\')" ' +

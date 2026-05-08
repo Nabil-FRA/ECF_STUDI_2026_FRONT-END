@@ -446,17 +446,12 @@ async function chargerMenusEmploye() {
       var themeLib = (menu.theme && menu.theme.libelle) ? menu.theme.libelle : (menu.theme || '—');
       var minP = menu.nombre_personne_minimum || menu.nb_personnes_min || '—';
       var stock = (menu.quantite_restante !== undefined) ? menu.quantite_restante : (menu.stock !== undefined ? menu.stock : '—');
-      var statutBadge = menu.actif !== false
-        ? '<span class="badge bg-success">Actif</span>'
-        : '<span class="badge bg-secondary">Inactif</span>';
-
       tr.innerHTML =
         '<td><strong>' + echapper(menu.titre || menu.nom) + '</strong></td>' +
         '<td>' + echapper(themeLib) + '</td>' +
         '<td>' + Number(prix).toFixed(2) + ' €</td>' +
         '<td>' + minP + '</td>' +
         '<td>' + stock + '</td>' +
-        '<td>' + statutBadge + '</td>' +
         '<td>' +
           '<button class="btn btn-sm btn-outline-primary me-1" ' +
             'onclick="ouvrirModifierMenuEmp(\'' + menu.id + '\')" ' +
