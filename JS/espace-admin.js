@@ -484,7 +484,7 @@ function afficherUtilisateurs(utilisateurs) {
 
     // bouton désactiver (employés actifs) / réactiver (comptes désactivés)
     var btnDesactiver = '';
-    if (u.role === 'employe') {
+    if (u.role === 'employe' || u.role === 'utilisateur') {
       btnDesactiver =
         '<button class="btn btn-warning" ' +
           'onclick="toggleActivation(\'' + u.id + '\', false)" ' +
