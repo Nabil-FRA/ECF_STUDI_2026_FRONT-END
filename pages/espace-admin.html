@@ -242,7 +242,7 @@
                 <p class="small fw-bold text-muted mb-2">Ajouter un plat</p>
                 <div class="mb-2">
                   <label for="plat-titre" class="form-label small">Nom du plat</label>
-                  <input type="text" id="plat-titre" class="form-control form-control-sm" placeholder="ex: Magret de canard">
+                  <input type="text" id="plat-titre" class="form-control form-control-sm" placeholder="ex: Magret de canard" maxlength="150">
                 </div>
                 <div class="mb-2">
                   <label for="plat-allergenes" class="form-label small">Allergènes <span class="text-muted">(Ctrl+clic pour plusieurs)</span></label>
@@ -272,6 +272,36 @@
         <button type="button" class="btn btn-primary" id="btn-sauvegarder-menu"><i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer</button>
       </div>
     </div></div>
+  </div>
+
+  <!-- MODAL MODIFIER UN PLAT (imbriqué dans modal-menu) -->
+  <div class="modal fade" id="modal-edit-plat-admin" tabindex="-1" aria-labelledby="modal-edit-plat-admin-titre" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="modal-edit-plat-admin-titre">Modifier le plat</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="admin-edit-plat-id">
+          <input type="hidden" id="admin-edit-plat-menu-id">
+          <div class="mb-3">
+            <label for="admin-edit-plat-titre" class="form-label">Nom du plat <span class="text-danger">*</span></label>
+            <input type="text" id="admin-edit-plat-titre" class="form-control" maxlength="150" required>
+          </div>
+          <div class="mb-3">
+            <label for="admin-edit-plat-allergenes" class="form-label">Allergènes <span class="text-muted small">(Ctrl+clic pour plusieurs)</span></label>
+            <select id="admin-edit-plat-allergenes" class="form-select" multiple style="height:110px;"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="btn-sauvegarder-edit-plat-admin">
+            <i class="bi bi-check-lg" aria-hidden="true"></i> Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL CRÉER EMPLOYÉ -->

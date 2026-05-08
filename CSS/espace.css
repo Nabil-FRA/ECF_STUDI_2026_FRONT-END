@@ -290,6 +290,7 @@
 }
 
 /* ── Modaux imbriqués — s'afficher au-dessus du modal parent ── */
-#modal-edit-plat {
+#modal-edit-plat,
+#modal-edit-plat-admin {
   z-index: 1065 !important;
 }

@@ -10,6 +10,29 @@ var tousLesUtilisateurs = [];
 var toutesLesCommandes = [];
 var commandesParMenuMongo = []; // données MongoDB pour le graphique
 
+var platsCourantsAdmin  = {}; // cache plats par ID pour l'édition
+var platsTempAdmin      = []; // plats en attente (création menu)
+var imagesTempAdmin     = []; // images en attente (création menu)
+var _editPlatTempIndexAdmin = -1;
+
+/**
+ * Ouvre un modal secondaire (imbriqué) par-dessus un modal déjà ouvert.
+ * Gère automatiquement le z-index du backdrop Bootstrap 5.
+ */
+function ouvrirModalSecondaireAdmin(id) {
+  var el = document.getElementById(id);
+  var modal = new bootstrap.Modal(el, { backdrop: true });
+  modal.show();
+  el.addEventListener('shown.bs.modal', function handler() {
+    el.removeEventListener('shown.bs.modal', handler);
+    var backdrops = document.querySelectorAll('.modal-backdrop');
+    if (backdrops.length > 1) {
+      backdrops[backdrops.length - 1].style.zIndex = '1060';
+    }
+    el.style.zIndex = '1065';
+  });
+}
+
 // ── échapper le HTML pour éviter les XSS ────────────────────
 function echapper(str) {
   if (!str) return '';
@@ -66,6 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ── ajouter un plat au menu ───────────────────────────────
   document.getElementById('btn-ajouter-plat').addEventListener('click', ajouterPlatMenu);
+
+  // ── sauvegarder modification plat ────────────────────────
+  document.getElementById('btn-sauvegarder-edit-plat-admin').addEventListener('click', sauvegarderEditPlatAdmin);
 
   // charger les allergènes disponibles
   chargerAllergenes();
@@ -247,7 +273,16 @@ function afficherGalerieImages(images) {
 async function ajouterImageMenu() {
   var menuId = document.getElementById('menu-id').value;
   var url = document.getElementById('menu-image-url').value.trim();
-  if (!menuId || !url) return;
+  if (!url) return;
+
+  document.getElementById('menu-image-url').value = '';
+
+  // Mode création : pas encore de menuId → stockage temporaire
+  if (!menuId) {
+    imagesTempAdmin.push(url);
+    afficherGalerieTempAdmin();
+    return;
+  }
 
   try {
     var data = await fetchAPI('/admin/menus/' + menuId + '/images', {
@@ -255,7 +290,6 @@ async function ajouterImageMenu() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url_image: url })
     });
-    document.getElementById('menu-image-url').value = '';
     var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
     if (menu) {
       if (!menu.images) menu.images = [];
@@ -307,11 +341,36 @@ async function sauvegarderMenu() {
     var url = isModif ? '/admin/menus/' + menuId : '/admin/menus';
     var method = isModif ? 'PUT' : 'POST';
 
-    await fetchAPI(url, {
+    var result = await fetchAPI(url, {
       method: method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(donnees)
     });
+
+    // Si création : envoyer les plats et images temporaires
+    if (!isModif && result && result.id) {
+      var newMenuId = result.id;
+      for (var i = 0; i < platsTempAdmin.length; i++) {
+        try {
+          await fetchAPI('/admin/menus/' + newMenuId + '/plats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ titre_plat: platsTempAdmin[i].titre, allergenes: platsTempAdmin[i].allergeneIds })
+          });
+        } catch (e) { /* continue */ }
+      }
+      for (var j = 0; j < imagesTempAdmin.length; j++) {
+        try {
+          await fetchAPI('/admin/menus/' + newMenuId + '/images', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url_image: imagesTempAdmin[j] })
+          });
+        } catch (e) { /* continue */ }
+      }
+      platsTempAdmin  = [];
+      imagesTempAdmin = [];
+    }
 
     bootstrap.Modal.getInstance(document.getElementById('modal-menu')).hide();
     document.getElementById('form-menu').reset();
@@ -344,8 +403,13 @@ if (modalMenu) {
       document.getElementById('modal-menu-titre').textContent = 'Nouveau menu';
       document.getElementById('form-menu').reset();
       document.getElementById('menu-id').value = '';
-      document.getElementById('section-galerie').style.display = 'none';
-      document.getElementById('section-plats').style.display = 'none';
+      platsTempAdmin  = [];
+      imagesTempAdmin = [];
+      platsCourantsAdmin = {};
+      document.getElementById('section-plats').style.display = '';
+      document.getElementById('section-galerie').style.display = '';
+      afficherPlatsTempAdmin();
+      afficherGalerieTempAdmin();
     }
   });
 }
@@ -379,6 +443,7 @@ function afficherPlats(plats) {
     return;
   }
   plats.forEach(function(plat) {
+    platsCourantsAdmin[plat.id] = plat;
     var allergenesBadges = (plat.allergenes || []).map(function(a) {
       return '<span class="badge bg-warning text-dark me-1">' + echapper(a.libelle) + '</span>';
     }).join('');
@@ -391,10 +456,16 @@ function afficherPlats(plats) {
         '<small class="text-muted me-1">Allergènes :</small>' +
         (allergenesBadges ? allergenesBadges : '<small class="text-muted fst-italic">aucun</small>') +
       '</div>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger ms-3 flex-shrink-0" ' +
-        'onclick="supprimerPlatMenu(' + plat.id + ')" aria-label="Supprimer le plat">' +
-        '<i class="bi bi-trash" aria-hidden="true"></i>' +
-      '</button>';
+      '<div class="d-flex gap-1 ms-3 flex-shrink-0">' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary" ' +
+          'onclick="ouvrirModalEditPlatAdmin(' + plat.id + ')" aria-label="Modifier le plat">' +
+          '<i class="bi bi-pencil" aria-hidden="true"></i>' +
+        '</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-danger" ' +
+          'onclick="supprimerPlatMenu(' + plat.id + ')" aria-label="Supprimer le plat">' +
+          '<i class="bi bi-trash" aria-hidden="true"></i>' +
+        '</button>' +
+      '</div>';
     liste.appendChild(div);
   });
 }
@@ -402,10 +473,21 @@ function afficherPlats(plats) {
 async function ajouterPlatMenu() {
   var menuId = document.getElementById('menu-id').value;
   var titre = document.getElementById('plat-titre').value.trim();
-  if (!menuId || !titre) return;
+  if (!titre) return;
 
   var selectAllergenes = document.getElementById('plat-allergenes');
   var allergeneIds = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+  var allergeneLibelles = Array.from(selectAllergenes.selectedOptions).map(function(o) { return o.text; });
+
+  document.getElementById('plat-titre').value = '';
+  Array.from(selectAllergenes.options).forEach(function(o) { o.selected = false; });
+
+  // Mode création : pas encore de menuId → stockage temporaire
+  if (!menuId) {
+    platsTempAdmin.push({ titre: titre, allergeneIds: allergeneIds, allergeneLibelles: allergeneLibelles });
+    afficherPlatsTempAdmin();
+    return;
+  }
 
   try {
     var data = await fetchAPI('/admin/menus/' + menuId + '/plats', {
@@ -413,9 +495,6 @@ async function ajouterPlatMenu() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
     });
-    document.getElementById('plat-titre').value = '';
-    Array.from(selectAllergenes.options).forEach(function(o) { o.selected = false; });
-
     var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
     if (menu) {
       if (!menu.plats) menu.plats = [];
@@ -440,6 +519,169 @@ async function supprimerPlatMenu(platId) {
     }
   } catch (err) {
     alert('Erreur lors de la suppression du plat.');
+  }
+}
+
+// ── Affichage plats temporaires (mode création) ──────────────
+function afficherPlatsTempAdmin() {
+  var liste = document.getElementById('plats-liste');
+  liste.innerHTML = '';
+  if (platsTempAdmin.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-2">Aucun plat.</p>';
+    return;
+  }
+  platsTempAdmin.forEach(function(plat, index) {
+    var badges = plat.allergeneLibelles.map(function(lib) {
+      return '<span class="badge bg-warning text-dark me-1">' + echapper(lib) + '</span>';
+    }).join('');
+    var div = document.createElement('div');
+    div.className = 'd-flex align-items-start justify-content-between border rounded px-3 py-2 mb-2';
+    div.innerHTML =
+      '<div class="w-100">' +
+        '<div class="fw-bold mb-1">' + echapper(plat.titre) + '</div>' +
+        '<hr class="my-1">' +
+        '<small class="text-muted me-1">Allergènes :</small>' +
+        (badges || '<small class="text-muted fst-italic">aucun</small>') +
+      '</div>' +
+      '<div class="d-flex gap-1 ms-3 flex-shrink-0">' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary" ' +
+          'onclick="ouvrirEditPlatTempAdmin(' + index + ')" aria-label="Modifier">' +
+          '<i class="bi bi-pencil" aria-hidden="true"></i>' +
+        '</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-danger" ' +
+          'onclick="supprimerPlatTempAdmin(' + index + ')" aria-label="Supprimer">' +
+          '<i class="bi bi-trash" aria-hidden="true"></i>' +
+        '</button>' +
+      '</div>';
+    liste.appendChild(div);
+  });
+}
+
+function supprimerPlatTempAdmin(index) {
+  platsTempAdmin.splice(index, 1);
+  afficherPlatsTempAdmin();
+}
+
+function ouvrirEditPlatTempAdmin(index) {
+  var plat = platsTempAdmin[index];
+  if (!plat) return;
+  _editPlatTempIndexAdmin = index;
+  document.getElementById('admin-edit-plat-id').value      = '';
+  document.getElementById('admin-edit-plat-menu-id').value = '';
+  document.getElementById('admin-edit-plat-titre').value   = plat.titre;
+  var select = document.getElementById('admin-edit-plat-allergenes');
+  select.innerHTML = '';
+  tousLesAllergenes.forEach(function(a) {
+    var opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = a.libelle;
+    opt.selected = plat.allergeneIds.indexOf(a.id) !== -1;
+    select.appendChild(opt);
+  });
+  ouvrirModalSecondaireAdmin('modal-edit-plat-admin');
+}
+
+// ── Affichage images temporaires (mode création) ─────────────
+function afficherGalerieTempAdmin() {
+  var liste = document.getElementById('galerie-liste');
+  liste.innerHTML = '';
+  if (imagesTempAdmin.length === 0) {
+    liste.innerHTML = '<p class="text-muted small mb-0">Aucune image.</p>';
+    return;
+  }
+  imagesTempAdmin.forEach(function(url, index) {
+    var div = document.createElement('div');
+    div.className = 'position-relative';
+    div.style.cssText = 'width:80px;height:60px;';
+    div.innerHTML =
+      '<img src="' + echapper(url) + '" alt="Image menu" ' +
+        'style="width:100%;height:100%;object-fit:cover;border-radius:4px;">' +
+      '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 p-0" ' +
+        'style="width:18px;height:18px;font-size:10px;line-height:1;" ' +
+        'onclick="supprimerImageTempAdmin(' + index + ')" aria-label="Supprimer">&times;</button>';
+    liste.appendChild(div);
+  });
+}
+
+function supprimerImageTempAdmin(index) {
+  imagesTempAdmin.splice(index, 1);
+  afficherGalerieTempAdmin();
+}
+
+// ── Ouvrir modal édition plat existant ───────────────────────
+function ouvrirModalEditPlatAdmin(platId) {
+  var menuId = document.getElementById('menu-id').value;
+  var plat   = platsCourantsAdmin[platId];
+  if (!plat) { alert('Plat introuvable.'); return; }
+
+  document.getElementById('admin-edit-plat-id').value      = platId;
+  document.getElementById('admin-edit-plat-menu-id').value = menuId;
+  document.getElementById('admin-edit-plat-titre').value   = plat.titre_plat || plat.titre || '';
+
+  var allergenesActifs = (plat.allergenes || []).map(function(a) { return a.id; });
+  var select = document.getElementById('admin-edit-plat-allergenes');
+  select.innerHTML = '';
+  tousLesAllergenes.forEach(function(a) {
+    var opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = a.libelle;
+    opt.selected = allergenesActifs.indexOf(a.id) !== -1;
+    select.appendChild(opt);
+  });
+
+  ouvrirModalSecondaireAdmin('modal-edit-plat-admin');
+}
+
+// ── Sauvegarder modification plat ────────────────────────────
+async function sauvegarderEditPlatAdmin() {
+  var platId  = document.getElementById('admin-edit-plat-id').value;
+  var menuId  = document.getElementById('admin-edit-plat-menu-id').value;
+  var titre   = document.getElementById('admin-edit-plat-titre').value.trim();
+
+  if (!titre) {
+    alert('Le nom du plat est obligatoire.');
+    document.getElementById('admin-edit-plat-titre').focus();
+    return;
+  }
+
+  var selectAllergenes  = document.getElementById('admin-edit-plat-allergenes');
+  var allergeneIds      = Array.from(selectAllergenes.selectedOptions).map(function(o) { return parseInt(o.value); });
+  var allergeneLibelles = Array.from(selectAllergenes.selectedOptions).map(function(o) { return o.text; });
+
+  // Mode temp (création menu, plat pas encore en base)
+  if (!platId && _editPlatTempIndexAdmin >= 0) {
+    platsTempAdmin[_editPlatTempIndexAdmin] = { titre: titre, allergeneIds: allergeneIds, allergeneLibelles: allergeneLibelles };
+    _editPlatTempIndexAdmin = -1;
+    bootstrap.Modal.getInstance(document.getElementById('modal-edit-plat-admin')).hide();
+    afficherPlatsTempAdmin();
+    return;
+  }
+
+  // Plat existant en base → appel API
+  try {
+    var result = await fetchAPI('/admin/menus/' + menuId + '/plats/' + platId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titre_plat: titre, allergenes: allergeneIds })
+    });
+
+    var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
+    if (menu && menu.plats) {
+      var plat = menu.plats.find(function(p) { return p.id == platId; });
+      if (plat && result.plat) {
+        plat.titre_plat = result.plat.titre_plat;
+        plat.titre      = result.plat.titre_plat;
+        plat.allergenes = result.plat.allergenes;
+        platsCourantsAdmin[plat.id] = plat;
+      }
+      afficherPlats(menu.plats);
+    }
+
+    bootstrap.Modal.getInstance(document.getElementById('modal-edit-plat-admin')).hide();
+    if (typeof afficherToast === 'function') afficherToast('Plat mis à jour.', 'success');
+
+  } catch (err) {
+    alert(err.message || 'Erreur lors de la modification du plat.');
   }
 }
 
