@@ -486,17 +486,17 @@ function afficherUtilisateurs(utilisateurs) {
     var btnDesactiver = '';
     if (u.role === 'employe') {
       btnDesactiver =
-        '<button class="btn btn-sm btn-outline-warning ms-1" ' +
+        '<button class="btn btn-warning" ' +
           'onclick="toggleActivation(\'' + u.id + '\', false)" ' +
           'aria-label="Désactiver ' + echapper(u.prenom) + '">' +
-          '<i class="bi bi-person-slash" aria-hidden="true"></i>' +
+          '<i class="bi bi-person-slash me-1" aria-hidden="true"></i>Désactiver' +
         '</button>';
     } else if (u.role === 'desactive') {
       btnDesactiver =
-        '<button class="btn btn-sm btn-outline-success ms-1" ' +
+        '<button class="btn btn-success" ' +
           'onclick="toggleActivation(\'' + u.id + '\', true)" ' +
           'aria-label="Réactiver ' + echapper(u.prenom) + '">' +
-          '<i class="bi bi-person-check" aria-hidden="true"></i>' +
+          '<i class="bi bi-person-check me-1" aria-hidden="true"></i>Réactiver' +
         '</button>';
     }
 
