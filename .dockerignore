@@ -1,0 +1,31 @@
+# ============================================
+# .dockerignore — Front-end Vite & Gourmand
+# Exclure les fichiers inutiles à l'image Docker
+# ============================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+*.pdf
+
+# CI/CD Netlify (remplacé par Nginx dans Docker)
+netlify.toml
+
+# Dossier Docker (sauf la config nginx nécessaire au build)
+docker/README*
+docker/*.md
+
+# Éditeur
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs locaux
+*.log

@@ -105,15 +105,22 @@ document.addEventListener('DOMContentLoaded', function() {
   // ── filtre rôle utilisateurs ──────────────────────────────
   document.getElementById('filtre-role').addEventListener('change', filtrerUtilisateurs);
 
-  // ── filtre commandes ──────────────────────────────────────
+  // ── filtre commandes → appel serveur à chaque fois ───────────────
   document.getElementById('btn-filtrer-commandes').addEventListener('click', chargerToutesCommandes);
 
-  // charger les commandes au clic sur l'onglet
+  // onglet Commandes → reset filtre puis appel serveur
   document.getElementById('tab-commandes').addEventListener('click', function() {
-    if (toutesLesCommandes.length === 0) {
-      chargerToutesCommandes();
-    }
+    document.getElementById('filtre-statut-admin').value = 'tous';
+    document.getElementById('filtre-date-debut').value   = '';
+    document.getElementById('filtre-date-fin').value     = '';
+    chargerToutesCommandes();
   });
+
+  // ── onglet Avis ───────────────────────────────────────────
+  document.getElementById('tab-avis').addEventListener('click', function() {
+    chargerAvis();
+  });
+  document.getElementById('filtre-statut-avis').addEventListener('change', filtrerAvis);
 
   // charger les stats/graphique au clic sur l'onglet
   document.getElementById('tab-stats').addEventListener('click', function() {
@@ -322,9 +329,9 @@ async function sauvegarderMenu() {
     theme:                    document.getElementById('menu-theme').value,
     regime:                   document.getElementById('menu-regime').value,
     nombre_personne_minimum:  parseInt(document.getElementById('menu-convives-min').value),
-    nombre_personne_maximum:  parseInt(document.getElementById('menu-convives-max').value),
     quantite_restante:        parseInt(document.getElementById('menu-stock').value) || 0,
-    description:              document.getElementById('menu-description').value.trim()
+    description:              document.getElementById('menu-description').value.trim(),
+    conditions:               document.getElementById('menu-conditions').value.trim()
   };
 
   if (!donnees.titre || !donnees.prix_par_personne || !donnees.theme) {
@@ -407,6 +414,96 @@ if (modalMenu) {
       afficherGalerieTempAdmin();
     }
   });
+
+  // bouton ajouter image
+  document.getElementById('btn-ajouter-image').addEventListener('click', async function() {
+    var menuId = document.getElementById('menu-id').value;
+    var url = document.getElementById('nouvelle-image-url').value.trim();
+
+    if (!url) {
+      alert('Veuillez saisir une URL.');
+      return;
+    }
+    if (!menuId) {
+      alert('Enregistrez d\'abord le menu avant d\'ajouter des images.');
+      return;
+    }
+
+    try {
+      var data = await fetchAPI('/admin/menus/' + menuId + '/images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url_image: url })
+      });
+
+      document.getElementById('nouvelle-image-url').value = '';
+
+      // mettre à jour l'objet menu en mémoire
+      var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
+      if (menu) {
+        if (!menu.images) menu.images = [];
+        menu.images.push(data.image);
+        afficherGalerieModal(menu.images);
+      }
+
+      if (typeof afficherToast === 'function') {
+        afficherToast('Image ajoutée.', 'success');
+      }
+    } catch (err) {
+      alert('Erreur lors de l\'ajout de l\'image.');
+    }
+  });
+}
+
+// ── Afficher la galerie dans le modal ────────────────────────
+function afficherGalerieModal(images) {
+  var conteneur = document.getElementById('galerie-images');
+  if (!conteneur) return;
+
+  conteneur.innerHTML = '';
+
+  if (!images || images.length === 0) {
+    conteneur.innerHTML = '<p class="text-muted small mb-0">Aucune photo. Ajoutez une URL ci-dessous.</p>';
+    return;
+  }
+
+  images.forEach(function(img) {
+    var imageId = img.id;
+    var url = img.url_image || img.url || '';
+
+    var div = document.createElement('div');
+    div.className = 'position-relative';
+    div.style.cssText = 'width:90px;height:90px;';
+    div.innerHTML =
+      '<img src="' + echapper(url) + '" alt="Photo du menu" ' +
+        'style="width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;"' +
+        'onerror="this.src=\'../img/menu-placeholder.jpg\'">' +
+      '<button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" ' +
+        'style="padding:0 4px;line-height:1.2;" ' +
+        'onclick="supprimerImage(' + imageId + ')" ' +
+        'aria-label="Supprimer cette photo">' +
+        '<i class="bi bi-x" aria-hidden="true"></i>' +
+      '</button>';
+    conteneur.appendChild(div);
+  });
+}
+
+async function supprimerImage(imageId) {
+  var menuId = document.getElementById('menu-id').value;
+  if (!menuId || !confirm('Supprimer cette photo ?')) return;
+
+  try {
+    await fetchAPI('/admin/menus/' + menuId + '/images/' + imageId, { method: 'DELETE' });
+
+    // mettre à jour l'objet menu en mémoire
+    var menu = tousLesMenus.find(function(m) { return m.id == menuId; });
+    if (menu && menu.images) {
+      menu.images = menu.images.filter(function(img) { return img.id !== imageId; });
+      afficherGalerieModal(menu.images);
+    }
+  } catch (err) {
+    alert('Erreur lors de la suppression de l\'image.');
+  }
 }
 
 // ── allergènes ───────────────────────────────────────────────
@@ -865,21 +962,45 @@ async function creerEmploye() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// COMMANDES (toutes)
+// COMMANDES (toutes) — filtre 100% côté serveur
 // ══════════════════════════════════════════════════════════════
+
+// Table de correspondance : valeur DB (lowercase) → { badge, libelle }
+// Le libelle EST IDENTIQUE au texte visible dans le <select> du filtre
+var STATUTS_COMMANDE = {
+  'en cours':                         { badge: 'bg-warning text-dark', libelle: 'En cours' },
+  'accepté':                          { badge: 'bg-success',           libelle: 'Accepté' },
+  'en préparation':                   { badge: 'bg-info text-dark',    libelle: 'En préparation' },
+  'en cours de livraison':            { badge: 'bg-primary',           libelle: 'En cours de livraison' },
+  'livré':                            { badge: 'bg-info',              libelle: 'Livré' },
+  'en attente du retour de matériel': { badge: 'bg-warning',           libelle: 'En attente du retour de matériel' },
+  'terminée':                         { badge: 'bg-secondary',         libelle: 'Terminée' },
+  'annulée':                          { badge: 'bg-danger',            libelle: 'Annulée' }
+};
+
+function getBadgeClassAdmin(statut) {
+  var s = (statut || '').toLowerCase().trim();
+  return (STATUTS_COMMANDE[s] || {}).badge || 'bg-secondary';
+}
+
+function getLibelleStatut(statut) {
+  var s = (statut || '').toLowerCase().trim();
+  return (STATUTS_COMMANDE[s] || {}).libelle || statut;
+}
+
 async function chargerToutesCommandes() {
   var body = document.getElementById('all-commandes-body');
   var chargement = document.getElementById('all-commandes-chargement');
 
-  var statut = document.getElementById('filtre-statut-admin').value;
+  var statut    = document.getElementById('filtre-statut-admin').value;
   var dateDebut = document.getElementById('filtre-date-debut').value;
-  var dateFin = document.getElementById('filtre-date-fin').value;
+  var dateFin   = document.getElementById('filtre-date-fin').value;
 
+  // Construction URL avec paramètres serveur
   var params = [];
   if (statut !== 'tous') params.push('statut=' + encodeURIComponent(statut));
-  if (dateDebut) params.push('dateDebut=' + dateDebut);
-  if (dateFin) params.push('dateFin=' + dateFin);
-
+  if (dateDebut)         params.push('dateDebut=' + encodeURIComponent(dateDebut));
+  if (dateFin)           params.push('dateFin='   + encodeURIComponent(dateFin));
   var url = '/admin/commandes' + (params.length ? '?' + params.join('&') : '');
 
   if (chargement) chargement.classList.remove('d-none');
@@ -889,6 +1010,11 @@ async function chargerToutesCommandes() {
     var data = await fetchAPI(url);
     toutesLesCommandes = data.commandes || data || [];
     if (chargement) chargement.classList.add('d-none');
+
+    if (toutesLesCommandes.length === 0) {
+      body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Aucune commande pour ces critères.</td></tr>';
+      return;
+    }
 
     toutesLesCommandes.forEach(function(cmd) {
       var tr = document.createElement('tr');
@@ -910,7 +1036,7 @@ async function chargerToutesCommandes() {
         '<td>' + echapper(cmd.client_email || '—') + '</td>' +
         '<td>' + echapper((cmd.menu && cmd.menu.titre) || cmd.menu_titre || '—') + '</td>' +
         '<td class="fw-bold">' + (cmd.prix_total ? Number(cmd.prix_total).toFixed(2) + ' €' : '—') + '</td>' +
-        '<td><span class="badge ' + badgeClass + '">' + echapper(cmd.statut) + '</span></td>';
+        '<td><span class="badge ' + badgeClass + '">' + echapper(getLibelleStatut(cmd.statut)) + '</span></td>';
 
       body.appendChild(tr);
     });
@@ -1283,15 +1409,119 @@ function calculerCA() {
 // données de démonstration pour le CA (si pas de commandes chargées)
 function getDemoCommandes() {
   return [
-    { id: 1, menu_id: 1, menuNom: 'Menu Noël Tradition', date: '2026-01-15', total: 450, statut: 'Terminée' },
-    { id: 2, menu_id: 1, menuNom: 'Menu Noël Tradition', date: '2026-01-20', total: 380, statut: 'Terminée' },
-    { id: 3, menu_id: 2, menuNom: 'Menu Pâques Printanier', date: '2026-02-10', total: 290, statut: 'Livrée' },
-    { id: 4, menu_id: 3, menuNom: 'Menu Classique Bordelais', date: '2026-02-14', total: 175, statut: 'Terminée' },
-    { id: 5, menu_id: 3, menuNom: 'Menu Classique Bordelais', date: '2026-03-01', total: 210, statut: 'Confirmée' },
-    { id: 6, menu_id: 4, menuNom: 'Menu Végétarien Gourmand', date: '2026-03-05', total: 320, statut: 'En attente' },
-    { id: 7, menu_id: 5, menuNom: 'Menu Événement Prestige', date: '2026-03-10', total: 890, statut: 'Terminée' },
-    { id: 8, menu_id: 1, menuNom: 'Menu Noël Tradition', date: '2026-03-15', total: 520, statut: 'Annulée' },
-    { id: 9, menu_id: 6, menuNom: 'Menu Végan Saison', date: '2026-03-20', total: 195, statut: 'Livrée' },
-    { id: 10, menu_id: 3, menuNom: 'Menu Classique Bordelais', date: '2026-04-01', total: 240, statut: 'Terminée' }
+    { id: 1, menu_id: 1, menuNom: 'Menu Noël Tradition', date: '2026-01-15', total: 450, statut: 'terminée' },
+    { id: 2, menu_id: 1, menuNom: 'Menu Noël Tradition', date: '2026-01-20', total: 380, statut: 'terminée' },
+    { id: 3, menu_id: 2, menuNom: 'Menu Pâques Printanier', date: '2026-02-10', total: 290, statut: 'livré' },
+    { id: 4, menu_id: 3, menuNom: 'Menu Classique Bordelais', date: '2026-02-14', total: 175, statut: 'terminée' },
+    { id: 5, menu_id: 3, menuNom: 'Menu Classique Bordelais', date: '2026-03-01', total: 210, statut: 'accepté' },
+    { id: 6, menu_id: 4, menuNom: 'Menu Végétarien Gourmand', date: '2026-03-05', total: 320, statut: 'en cours' },
+    { id: 7, menu_id: 5, menuNom: 'Menu Événement Prestige', date: '2026-03-10', total: 890, statut: 'terminée' },
+    { id: 8, menu_id: 1, menuNom: 'Menu Noël Tradition', date: '2026-03-15', total: 520, statut: 'annulée' },
+    { id: 9, menu_id: 6, menuNom: 'Menu Végan Saison', date: '2026-03-20', total: 195, statut: 'livré' },
+    { id: 10, menu_id: 3, menuNom: 'Menu Classique Bordelais', date: '2026-04-01', total: 240, statut: 'terminée' }
   ];
+}
+
+// ══════════════════════════════════════════════════════════════
+// AVIS
+// ══════════════════════════════════════════════════════════════
+var tousLesAvisAdmin = [];
+
+async function chargerAvis() {
+  var body = document.getElementById('avis-body');
+  var chargement = document.getElementById('avis-chargement');
+  var vide = document.getElementById('avis-vide');
+
+  if (chargement) chargement.classList.remove('d-none');
+  if (vide) vide.classList.add('d-none');
+  body.innerHTML = '';
+
+  try {
+    var data = await fetchAPI('/admin/avis');
+    tousLesAvisAdmin = data.avis || [];
+    if (chargement) chargement.classList.add('d-none');
+    filtrerAvis();
+  } catch (err) {
+    console.error('Erreur avis :', err);
+    if (chargement) chargement.innerHTML = '<p class="text-danger">Erreur de chargement.</p>';
+  }
+}
+
+function filtrerAvis() {
+  var filtre = document.getElementById('filtre-statut-avis').value;
+  var liste = filtre === 'tous'
+    ? tousLesAvisAdmin
+    : tousLesAvisAdmin.filter(function(a) { return a.statut === filtre; });
+
+  afficherAvis(liste);
+}
+
+function afficherAvis(avis) {
+  var body = document.getElementById('avis-body');
+  var vide = document.getElementById('avis-vide');
+  body.innerHTML = '';
+
+  if (avis.length === 0) {
+    if (vide) vide.classList.remove('d-none');
+    return;
+  }
+  if (vide) vide.classList.add('d-none');
+
+  avis.forEach(function(a) {
+    var etoiles = '';
+    for (var i = 1; i <= 5; i++) {
+      etoiles += '<i class="bi bi-star' + (i <= a.note ? '-fill text-warning' : '') + '" aria-hidden="true"></i>';
+    }
+
+    var statutBadge = {
+      'en attente': '<span class="badge bg-warning text-dark">En attente</span>',
+      'validé':     '<span class="badge bg-success">Validé</span>',
+      'refusé':     '<span class="badge bg-danger">Refusé</span>'
+    }[a.statut] || '<span class="badge bg-secondary">' + echapper(a.statut) + '</span>';
+
+    var btnActions = '';
+    if (a.statut === 'en attente') {
+      btnActions =
+        '<button class="btn btn-sm btn-success me-1" onclick="changerStatutAvis(' + a.id + ', \'validé\')" ' +
+          'aria-label="Valider cet avis">' +
+          '<i class="bi bi-check-lg" aria-hidden="true"></i>' +
+        '</button>' +
+        '<button class="btn btn-sm btn-danger" onclick="changerStatutAvis(' + a.id + ', \'refusé\')" ' +
+          'aria-label="Refuser cet avis">' +
+          '<i class="bi bi-x-lg" aria-hidden="true"></i>' +
+        '</button>';
+    }
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + echapper(a.client || '—') + '</td>' +
+      '<td class="small">' + echapper(a.commande || '—') + '</td>' +
+      '<td>' + etoiles + '</td>' +
+      '<td class="small">' + echapper(a.description || '—') + '</td>' +
+      '<td>' + statutBadge + '</td>' +
+      '<td>' + btnActions + '</td>';
+
+    body.appendChild(tr);
+  });
+}
+
+async function changerStatutAvis(avisId, statut) {
+  try {
+    await fetchAPI('/admin/avis/' + avisId + '/statut', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statut: statut })
+    });
+
+    var avis = tousLesAvisAdmin.find(function(a) { return a.id === avisId; });
+    if (avis) avis.statut = statut;
+
+    filtrerAvis();
+
+    if (typeof afficherToast === 'function') {
+      afficherToast('Avis ' + statut + '.', statut === 'validé' ? 'success' : 'warning');
+    }
+  } catch (err) {
+    alert('Erreur lors de la modification de l\'avis.');
+  }
 }
