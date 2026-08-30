@@ -7,7 +7,7 @@
 .page-titre {
   color: var(--vg-primary, #b5451b);
   font-weight: 700;
-  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  font-size: 1.4rem;
   margin-bottom: 0.5rem;
 }
 
@@ -72,6 +72,7 @@
   font-weight: 600;
   border-radius: var(--vg-radius, 8px);
   transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 100%;
 }
 
 #btn-envoyer:hover {
@@ -112,9 +113,9 @@
   background-color: var(--vg-bg-alt, #faf8f6);
   border: 1px solid var(--vg-border, #e2ddd8);
   border-radius: var(--vg-radius-lg, 12px);
-  padding: 2rem;
-  position: sticky;
-  top: 100px;
+  padding: 1.5rem;
+  position: static;
+  margin-top: 2rem;
   box-shadow: var(--vg-shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
 }
 
@@ -232,24 +233,28 @@
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* ── Responsive ────────────────────────────────────────────── */
-@media (max-width: 991.98px) {
-  .coordonnees-card {
-    position: static;
-    margin-top: 2rem;
-  }
-}
+/* ── Responsive — mobile first ─────────────────────────────── */
 
-@media (max-width: 575.98px) {
+/* sm ≥ 576px */
+@media (min-width: 576px) {
   .page-titre {
-    font-size: 1.4rem;
+    font-size: clamp(1.5rem, 3vw, 1.9rem);
   }
 
   .coordonnees-card {
-    padding: 1.5rem;
+    padding: 2rem;
   }
 
   #btn-envoyer {
-    width: 100%;
+    width: auto;
+  }
+}
+
+/* lg ≥ 992px : la carte coordonnées passe en colonne collante */
+@media (min-width: 992px) {
+  .coordonnees-card {
+    position: sticky;
+    top: 100px;
+    margin-top: 0;
   }
 }

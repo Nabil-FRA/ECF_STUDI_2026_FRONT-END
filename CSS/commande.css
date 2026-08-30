@@ -5,7 +5,7 @@
 /* ── En-tête de page ───────────────────────────────────────── */
 .page-header {
   background-color: var(--color-bg-alt, #f8f5f0);
-  padding: 2rem 0 1.5rem;
+  padding: 1.25rem 0 1rem;
   border-bottom: 1px solid #e8e0d5;
 }
 
@@ -45,8 +45,8 @@
   content: "";
   position: absolute;
   top: 18px;
-  left: calc(50% + 20px);
-  width: calc(100% - 40px);
+  left: calc(50% + 18px);
+  width: calc(100% - 36px);
   height: 2px;
   background-color: #dee2e6;
   z-index: 0;
@@ -97,8 +97,9 @@
   display: none;
 }
 
-/* Label sous le cercle */
+/* Label sous le cercle — masqué par défaut (mobile), affiché dès sm */
 .stepper-label {
+  display: none;
   margin-top: 0.5rem;
   font-size: 0.8rem;
   color: #6c757d;
@@ -124,7 +125,7 @@
 
 .form-step-title {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
   border-bottom: 2px solid var(--color-primary, #b5451b);
@@ -267,46 +268,66 @@
   border-color: var(--color-primary, #b5451b);
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 575.98px) {
-  /* Stepper : labels masqués sur très petits écrans */
+/* ── Navigation entre étapes — mobile first ─────────────────── */
+/* Cible la classe .nav-etapes du HTML, plus la combinaison
+   d'utilitaires .d-flex.justify-content-between : ce sélecteur
+   attrapait n'importe quel bloc portant ces classes. */
+.nav-etapes {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nav-etapes .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* "Étape suivante" au-dessus de "Étape précédente" sur mobile */
+.nav-etapes .btn-outline-secondary {
+  order: 2;
+}
+
+.nav-etapes .btn-primary,
+.nav-etapes .btn-success {
+  order: 1;
+}
+
+/* ── Responsive — mobile first ─────────────────────────────── */
+
+/* sm ≥ 576px */
+@media (min-width: 576px) {
   .stepper-label {
-    display: none;
+    display: block;
   }
 
   .stepper-item:not(:last-child)::after {
-    top: 18px;
-    left: calc(50% + 18px);
-    width: calc(100% - 36px);
+    left: calc(50% + 20px);
+    width: calc(100% - 40px);
   }
 
   .form-step-title {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
 
-  /* Boutons empilés, "Suivant" toujours en premier */
-  .d-flex.justify-content-between {
-    flex-direction: column;
-    gap: 0.75rem;
+  .nav-etapes {
+    flex-direction: row;
+    gap: 0;
   }
 
-  .d-flex.justify-content-between .btn {
-    width: 100%;
-    justify-content: center;
+  .nav-etapes .btn {
+    width: auto;
   }
 
-  .d-flex.justify-content-between .btn-outline-secondary {
-    order: 2;
-  }
-
-  .d-flex.justify-content-between .btn-primary,
-  .d-flex.justify-content-between .btn-success {
-    order: 1;
+  .nav-etapes .btn-outline-secondary,
+  .nav-etapes .btn-primary,
+  .nav-etapes .btn-success {
+    order: 0;
   }
 }
 
-@media (max-width: 767.98px) {
+/* md ≥ 768px */
+@media (min-width: 768px) {
   .page-header {
-    padding: 1.25rem 0 1rem;
+    padding: 2rem 0 1.5rem;
   }
 }

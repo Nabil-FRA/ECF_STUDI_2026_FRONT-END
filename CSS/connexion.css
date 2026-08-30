@@ -5,7 +5,7 @@
 /* ── En-tête de page ───────────────────────────────────────── */
 .page-header {
   background-color: var(--color-bg-alt, #f8f5f0);
-  padding: 2rem 0 1.5rem;
+  padding: 1.25rem 0 1rem;
   border-bottom: 1px solid #e8e0d5;
   text-align: center;
 }
@@ -173,17 +173,13 @@ a.fw-semibold:focus {
   font-weight: 600;
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 575.98px) {
-  .login-card .card-body {
-    padding: 1.5rem !important;
-  }
-
+/* ── Responsive — mobile first (sm ≥ 576px) ─────────────────── */
+/* .login-card .card-body : rien ici, la classe p-4 du HTML vaut
+   déjà 1.5rem — la surcharge !important était sans effet.
+   .page-header h1 : géré par clamp(), qui plafonne déjà à 1.5rem
+   sous 600px — pas besoin de media query. */
+@media (min-width: 576px) {
   .page-header {
-    padding: 1.25rem 0 1rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.5rem;
+    padding: 2rem 0 1.5rem;
   }
 }
