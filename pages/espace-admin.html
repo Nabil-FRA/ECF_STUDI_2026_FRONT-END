@@ -145,9 +145,9 @@
       <!-- ONGLET COMMANDES -->
       <div class="tab-pane fade" id="panel-commandes" role="tabpanel" aria-labelledby="tab-commandes">
         <h2 class="h5 mb-3">Toutes les commandes</h2>
-        <div class="d-flex gap-2 mb-3 flex-wrap">
+        <div class="d-flex gap-2 mb-3 flex-wrap filtres-bar">
           <label for="filtre-statut-admin" class="visually-hidden">Statut</label>
-          <select id="filtre-statut-admin" class="form-select form-select-sm" style="width:auto;" aria-label="Filtrer par statut">
+          <select id="filtre-statut-admin" class="form-select form-select-sm" aria-label="Filtrer par statut">
             <option value="tous">Tous</option>
             <option value="en cours">En cours</option>
             <option value="accepté">Accepté</option>
@@ -159,10 +159,10 @@
             <option value="annulée">Annulée</option>
           </select>
           <label for="filtre-date-debut" class="visually-hidden">Date début</label>
-          <input type="date" id="filtre-date-debut" class="form-control form-control-sm" style="width:auto;" aria-label="Date début">
+          <input type="date" id="filtre-date-debut" class="form-control form-control-sm" aria-label="Date début">
           <span class="align-self-center" aria-hidden="true">à</span>
           <label for="filtre-date-fin" class="visually-hidden">Date fin</label>
-          <input type="date" id="filtre-date-fin" class="form-control form-control-sm" style="width:auto;" aria-label="Date fin">
+          <input type="date" id="filtre-date-fin" class="form-control form-control-sm" aria-label="Date fin">
           <button id="btn-filtrer-commandes" class="btn btn-sm btn-primary">Filtrer</button>
         </div>
         <div class="table-responsive">
