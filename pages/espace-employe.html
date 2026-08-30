@@ -69,9 +69,9 @@
       <div class="tab-pane fade show active" id="panel-commandes" role="tabpanel" aria-labelledby="tab-commandes">
 
         <!-- Filtres -->
-        <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <div class="d-flex flex-wrap gap-2 mb-3 align-items-center filtres-bar">
           <label for="filtre-statut" class="form-label mb-0 fw-bold">Statut :</label>
-          <select id="filtre-statut" class="form-select form-select-sm" style="width:auto;" aria-label="Filtrer par statut">
+          <select id="filtre-statut" class="form-select form-select-sm" aria-label="Filtrer par statut">
             <option value="tous">Tous</option>
             <option value="en cours">En cours</option>
             <option value="accepté">Accepté</option>
@@ -84,10 +84,10 @@
           </select>
 
           <label for="filtre-client" class="form-label mb-0 ms-3 fw-bold">Client :</label>
-          <input type="search" id="filtre-client" class="form-control form-control-sm" style="width:180px;" placeholder="Nom ou email..." aria-label="Filtrer par client">
+          <input type="search" id="filtre-client" class="form-control form-control-sm" placeholder="Nom ou email..." aria-label="Filtrer par client">
 
           <label for="filtre-date" class="form-label mb-0 ms-3 fw-bold">Date :</label>
-          <input type="date" id="filtre-date" class="form-control form-control-sm" style="width:auto;" aria-label="Filtrer par date de prestation">
+          <input type="date" id="filtre-date" class="form-control form-control-sm" aria-label="Filtrer par date de prestation">
           <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-effacer-date" title="Voir toutes les dates"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
 

@@ -347,16 +347,17 @@ function initToggleFiltres() {
   btnToggle.addEventListener('click', function() {
     var estOuvert = btnToggle.getAttribute('aria-expanded') === 'true';
 
+    // On pilote l'ouverture avec notre propre classe .is-open et non
+    // avec les utilitaires .d-none / .d-block de Bootstrap : ceux-ci
+    // portent !important, ce qui obligeait le CSS à surenchérir.
     if (estOuvert) {
       // on ferme
-      panneauFiltres.classList.add('d-none');
-      panneauFiltres.classList.remove('d-block');
+      panneauFiltres.classList.remove('is-open');
       btnToggle.setAttribute('aria-expanded', 'false');
       btnToggle.innerHTML = '<i class="bi bi-funnel" aria-hidden="true"></i> Filtres';
     } else {
       // on ouvre
-      panneauFiltres.classList.remove('d-none');
-      panneauFiltres.classList.add('d-block');
+      panneauFiltres.classList.add('is-open');
       btnToggle.setAttribute('aria-expanded', 'true');
       btnToggle.innerHTML = '<i class="bi bi-x-lg" aria-hidden="true"></i> Fermer';
     }

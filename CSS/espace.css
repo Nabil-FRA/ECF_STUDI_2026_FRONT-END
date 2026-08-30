@@ -6,7 +6,11 @@
 .page-titre {
   color: var(--color-primary, #b5451b);
   font-weight: 700;
-  font-size: 1.6rem;
+  font-size: 1.1rem;
+}
+
+.page-titre i {
+  font-size: 1rem;
 }
 
 /* ── Cartes statistiques ───────────────────────────────────── */
@@ -20,16 +24,26 @@
 }
 
 .stat-nombre {
-  font-size: 2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #212529;
 }
 
 .stat-label {
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: #6c757d;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+.stat-card .card-body {
+  padding: 0.75rem 0.5rem;
+}
+
+/* Icônes .display-6 des cartes stats : réduites sur mobile,
+   remises aux valeurs natives de Bootstrap dès sm. */
+.stat-card .display-6 {
+  font-size: 1.5rem;
 }
 
 /* couleurs pour les stats employé */
@@ -38,9 +52,27 @@
 .stat-livree .stat-nombre { color: #0d6efd; }
 
 /* ── Onglets Bootstrap custom ──────────────────────────────── */
+/* Mobile : onglets en icônes seules, répartis à largeur égale.
+   Le texte et les proportions normales reviennent dès md. */
+.nav-tabs .nav-item {
+  flex: 1;
+  text-align: center;
+}
+
 .nav-tabs .nav-link {
   color: #495057;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font-size: 0;
+  line-height: 1;
+}
+
+.nav-tabs .nav-link i {
+  font-size: 1.1rem;
 }
 
 .nav-tabs .nav-link.active {
@@ -59,15 +91,43 @@
 }
 
 /* ── Tableaux ──────────────────────────────────────────────── */
+/* Mobile : cellules compactes, scroll horizontal encadré,
+   colonnes secondaires masquées. Tout revient à la normale dès md. */
 .table th {
-  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
   color: #6c757d;
 }
 
 .table td {
   vertical-align: middle;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem 0.4rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.table thead th {
+  font-size: 0.7rem;
+  letter-spacing: 0;
+}
+
+.table-responsive {
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.table .col-hide-mobile {
+  display: none;
+}
+
+/* Boutons d'action dans les tableaux */
+td .btn-sm {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.75rem;
 }
 
 /* ── Badges ────────────────────────────────────────────────── */
@@ -109,183 +169,197 @@
   box-shadow: 0 0 0 0.2rem rgba(181, 69, 27, 0.15);
 }
 
-/* ── Responsive ────────────────────────────────────────────── */
-@media (max-width: 768px) {
+/* ============================================================
+   RESPONSIVE — mobile first
+   Le mobile est décrit par les règles de base ci-dessus ;
+   les paliers ci-dessous ajoutent le confort des grands écrans.
+   Breakpoints = ceux de Bootstrap (576 / 768).
+
+   Règles supprimées car sans effet sur le rendu — Bootstrap
+   applique déjà ces valeurs nativement sous 576px :
+     .modal-dialog { margin: 0.5rem; max-width: calc(100% - 1rem) }
+     .modal-body   { padding: 1rem }
+   Ne pas remettre max-width ici : la règle déborderait au-dessus
+   de 576px et écraserait les tailles .modal-lg / .modal-xl.
+   ============================================================ */
+
+/* ── Modales : compactes et scrollables sur mobile ─────────── */
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-footer .btn {
+  width: 100%;
+}
+
+/* ── Onglets : texte masqué sur mobile, icônes seules ──────── */
+/* (les boutons portent un aria-label, l'info reste accessible) */
+.nav-tabs .nav-link span {
+  display: none;
+}
+
+/* ── Barre de filtres — espace employé ─────────────────────── */
+/* Les largeurs des champs étaient en style="width:…" inline dans
+   le HTML, ce qui obligeait à un width:100% !important pour les
+   surcharger. Elles sont désormais ici : plus d'inline, plus de
+   !important sur la largeur. */
+.filtres-bar {
+  flex-direction: column;
+}
+
+.filtres-bar .form-select,
+.filtres-bar .form-control,
+.filtres-bar .form-label {
+  width: 100%;
+}
+
+.filtres-bar .ms-3 {
+  margin-left: 0 !important;
+  margin-top: 0.5rem;
+}
+
+/* ── En-tête d'espace : titre + bouton déconnexion ─────────── */
+.espace-entete {
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 0.75rem;
+}
+
+/* ---------- sm ≥ 576px ---------- */
+@media (min-width: 576px) {
   .page-titre {
     font-size: 1.3rem;
+  }
+
+  .page-titre i {
+    font-size: inherit;
   }
 
   .stat-nombre {
     font-size: 1.5rem;
   }
 
-  .nav-tabs .nav-link {
+  .stat-label {
     font-size: 0.85rem;
-    padding: 0.5rem 0.75rem;
   }
 
-  /* cacher le texte des onglets sur petit écran, garder l'icône */
-  .nav-tabs .nav-link span {
-    display: none;
-  }
-}
-
-/* ============================================================
-   PATCH espace.css — À COLLER À LA FIN de ton espace.css
-   Corrige le responsive mobile pour les 3 espaces
-   ============================================================ */
-
-/* ── MODALS : ne débordent plus sur mobile ─────────────────── */
-@media (max-width: 575.98px) {
-  .modal-dialog {
-    margin: 0.5rem;
-    max-width: calc(100% - 1rem);
-  }
-
-  .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .modal-body {
+  .stat-card .card-body {
     padding: 1rem;
   }
 
+  /* valeur native de .display-6 (Bootstrap) */
+  .stat-card .display-6 {
+    font-size: calc(1.375rem + 1.5vw);
+  }
+
+  td .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Bootstrap reprend la main : l'espacement du footer repasse
+     par ses marges natives (gap: normal). */
+  .modal-content {
+    max-height: none;
+    overflow-y: visible;
+  }
+
   .modal-footer {
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-direction: row;
+    gap: normal;
   }
 
   .modal-footer .btn {
-    width: 100%;
+    width: auto;
+  }
+
+  .espace-entete {
+    flex-direction: row;
+    align-items: center !important;
+    gap: normal;
   }
 }
 
-/* ── TABLEAUX : scroll horizontal propre sur mobile ────────── */
-@media (max-width: 767.98px) {
-  .table-responsive {
-    border: 1px solid #e9ecef;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  /* colonnes moins importantes masquées sur très petit écran */
-  .table .col-hide-mobile {
-    display: none;
-  }
-
-  /* cellules plus compactes */
-  .table th,
-  .table td {
-    padding: 0.5rem 0.4rem;
-    font-size: 0.8rem;
-    white-space: nowrap;
-  }
-
-  /* le header du tableau reste lisible */
-  .table thead th {
-    font-size: 0.7rem;
-    letter-spacing: 0;
-  }
-}
-
-/* ── ONGLETS : accessibilité quand le texte est masqué ─────── */
-@media (max-width: 768px) {
-  /* on garde les icônes visibles et on masque le texte */
-  .nav-tabs .nav-link {
-    padding: 0.5rem 0.6rem;
-    font-size: 0;
-    line-height: 1;
-  }
-
-  /* mais les icônes restent à taille normale */
-  .nav-tabs .nav-link i {
-    font-size: 1.1rem;
-  }
-
-  /* les onglets prennent la même largeur */
-  .nav-tabs {
-    display: flex;
-  }
-
-  .nav-tabs .nav-item {
-    flex: 1;
-    text-align: center;
-  }
-
-  .nav-tabs .nav-link {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-/* ── STATS : compactes sur mobile ──────────────────────────── */
-@media (max-width: 575.98px) {
-  .stat-card .card-body {
-    padding: 0.75rem 0.5rem;
+/* ---------- md ≥ 768px ---------- */
+@media (min-width: 768px) {
+  .page-titre {
+    font-size: 1.6rem;
   }
 
   .stat-nombre {
-    font-size: 1.3rem;
+    font-size: 2rem;
   }
 
-  .stat-label {
-    font-size: 0.7rem;
+  /* Onglets : le libellé revient, largeurs naturelles */
+  .nav-tabs .nav-link span {
+    display: inline;
   }
 
-  .stat-card .display-6 {
-    font-size: 1.5rem !important;
-  }
-}
-
-/* ── FILTRES EMPLOYÉ : empilés sur mobile ──────────────────── */
-@media (max-width: 767.98px) {
-  .d-flex.flex-wrap.gap-2.mb-3 {
-    flex-direction: column;
+  .nav-tabs .nav-item {
+    flex: 0 1 auto;
+    text-align: start;
   }
 
-  .d-flex.flex-wrap.gap-2.mb-3 .form-select,
-  .d-flex.flex-wrap.gap-2.mb-3 .form-control {
-    width: 100% !important;
+  .nav-tabs .nav-link {
+    display: block;
+    width: auto;
+    padding: 0.5rem 1rem;
+    font-size: inherit;
+    line-height: inherit;
   }
 
-  .d-flex.flex-wrap.gap-2.mb-3 .ms-3 {
-    margin-left: 0 !important;
-    margin-top: 0.5rem;
+  .nav-tabs .nav-link i {
+    font-size: inherit;
   }
 
-  /* le label "Date :" etc. sur sa propre ligne */
-  .d-flex.flex-wrap.gap-2.mb-3 .form-label {
-    width: 100%;
-  }
-}
-
-/* ── BOUTONS D'ACTION : empilés sur mobile ─────────────────── */
-@media (max-width: 575.98px) {
-  /* dans les tableaux, les boutons d'action s'empilent */
-  td .btn-sm {
-    padding: 0.2rem 0.4rem;
-    font-size: 0.75rem;
+  /* Tableaux : cellules normales, colonnes secondaires visibles */
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    font-size: inherit;
+    white-space: normal;
   }
 
-  /* le d-flex entre titre et bouton déconnexion */
-  .d-flex.justify-content-between.align-items-center.mb-4 {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 0.75rem;
-  }
-}
-
-/* ── PAGE TITRE : plus petit sur mobile ────────────────────── */
-@media (max-width: 575.98px) {
-  .page-titre {
-    font-size: 1.1rem;
+  .table th,
+  .table thead th {
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
   }
 
-  .page-titre i {
-    font-size: 1rem;
+  .table-responsive {
+    border: 0;
+    border-radius: 0;
+    margin-bottom: 0;
+  }
+
+  .table .col-hide-mobile {
+    display: table-cell;
+  }
+
+  /* Filtres de nouveau en ligne, avec leurs largeurs propres */
+  .filtres-bar {
+    flex-direction: row;
+  }
+
+  .filtres-bar .form-select,
+  .filtres-bar .form-control,
+  .filtres-bar .form-label {
+    width: auto;
+  }
+
+  #filtre-client {
+    width: 180px;
+  }
+
+  .filtres-bar .ms-3 {
+    margin-left: 1rem !important;
+    margin-top: 0;
   }
 }
 

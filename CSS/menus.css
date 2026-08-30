@@ -5,7 +5,7 @@
 /* ── En-tête de page ───────────────────────────────────────── */
 .page-header {
   background-color: var(--color-bg-alt, #f8f5f0);
-  padding: 2rem 0 1.5rem;
+  padding: 1.25rem 0 1rem;
   border-bottom: 1px solid #e8e0d5;
 }
 
@@ -22,13 +22,24 @@
 }
 
 /* ── Sidebar Filtres ───────────────────────────────────────── */
+/* Mobile : le panneau est replié, la carte suit le flux normal.
+   Dès lg, le panneau est toujours ouvert et la carte devient
+   collante (voir le bloc responsive en bas de fichier). */
+#filters-panel {
+  display: none;
+}
+
+#filters-panel.is-open {
+  display: block;
+}
+
 .filters-card {
   background-color: #fff;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  position: sticky;
-  top: 1rem;
+  position: static;
+  margin-bottom: 1.5rem;
 }
 
 .filters-title {
@@ -79,7 +90,8 @@
 .results-bar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 1rem;
   padding: 0.75rem 1rem;
@@ -122,7 +134,7 @@
 }
 
 .menu-card-img {
-  height: 180px;
+  height: 150px;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
@@ -283,77 +295,50 @@
   color: var(--color-primary, #b5451b) !important;
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 991.98px) {
-  /* Filtres en haut sur tablette/mobile */
-  .filters-card {
-    position: static;
-    margin-bottom: 1.5rem;
-  }
+/* ============================================================
+   RESPONSIVE — mobile first
+   Le mobile est décrit par les règles de base ci-dessus.
+   Breakpoints = ceux de Bootstrap (576 / 992).
 
-  /* On cache certains filtres par défaut sur mobile */
-  .filters-card fieldset {
-    display: none;
-  }
+   Règles supprimées car elles ne ciblaient rien dans menus.html :
+     .filters-toggle          → le bouton porte id="filters-toggle"
+                                et la classe utilitaire .d-lg-none,
+                                qui gère déjà le masquage dès lg ;
+     .filters-card fieldset   → il n'y a aucun <fieldset> dans la page ;
+     .filters-card.expanded   → la classe .expanded n'est jamais posée.
 
-  .filters-card.expanded fieldset {
-    display: block;
-  }
+   Les !important ont disparu : le panneau est piloté par .is-open
+   (classe maison) au lieu des utilitaires .d-none / .d-block de
+   Bootstrap, qui portent !important et obligeaient à surenchérir.
+   ============================================================ */
 
-  /* Bouton pour afficher/masquer les filtres */
-  .filters-toggle {
-    display: block;
-    width: 100%;
-    margin-bottom: 1rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .filters-toggle {
-    display: none;
-  }
-}
-
-@media (max-width: 575.98px) {
+/* ---------- sm ≥ 576px ---------- */
+@media (min-width: 576px) {
   .page-header {
-    padding: 1.25rem 0 1rem;
+    padding: 2rem 0 1.5rem;
   }
 
   .results-bar {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
   }
 
   .menu-card-img {
-    height: 150px;
+    height: 180px;
   }
 }
 
-/* Sur mobile : cacher le panneau filtres par défaut */
-@media (max-width: 991.98px) {
-  #filters-panel {
-    display: none;
-  }
- 
-  /* quand on clique sur le bouton toggle, la classe d-block l'affiche */
-  #filters-panel.d-block {
-    display: block !important;
-  }
- 
-  /* le panneau prend toute la largeur sur mobile */
-  #filters-panel .filters-card {
-    position: static;
-    margin-bottom: 1.5rem;
-  }
-}
- 
-/* Sur desktop : toujours visible, pas besoin du toggle */
+/* ---------- lg ≥ 992px ---------- */
 @media (min-width: 992px) {
+  /* Panneau toujours visible : on ignore l'état du toggle mobile */
   #filters-panel {
-    display: block !important;
+    display: block;
   }
- 
-  #filters-toggle {
-    display: none !important;
+
+  /* La carte filtres devient une colonne collante */
+  .filters-card {
+    position: sticky;
+    top: 1rem;
+    margin-bottom: 0;
   }
 }

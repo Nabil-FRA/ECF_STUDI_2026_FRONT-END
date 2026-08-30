@@ -7,7 +7,7 @@
 .hero {
   background: linear-gradient(135deg, var(--vg-bg-dark) 0%, #3d2a1a 100%);
   color: #fff;
-  padding: 5rem 0 4.5rem;
+  padding: 3.5rem 0 3rem;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -41,7 +41,7 @@
 }
 
 .hero p {
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: rgba(255,255,255,0.85);
   margin-bottom: 2rem;
   line-height: 1.7;
@@ -78,7 +78,7 @@
 .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .card-feature {
@@ -181,7 +181,7 @@
   background: linear-gradient(135deg, var(--vg-primary) 0%, var(--vg-primary-dark) 100%);
   color: #fff;
   text-align: center;
-  padding: 4rem 0;
+  padding: 3rem 0;
 }
 
 .cta-title {
@@ -232,26 +232,24 @@
 [data-animate-delay="2"] { animation-delay: 0.3s; }
 [data-animate-delay="3"] { animation-delay: 0.45s; }
 
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 767.98px) {
+/* ---------- RESPONSIVE — mobile first (md ≥ 768px) ---------- */
+/* .features-grid / .avis-grid : plus de surcharge en 1 colonne.
+   repeat(auto-fit, minmax(...)) le fait déjà tout seul sous 768px,
+   puisque le conteneur Bootstrap y plafonne à 540px. */
+@media (min-width: 768px) {
   .hero {
-    padding: 3.5rem 0 3rem;
+    padding: 5rem 0 4.5rem;
   }
 
   .hero p {
-    font-size: 1rem;
+    font-size: 1.15rem;
   }
 
   .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .avis-grid {
-    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .section-cta {
-    padding: 3rem 0;
+    padding: 4rem 0;
   }
 }

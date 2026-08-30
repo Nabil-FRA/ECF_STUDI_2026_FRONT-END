@@ -5,7 +5,7 @@
 /* ── En-tête de page ───────────────────────────────────────── */
 .page-header {
   background-color: var(--color-bg-alt, #f8f5f0);
-  padding: 2rem 0 1.5rem;
+  padding: 1.25rem 0 1rem;
   border-bottom: 1px solid #e8e0d5;
   text-align: center;
 }
@@ -187,22 +187,14 @@ a.fw-semibold:focus {
   font-weight: 600;
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 575.98px) {
-  .register-card .card-body {
-    padding: 1.5rem !important;
-  }
-
+/* ── Responsive — mobile first (sm ≥ 576px) ─────────────────── */
+/* Retirées car sans effet sur cette page :
+   - .register-card .card-body : ces classes n'existent pas dans
+     inscription.html (le formulaire n'est pas dans une card) ;
+   - .row.g-3 > .col-sm-6 : le HTML utilise col-md-6, pas col-sm-6 ;
+   - .page-header h1 : clamp() plafonne déjà à 1.5rem sous 600px. */
+@media (min-width: 576px) {
   .page-header {
-    padding: 1.25rem 0 1rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.5rem;
-  }
-
-  /* Sur mobile, prénom et nom sur 2 lignes */
-  .row.g-3 > .col-sm-6 {
-    margin-bottom: 0.5rem;
+    padding: 2rem 0 1.5rem;
   }
 }
