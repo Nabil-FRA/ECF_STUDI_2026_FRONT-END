@@ -1,7 +1,7 @@
-# Vite & Gourmand — Front-end
+# Vite & Gourmand : Front-end
 
-> **ECF — RNCP37674 Developpeur Web et Web Mobile**
-> Bloc de competences BC01 — Developper la partie front-end d'une application web
+> **ECF : RNCP37674 Developpeur Web et Web Mobile**
+> Bloc de competences BC01 : Developper la partie front-end d'une application web
 
 Application front-end statique (HTML / CSS / JS / Bootstrap 5.3) pour le site de traiteur en ligne **Vite & Gourmand**. Consomme l'API REST du back-end Symfony.
 
@@ -167,4 +167,4 @@ ECF_STUDI_2026_FRONT-END/
 
 ---
 
-*Projet realise dans le cadre de l'ECF — RNCP37674 Developpeur Web et Web Mobile — Studi 2026*
+*Projet realise dans le cadre de l'ECF RNCP37674 Developpeur Web et Web Mobile, Studi 2026*

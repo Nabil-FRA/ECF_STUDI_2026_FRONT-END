@@ -15,7 +15,7 @@ const DEPT_LIVRAISON = '33';
 // distance forfaitaire de 20 km. Sinon le récapitulatif de l'étape 3 annonce
 // un prix que la commande enregistrée ne confirme pas.
 const FRAIS_LIVRAISON = 5.00;
-const FRAIS_KM = 0.59; // €/km — même tarif que le serveur
+const FRAIS_KM = 0.59; // €/km, même tarif que le serveur
 const DISTANCE_ESTIMEE_KM = 20;
 
 /**
@@ -218,7 +218,7 @@ function mettreAJourInfosMenu() {
     'Thème : ' + echapper(menuCourant._theme) + ' | ' +
     'Régime : ' + echapper(menuCourant._regime) + '<br>' +
     'Prix : <strong>' + formatPrix(menuCourant._prix) + '</strong>' +
-    '/pers. — min ' + menuCourant._minPersonnes + ' pers.';
+    '/pers., min ' + menuCourant._minPersonnes + ' pers.';
 
   // AJOUT : afficher le stock restant (c'était dans le cahier des charges)
   const btnSuivant = document.getElementById('btn-etape-2-suivant');
@@ -270,7 +270,7 @@ function calculerPrix() {
   }
 
   // Frais de livraison : offerte à Bordeaux, sinon forfait 5 € + 0,59 €/km
-  // sur 20 km — exactement la formule appliquée par le serveur.
+  // sur 20 km, exactement la formule appliquée par le serveur.
   const cp = document.getElementById('code-postal').value.trim();
   const horsBoirdeaux = !livraisonOfferte(cp, construireLieuPrestation());
 
