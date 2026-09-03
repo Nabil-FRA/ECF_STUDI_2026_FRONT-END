@@ -40,7 +40,7 @@ Application front-end statique (HTML / CSS / JS / Bootstrap 5.3) pour le site de
 
 ---
 
-## Installation avec Docker (recommande)
+## Installation avec Docker (recommandé)
 
 Le front-end est integre dans le `docker-compose.yml` du back-end. Les deux depots doivent respecter l'arborescence suivante :
 
@@ -48,22 +48,27 @@ Le front-end est integre dans le `docker-compose.yml` du back-end. Les deux depo
 Projet/
 ├── ECF_STUDI_2026_FRONT-END/          <-- ce depot
 └── Backend/
-    └── ECF_STUDI_2026_BACK-END/
-        └── vite-et-gourmand/           <-- depot back-end (contient docker-compose.yml)
+    └── ECF_STUDI_2026_BACK-END/       <-- depot back-end (contient docker-compose.yml)
 ```
+
+> Cette arborescence n'est pas decorative : le service `frontend` du
+> `docker-compose.yml` se construit depuis `../../ECF_STUDI_2026_FRONT-END`.
+> Un niveau de dossier en trop et le build echoue.
 
 ### Etapes
 
-**1. Cloner les deux depots**
+**1. Cloner les deux dépots**
 
 ```bash
 mkdir Projet && cd Projet
 
 git clone https://github.com/Nabil-FRA/ECF_STUDI_2026_FRONT-END.git
-mkdir -p Backend/ECF_STUDI_2026_BACK-END
-cd Backend/ECF_STUDI_2026_BACK-END
-git clone https://github.com/Nabil-FRA/ECF_STUDI_2026_BACK-END.git vite-et-gourmand
+
+mkdir Backend
+git clone https://github.com/Nabil-FRA/ECF_STUDI_2026_BACK-END.git Backend/ECF_STUDI_2026_BACK-END
 ```
+
+Vous restez dans `Projet/` a la fin de cette etape.
 
 **2. Configurer l'URL de l'API pour Docker**
 
@@ -82,7 +87,7 @@ var API_BASE_URL = 'http://localhost:8080/api';
 **3. Lancer Docker**
 
 ```bash
-cd vite-et-gourmand
+cd Backend/ECF_STUDI_2026_BACK-END
 docker-compose up -d --build
 ```
 

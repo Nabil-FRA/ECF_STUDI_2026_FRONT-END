@@ -1,1 +1,25 @@
+# Dependances (le front est du HTML/CSS/JS natif : aucune n'est necessaire)
+node_modules/
+
+# Outils d'assistance
 .claude/
+
+# Environnement local
+.env
+.env.local
+.env.*.local
+
+# Editeurs
+.vscode/
+.idea/
+*.swp
+
+# Systemes de fichiers
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Journaux et temporaires
+*.log
+npm-debug.log*
+*.tmp
