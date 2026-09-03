@@ -9,11 +9,13 @@ const cpBordeaux = ['33000', '33100', '33200', '33300', '33800'];
 // L'énoncé : "notre équipe logistique livre dans toute la métropole bordelaise"
 const DEPT_LIVRAISON = '33';
 
-// prix livraison hors bordeaux (mais dans la Gironde)
+// Frais de livraison hors Bordeaux (mais dans la Gironde).
+// ATTENTION : ces trois constantes doivent rester identiques au calcul du
+// serveur (UserApiController::createCommande), soit 5 € + 0,59 €/km sur une
+// distance forfaitaire de 20 km. Sinon le récapitulatif de l'étape 3 annonce
+// un prix que la commande enregistrée ne confirme pas.
 const FRAIS_LIVRAISON = 5.00;
-const FRAIS_KM = 1.50; // €/km — tarif traiteur affiché (estimation côté client)
-
-// distance estimée par défaut pour livraison hors Bordeaux intra-muros (km)
+const FRAIS_KM = 0.59; // €/km — même tarif que le serveur
 const DISTANCE_ESTIMEE_KM = 20;
 
 /**
@@ -22,6 +24,32 @@ const DISTANCE_ESTIMEE_KM = 20;
 function estDansZoneLivraison(cp) {
   if (!cp || cp.length < 2) return false;
   return cp.startsWith(DEPT_LIVRAISON);
+}
+
+/**
+ * Assemble lieu_prestation exactement comme il est envoyé à l'API,
+ * pour que le front et le serveur raisonnent sur la même chaîne.
+ */
+function construireLieuPrestation() {
+  var adresse = document.getElementById('adresse-livraison');
+  var cp      = document.getElementById('code-postal');
+  var ville   = document.getElementById('ville');
+  return [
+    adresse ? adresse.value.trim() : '',
+    cp      ? cp.value.trim()      : '',
+    ville   ? ville.value.trim()   : ''
+  ].filter(Boolean).join(', ');
+}
+
+/**
+ * Reproduit la règle de gratuité appliquée par le serveur : la livraison est
+ * offerte si le code postal est dans Bordeaux intra-muros, ou si l'adresse
+ * saisie contient le mot « bordeaux » (le serveur teste lieu_prestation en
+ * minuscules avant de facturer le moindre kilomètre).
+ */
+function livraisonOfferte(cp, lieuPrestation) {
+  if (cp && cpBordeaux.includes(cp)) return true;
+  return (lieuPrestation || '').toLowerCase().includes('bordeaux');
 }
 
 // pour la remise
@@ -241,11 +269,11 @@ function calculerPrix() {
     aRemise = true;
   }
 
-  // Frais de livraison : forfait 5€ + 1,50€/km estimé hors Bordeaux
+  // Frais de livraison : offerte à Bordeaux, sinon forfait 5 € + 0,59 €/km
+  // sur 20 km — exactement la formule appliquée par le serveur.
   const cp = document.getElementById('code-postal').value.trim();
-  const horsBoirdeaux = !cpBordeaux.includes(cp);
+  const horsBoirdeaux = !livraisonOfferte(cp, construireLieuPrestation());
 
-  // Estimation distance : DISTANCE_ESTIMEE_KM pour hors Bordeaux (sera recalculée côté serveur)
   let fraisLiv = 0;
   let distanceEstimee = 0;
   if (horsBoirdeaux) {
@@ -505,7 +533,7 @@ async function envoyerCommande(e) {
     heure_livraison: document.getElementById('heure-livraison').value,
     lieu_prestation: lieuPrestation,
     pret_materiel:   document.getElementById('pret-materiel') ? document.getElementById('pret-materiel').checked : false,
-    distance_km:     cp && !cpBordeaux.includes(cp) ? DISTANCE_ESTIMEE_KM : 0
+    distance_km:     livraisonOfferte(cp, lieuPrestation) ? 0 : DISTANCE_ESTIMEE_KM
   };
 
   try {
