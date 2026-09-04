@@ -13,10 +13,10 @@
   // URL de base de l'API — à modifier selon l'environnement
   // En production : 'https://api.viteetgourmand.fr'
   // En dev local  : le back-end Symfony tourne sur le port 8080 via Docker
-  var API_BASE_URL = 'https://vite-et-gourmand-ecf-nar-7b5ab7722b1a.herokuapp.com/api';
+  const API_BASE_URL = 'https://vite-et-gourmand-ecf-nar-7b5ab7722b1a.herokuapp.com/api';
 
   // Timeout par défaut (en ms)
-  var TIMEOUT_MS = 15000;
+  const TIMEOUT_MS = 15000;
 
   // ══════════════════════════════════════════════════════════
   // FONCTION PRINCIPALE : fetchAPI
@@ -40,10 +40,10 @@
     options = options || {};
 
     // Construire l'URL complète
-    var url = API_BASE_URL + endpoint;
+    const url = API_BASE_URL + endpoint;
 
     // Headers par défaut
-    var headers = options.headers || {};
+    const headers = options.headers || {};
 
     // Ajouter le Content-Type JSON si pas déjà défini et si on envoie un body
     if (options.body && !headers['Content-Type']) {
@@ -51,7 +51,7 @@
     }
 
     // Ajouter le token d'authentification si disponible
-    var token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
     if (token && !headers['Authorization']) {
       headers['Authorization'] = 'Bearer ' + token;
     }
@@ -62,7 +62,7 @@
     }
 
     // Fusionner les options
-    var fetchOptions = {
+    const fetchOptions = {
       method: options.method || 'GET',
       headers: headers,
       credentials: 'same-origin' // envoie les cookies
@@ -73,8 +73,8 @@
     }
 
     // Timeout avec AbortController
-    var controller = null;
-    var timeoutId = null;
+    let controller = null;
+    let timeoutId = null;
 
     if (window.AbortController) {
       controller = new AbortController();
@@ -85,21 +85,21 @@
     }
 
     try {
-      var response = await fetch(url, fetchOptions);
+      const response = await fetch(url, fetchOptions);
 
       // Annuler le timeout
       if (timeoutId) clearTimeout(timeoutId);
 
       // Vérifier le statut HTTP
       if (!response.ok) {
-        var errorData = null;
+        let errorData = null;
         try {
           errorData = await response.json();
         } catch (e) {
           // la réponse n'est pas du JSON
         }
 
-        var errorObj = {
+        const errorObj = {
           status: response.status,
           message: (errorData && errorData.message) || getMessageErreurHTTP(response.status),
           data: errorData
@@ -114,7 +114,7 @@
       }
 
       // Parser le JSON
-      var data = await response.json();
+      const data = await response.json();
       return data;
 
     } catch (error) {
@@ -148,7 +148,7 @@
   // ══════════════════════════════════════════════════════════
 
   function getMessageErreurHTTP(status) {
-    var messages = {
+    const messages = {
       400: 'Requête invalide. Vérifiez les données envoyées.',
       401: 'Non autorisé. Veuillez vous reconnecter.',
       403: 'Accès interdit.',
@@ -179,7 +179,7 @@
 
       // Ne pas rediriger si on est déjà sur la page de connexion
       if (!window.location.pathname.includes('connexion')) {
-        var retour = encodeURIComponent(window.location.href);
+        const retour = encodeURIComponent(window.location.href);
         window.location.href = (window.location.pathname.includes('/pages/') ? '' : 'pages/') +
           'connexion.html?retour=' + retour;
       }
