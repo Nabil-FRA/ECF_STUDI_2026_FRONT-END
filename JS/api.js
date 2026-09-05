@@ -19,6 +19,61 @@
   const TIMEOUT_MS = 15000;
 
   // ══════════════════════════════════════════════════════════
+  // JETON CSRF
+  // ══════════════════════════════════════════════════════════
+
+  // Le jeton est émis et signé par le back-end (GET /api/csrf-token) : un jeton
+  // fabriqué ici ne prouverait rien. Ce qui protège, c'est que le CORS interdit
+  // à un site tiers de lire cette réponse, donc d'obtenir un jeton valide.
+  // On le garde en mémoire pour la durée de l'onglet et on le renouvelle
+  // automatiquement quand le serveur le refuse.
+
+  const METHODES_MODIFIANTES = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
+  let csrfToken = null;
+  let csrfEnVol = null;
+
+  function recupererTokenCSRF(forcer) {
+    if (csrfToken && !forcer) {
+      return Promise.resolve(csrfToken);
+    }
+
+    // Une seule requête en vol, même si plusieurs appels partent en parallèle.
+    if (csrfEnVol) {
+      return csrfEnVol;
+    }
+
+    csrfEnVol = fetch(API_BASE_URL + '/csrf-token', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function(reponse) {
+        return reponse.ok ? reponse.json() : null;
+      })
+      .then(function(donnees) {
+        csrfToken = (donnees && donnees.token) || null;
+        return csrfToken;
+      })
+      .catch(function() {
+        return null;
+      })
+      .then(function(jeton) {
+        csrfEnVol = null;
+        return jeton;
+      });
+
+    return csrfEnVol;
+  }
+
+  // Exposées pour les scripts de page (main.js notamment).
+  window.getCSRFToken = function() {
+    return csrfToken || '';
+  };
+  window.ensureCSRFToken = function() {
+    return recupererTokenCSRF(false);
+  };
+
+  // ══════════════════════════════════════════════════════════
   // FONCTION PRINCIPALE : fetchAPI
   // ══════════════════════════════════════════════════════════
 
@@ -56,14 +111,21 @@
       headers['Authorization'] = 'Bearer ' + token;
     }
 
-    // Ajouter le token CSRF si disponible
-    if (typeof window.getCSRFToken === 'function' && !headers['X-CSRF-Token']) {
-      headers['X-CSRF-Token'] = window.getCSRFToken();
+    // Jeton CSRF sur les méthodes qui modifient des données. On écrase une
+    // éventuelle valeur fournie par l'appelant : seul le jeton signé par le
+    // serveur est accepté côté back-end.
+    const methode = (options.method || 'GET').toUpperCase();
+
+    if (METHODES_MODIFIANTES.indexOf(methode) !== -1) {
+      const jetonCsrf = await recupererTokenCSRF(false);
+      if (jetonCsrf) {
+        headers['X-CSRF-Token'] = jetonCsrf;
+      }
     }
 
     // Fusionner les options
     const fetchOptions = {
-      method: options.method || 'GET',
+      method: methode,
       headers: headers,
       credentials: 'same-origin' // envoie les cookies
     };
@@ -97,6 +159,23 @@
           errorData = await response.json();
         } catch (e) {
           // la réponse n'est pas du JSON
+        }
+
+        // Jeton CSRF expiré (durée de vie 2 h) : on en redemande un et on
+        // rejoue la requête une seule fois, de façon transparente.
+        const csrfRefuse = response.status === 403
+          && errorData
+          && typeof errorData.message === 'string'
+          && errorData.message.indexOf('CSRF') !== -1;
+
+        if (csrfRefuse && !options._csrfRejoue) {
+          await recupererTokenCSRF(true);
+
+          const optionsRejeu = Object.assign({}, options, { _csrfRejoue: true });
+          optionsRejeu.headers = Object.assign({}, options.headers || {});
+          delete optionsRejeu.headers['X-CSRF-Token'];
+
+          return window.fetchAPI(endpoint, optionsRejeu);
         }
 
         const errorObj = {
