@@ -178,6 +178,40 @@
           return window.fetchAPI(endpoint, optionsRejeu);
         }
 
+        // Session expiree. L'en-tete Authorization part sur TOUS les appels des
+        // qu'un jeton existe : un jeton perime bloquait donc aussi les routes
+        // publiques, et rien ne purgeait la session, l'utilisateur restait
+        // coince. On nettoie ici, dans fetchAPI, pour que ce soit vrai meme
+        // quand l'appelant attrape l'erreur lui-meme.
+        if (response.status === 401) {
+          const avaitUnJeton = !!localStorage.getItem('token');
+
+          if (avaitUnJeton) {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+          }
+
+          // On rejoue une fois en anonyme : si la route etait publique, la
+          // page se remplit normalement et l'utilisateur ne voit rien.
+          if (avaitUnJeton && !options._sansJeton) {
+            const optionsAnonymes = Object.assign({}, options, { _sansJeton: true });
+            optionsAnonymes.headers = Object.assign({}, options.headers || {});
+            delete optionsAnonymes.headers['Authorization'];
+
+            return window.fetchAPI(endpoint, optionsAnonymes);
+          }
+
+          // La route exige vraiment une authentification : retour au login, en
+          // conservant la page d'origine. Sauf si on y est deja, sinon un
+          // echec de connexion provoquerait une boucle.
+          if (!window.location.pathname.includes('connexion')) {
+            const retour = encodeURIComponent(window.location.href);
+            window.location.href =
+              (window.location.pathname.includes('/pages/') ? '' : 'pages/') +
+              'connexion.html?retour=' + retour;
+          }
+        }
+
         const errorObj = {
           status: response.status,
           message: (errorData && errorData.message) || getMessageErreurHTTP(response.status),
