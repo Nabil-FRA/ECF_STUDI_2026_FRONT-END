@@ -369,10 +369,12 @@ function afficherComposition(composition) {
 // ── charger les menus similaires ────────────────────────────
 async function chargerMenusSimilaires(themeObj, idActuel) {
   try {
-    var themeLibelle = (themeObj && themeObj.libelle) ? themeObj.libelle : (themeObj || '');
-    if (!themeLibelle) return;
+    // L'API filtre sur l'identifiant du theme, pas sur son libelle. Envoyer
+    // « Paques » faisait repondre 400 et la section restait masquee.
+    var themeId = (themeObj && themeObj.id) ? themeObj.id : null;
+    if (!themeId) return;
 
-    const menus = await fetchAPI('/menus?theme=' + encodeURIComponent(themeLibelle) + '&limit=4');
+    const menus = await fetchAPI('/menus?theme=' + encodeURIComponent(themeId));
     const data = Array.isArray(menus) ? menus : (menus.menus || []);
 
     const similaires = data
